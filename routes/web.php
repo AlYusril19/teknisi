@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdminBerandaController;
+use App\Http\Controllers\LaporanKerjaAdminController;
+use App\Http\Controllers\LaporanKerjaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TeknisiBerandaController;
 use Illuminate\Support\Facades\Route;
@@ -20,8 +23,15 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Protected route for technicians
-Route::middleware('auth.api')->group(function () {
+// role didaftarkan di kernel dan middleware
+Route::middleware(['auth.api', 'role:staff'])->group(function () {
     Route::resource('/teknisi', TeknisiBerandaController::class);
+    Route::resource('/laporan', LaporanKerjaController::class);
+});
+
+Route::middleware(['auth.api', 'role:admin'])->group(function () {
+    Route::resource('/admin', AdminBerandaController::class);
+    Route::resource('/laporan-admin', LaporanKerjaAdminController::class);
 });
 
 // Default route

@@ -32,12 +32,20 @@ class LoginController extends Controller
             $user = $response->json()['user']; // Ambil data user dari response
 
             // Simpan token dan data user di session
-            session(['api_token' => $token]);
-            session(['user_name' => $user['name']]);
-            session(['user_role' => $user['role']]);
+            session([
+                'api_token' => $token,
+                'user_id' => $user['id'],
+                'user_name' => $user['name'],
+                'user_role' => $user['role'],
+            ]);
 
             // Redirect ke dashboard atau halaman lain
-            return redirect()->route('teknisi.index')->with('success', 'Login successful');
+            if ($user['role'] === 'staff') {
+                return redirect()->route('teknisi.index')->with('success', 'Login successful');
+            }
+            if ($user['role'] === 'admin') {
+                return redirect()->route('admin.index')->with('success', 'Login successful');
+            }
         } else {
             // Jika login gagal
             return back()->withErrors(['message' => 'Login failed. Please check your credentials.']);

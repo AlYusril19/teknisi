@@ -141,30 +141,30 @@
 
           <ul class="menu-inner py-1">
             <!-- Dashboard -->
-            <li class="menu-item {{ \Route::is('teknisi.index') ? 'active open' : '' }}">
-              <a href="{{ route('teknisi.index') }}" class="menu-link">
+            <li class="menu-item {{ \Route::is('admin.index') ? 'active open' : '' }}">
+              <a href="{{ route('admin.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">Dashboard</div>
               </a>
             </li>
 
             <!-- Layouts -->
-            <li class="menu-item {{ \Route::is('laporan.*') ? 'active open' : '' }}">
+            <li class="menu-item {{ \Route::is('laporan-admin.*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-layout"></i>
                 <div data-i18n="Layouts">Kegiatan</div>
               </a>
 
               <ul class="menu-sub">
-                <li class="menu-item {{ \Route::is('laporan.index') ? 'active' : '' }}">
-                  <a href="{{ route('laporan.index') }}" class="menu-link">
+                <li class="menu-item {{ \Route::is('laporan-admin.index') ? 'active' : '' }}">
+                  <a href="{{ route('laporan-admin.index') }}" class="menu-link">
                     <div data-i18n="Without menu">Daftar Kegiatan</div>
                   </a>
                 </li>
               </ul>
             </li>
 
-            <li class="menu-header small text-uppercase">
+            {{-- <li class="menu-header small text-uppercase">
               <span class="menu-header-text">Pages</span>
             </li>
             <li class="menu-item {{ \Route::is('teknisi.create') ? 'active open' : '' }}">
@@ -179,7 +179,7 @@
                   </a>
                 </li>
               </ul>
-            </li>
+            </li> --}}
           </ul>
         </aside>
         <!-- / Menu -->
