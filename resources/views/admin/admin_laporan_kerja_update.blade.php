@@ -15,25 +15,25 @@
                 <div class="d-flex align-items-center">
                   <div class="me-2">
                     <h5 class="mb-0 text-heading">{{ $data['laporan']->jenis_kegiatan }}</h5>
-                    <small class="fw-medium">Staff: </small><small>{{ $data['laporan']->user['name'] }}</small>
+                    <small class="fw-medium">Staff: </small><small>{{ $data['laporan']->user['name'] ?? '-'}}</small>
                     <div class="client-info text-body">
                       <small class="fw-medium">Alamat: </small><small> {{ $data['laporan']->alamat_kegiatan ?? '-' }}</small>
                     </div>
                   </div>
                 </div>
                 <div class="ms-auto">
-                  <p class="mb-0">Date: {{ $data['laporan']->tanggal_kegiatan }}</p>
-                  <p class="mb-0">Time: {{ \Carbon\Carbon::parse($data['laporan']->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($data['laporan']->jam_selesai)->format('H:i') }}</p>
+                  <p class="mb-0">Date: {{ $data['laporan']->tanggal_kegiatan ?? '-'}}</p>
+                  <p class="mb-0">Time: {{ \Carbon\Carbon::parse($data['laporan']->jam_mulai)->format('H:i') ?? '-' }} - {{ \Carbon\Carbon::parse($data['laporan']->jam_selesai)->format('H:i') }}</p>
                   {{-- <p class="mb-0">Durasi: {{ $data['laporan']->jam_mulai + $data['laporan']->jam_selesai }}</p> --}}
                 </div>
               </div>
               <h6 class="mb-0 mt-3 ">Keterangan Kegiatan :</h6>
-              <p class="mb-2 pb-1">{{ $data['laporan']->keterangan_kegiatan }}</p>
+              <p class="mb-2 pb-1">{{ $data['laporan']->keterangan_kegiatan ?? '-' }}</p>
 
               <h6 class="mb-0">Daftar Barang</h6>
               <ul class="mb-0">
                 @foreach ($data['barangKeluarView'] as $barang)
-                  <li>{{ $barang['nama'] }} | {{ $barang['jumlah'] }}x</li>
+                  <li>{{ $barang['nama'] ?? '-' }} | {{ $barang['jumlah'] ?? '-' }}x</li>
                 @endforeach
               </ul>
             </div>
@@ -41,18 +41,20 @@
               <div class="d-flex align-items-center">
                 <div class="d-flex align-items-center">
                     <ul class="list-unstyled d-flex align-items-center avatar-group mb-0 z-2">
-                      @foreach ($data['laporan']->galeri as $foto)
-                        <div class="image-container">
-                          <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-sm pull-up" aria-label="Dokumentasi" data-bs-original-title="Dokumentasi">
-                              <img src="{{ asset('storage/' . $foto->file_path) }}" alt="Dokumentasi" style="cursor: pointer;" onclick="openImageModal('{{ asset('storage/' . $foto->file_path) }}')">
-                          </li>
-                        </div>
-                      @endforeach
+                      @if ($data['laporan'])
+                          @foreach ($data['laporan']->galeri as $foto)
+                            <div class="image-container">
+                              <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-sm pull-up" aria-label="Dokumentasi" data-bs-original-title="Dokumentasi">
+                                  <img src="{{ asset('storage/' . $foto->file_path) }}" alt="Dokumentasi" style="cursor: pointer;" onclick="openImageModal('{{ asset('storage/' . $foto->file_path) }}')">
+                              </li>
+                            </div>
+                          @endforeach
+                      @endif
                       {{-- <li><small class="text-muted">280 Members</small></li> --}}
                     </ul>
                 </div>
                 <div class="ms-auto">
-                  <form method="POST" action="{{ route('laporan-admin.update', $data['laporan']->id) }}" enctype="multipart/form-data">
+                  <form method="POST" action="{{ route('laporan-admin.update', $data['laporan']->id) ?? '-' }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <button type="submit" name="status" value="selesai" class="btn badge bg-label-success">Accept</button>
