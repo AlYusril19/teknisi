@@ -165,85 +165,85 @@
                         <button type="submit" name="status" value="draft" class="btn btn-secondary me-2">Draft</button>
                         {{-- <button type="reset" class="btn btn-outline-secondary">Batal</button> --}}
                     </div>
-
-                    <!-- Modal untuk Tabel Barang dan Pilihan Barang -->
-                    <!-- Tabel Barang yang Ditambahkan -->
-                    <div class="modal fade" id="barangModal" tabindex="-1" aria-labelledby="barangModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="barangModalLabel">Daftar Barang</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Barang Selection -->
-                                    <div class="row d-flex align-items-center">
-                                        <div class="col-sm-2 mb-2">
-                                            <label class="col-form-label" for="barang_id">Barang</label>
-                                        </div>
-                                        <div class="col-sm-8 mb-2">
-                                            <select name="barang_id" id="barang_id" class="form-control">
-                                                <option value="">Pilih Barang</option>
-                                                    @foreach($barangs as $b)
-                                                        <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
-                                                    @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 mb-2">
-                                            <button type="button" id="btn-tambah-barang" class="btn btn-light">
-                                                <i class="menu-icon tf-icons bx bx-cart">+</i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <!-- Tabel Barang -->
-                                    <div class="table-responsive mt-2">
-                                        <table class="table table-bordered" id="daftar-barang">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nama Barang</th>
-                                                    <th>Jumlah</th>
-                                                    <th>Aksi</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Daftar barang akan muncul di sini -->
-                                                <!-- Tampilkan barang yang sudah ada dari JSON -->
-                                                @if($barangKeluarView)
-                                                    @foreach($barangKeluarView as $barang)
-                                                        <tr data-barang-id="{{ $barang['id'] }}">
-                                                            <td>{{ $barang['nama'] }}</td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <button type="button" class="btn btn-secondary btn-kurang-barang">-</button>
-                                                                    <input type="number" class="form-control jumlah-barang-input text-center" value="{{ $barang['jumlah'] ?? 1 }}" min="1" style="max-width: 60px;">
-                                                                    <button type="button" class="btn btn-secondary btn-tambah-barang">+</button>
-                                                                </div>
-                                                                <input type="hidden" name="barang_ids[]" value="{{ $barang['id'] }}">
-                                                                <input type="hidden" name="jumlah[]" value="{{ $barang['jumlah'] }}">
-                                                            </td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-danger btn-hapus-barang">Hapus</button>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                    <button type="button" class="btn btn-primary" id="btn-simpan-barang">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- End Modal Barang --}}
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal untuk Tabel Barang dan Pilihan Barang -->
+<!-- Tabel Barang yang Ditambahkan -->
+<div class="modal fade" id="barangModal" tabindex="-1" aria-labelledby="barangModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="barangModalLabel">Daftar Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Barang Selection -->
+                <div class="row d-flex align-items-center">
+                    <div class="col-sm-2 mb-2">
+                        <label class="col-form-label" for="barang_id">Barang</label>
+                    </div>
+                    <div class="col-sm-8 mb-2">
+                        <select name="barang_id" id="barang_id" class="form-control">
+                            <option value="">Pilih Barang</option>
+                                @foreach($barangs as $b)
+                                    <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
+                                @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-2 mb-2">
+                        <button type="button" id="btn-tambah-barang" class="btn btn-light">
+                            <i class="menu-icon tf-icons bx bx-cart">+</i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Tabel Barang -->
+                <div class="table-responsive mt-2">
+                    <table class="table table-bordered" id="daftar-barang">
+                        <thead>
+                            <tr>
+                                <th>Nama Barang</th>
+                                <th>Jumlah</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Daftar barang akan muncul di sini -->
+                            <!-- Tampilkan barang yang sudah ada dari JSON -->
+                            @if($barangKeluarView)
+                                @foreach($barangKeluarView as $barang)
+                                    <tr data-barang-id="{{ $barang['id'] }}">
+                                        <td>{{ $barang['nama'] }}</td>
+                                        <td>
+                                            <div class="input-group">
+                                                <button type="button" class="btn btn-secondary btn-kurang-barang">-</button>
+                                                <input type="number" class="form-control jumlah-barang-input text-center" value="{{ $barang['jumlah'] ?? 1 }}" min="1" style="max-width: 60px;">
+                                                <button type="button" class="btn btn-secondary btn-tambah-barang">+</button>
+                                            </div>
+                                            <input type="hidden" name="barang_ids[]" value="{{ $barang['id'] }}">
+                                            <input type="hidden" name="jumlah[]" value="{{ $barang['jumlah'] }}">
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-hapus-barang">Hapus</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-primary" id="btn-simpan-barang">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End Modal Barang --}}
 
 @endsection
 
@@ -354,7 +354,7 @@
             // Logic to save the data (if necessary)
             $('#barangModal').modal('hide'); // Close the modal
         });
-        updateTotalBarang();
+        // updateTotalBarang();
     });
 
 </script>

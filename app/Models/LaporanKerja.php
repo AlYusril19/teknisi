@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class LaporanKerja extends Model
 {
@@ -20,5 +21,27 @@ class LaporanKerja extends Model
         'keterangan_kegiatan',
         'barang',
         'status',
+        'alamat_kegiatan',
     ];
+
+    public function galeri()
+    {
+        return $this->hasMany(Galeri::class, 'laporan_id');
+    }
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Event saat laporan dihapus
+        static::deleting(function ($laporan) {
+            // Hapus semua foto yang terkait dengan laporan ini
+            foreach ($laporan->galeri as $foto) {
+                // Hapus file gambar dari storage
+                Storage::disk('public')->delete($foto->file_path);
+
+                // Hapus data foto dari database
+                $foto->delete();
+            }
+        });
+    }
 }

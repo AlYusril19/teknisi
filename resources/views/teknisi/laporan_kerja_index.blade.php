@@ -30,7 +30,11 @@
                             <td>{{ $data->jenis_kegiatan }}</td>
                             <td>{{ $data->keterangan_kegiatan }}</td>
                             <td align="center">
-                                <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : ($data->status === 'pending' ? 'warning' : 'success') }}">{{ $data->status ?? 'null' }}</span>
+                                <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : 
+                                                            ($data->status === 'pending' ? 'warning' : 
+                                                            ($data->status === 'reject' ? 'danger' : 'success')) }}">
+                                                            {{ $data->status ?? 'null' }}
+                                </span>
                             </td>
                             <td align="center">
                                 <div class="dropdown">

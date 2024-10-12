@@ -27,6 +27,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth.api', 'role:staff'])->group(function () {
     Route::resource('/teknisi', TeknisiBerandaController::class);
     Route::resource('/laporan', LaporanKerjaController::class);
+    Route::delete('/delete-image/{id}', [LaporanKerjaController::class, 'deleteImage'])->name('delete-image');
 });
 
 Route::middleware(['auth.api', 'role:admin'])->group(function () {

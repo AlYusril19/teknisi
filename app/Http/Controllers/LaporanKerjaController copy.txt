@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use ApiResponse;
-use App\Models\Galeri;
 use App\Models\LaporanKerja;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 
 class LaporanKerjaController extends Controller
 {
@@ -81,10 +79,7 @@ class LaporanKerjaController extends Controller
             'jam_selesai' => 'required',
             'jenis_kegiatan' => 'required|string',
             'keterangan_kegiatan' => 'required|string',
-            'alamat_kegiatan' => 'required|string',
             'status' => 'required|in:draft,pending',
-            'fotos' => 'nullable', // Bisa kosong
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096', // Validasi untuk setiap file dalam array 'fotos'
         ]);
 
         $userId = session('user_id');
@@ -97,8 +92,7 @@ class LaporanKerjaController extends Controller
                         "Jenis Kegiatan: " . $request->jenis_kegiatan . "\n" .
                         "Keterangan Kegiatan: " . $request->keterangan_kegiatan . "\n" .
                         "Barang: ";
-
-        $message = '';
+        
         // Format data barang keluar untuk dikirim ke web lama
         if ($request->barang_ids != null) {
             $barangKeluar = [];
@@ -116,7 +110,6 @@ class LaporanKerjaController extends Controller
                     $pesanWhatsApp .= "\n- " . $barangDetail['nama_barang'] . " (x" . $barang['jumlah'] . ")";
                 }
             }
-            $message .= 'dan barang keluar ';
         } else {
             $barangKeluar = null;
             $pesanWhatsApp .= ' - ';
@@ -125,31 +118,35 @@ class LaporanKerjaController extends Controller
         $laporan = [ 'user_id' => $userId,
                     'jenis_kegiatan' => $request->jenis_kegiatan,
                     'keterangan_kegiatan' => $request->keterangan_kegiatan,
-                    'alamat_kegiatan' => $request->alamat_kegiatan,
                     'tanggal_kegiatan' => $request->tanggal_kegiatan,
                     'jam_mulai' => $request->jam_mulai,
                     'jam_selesai' => $request->jam_selesai, 
                     'barang' => json_encode($barangKeluar), // Simpan data barang sebagai JSON
                     'status' => $request->status,
                 ];
-                
         // 
+        // Jika Barang tidak diisi, laporan saja yang akan diinput
+        // if ($barangKeluar === null || $request->status === 'draft') {
+        //     LaporanKerja::create($laporan);
+        //     return redirect()->route('laporan.index')->with('success', 'Laporan berhasil disimpan.');
+        // }
+
+        // Kirim data ke API web lama
+        // $response = ApiResponse::post('/api/penjualan', [
+        //     'user_id' => $userId, // User yang melaporkan
+        //     'barang' => $barangKeluar, // Kirim barang dan jumlah
+        //     'kegiatan' => $request->jenis_kegiatan, //jenis kegiatan
+        // ]);
+
+        // if ($response->failed()) {
+        //     return redirect()->back()->with('error', 'Gagal mencatat barang keluar di web lama.');
+        // }
         // Buat link WhatsApp
         $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
         // Simpan laporan kerja di database web baru
-        $laporan = LaporanKerja::create($laporan);
-        if ($request->hasFile('fotos')) {
-            foreach ($request->file('fotos') as $foto) {
-                $path = $foto->store('dokumentasi_foto', 'public');
-                Galeri::create([
-                    'laporan_id' => $laporan->id,
-                    'file_path' => $path,
-                ]);
-            }
-            $message .= 'beserta foto ';
-        }
+        LaporanKerja::create($laporan);
         return redirect()->route('laporan.index')
-                        ->with('success', 'Laporan ' .$message. 'berhasil disimpan.')
+                        ->with('success', 'Laporan berhasil disimpan dan barang keluar tercatat.')
                         ->with('whatsappLink', $linkWhatsApp);
     }
 
@@ -167,7 +164,6 @@ class LaporanKerjaController extends Controller
     public function edit(string $id)
     {
         $laporan = LaporanKerja::findOrFail($id);
-        // $fotos = Galeri::where('laporan_id', $laporan->id)->get();
         if ($laporan->status === 'selesai') {
             return redirect()->route('laporan.index')->with('error', 'Laporan selesai tidak dapat diedit.');
         } elseif ($laporan->status === 'pending') {
@@ -206,17 +202,13 @@ class LaporanKerjaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // dd($request);
         $request->validate([
             'tanggal_kegiatan' => 'required|date',
             'jam_mulai' => 'required',
             'jam_selesai' => 'required',
             'jenis_kegiatan' => 'required|string',
             'keterangan_kegiatan' => 'required|string',
-            'alamat_kegiatan' => 'required|string',
             'status' => 'required|in:draft,pending',
-            'fotos' => 'nullable', // Bisa kosong
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096', // Validasi untuk setiap file dalam array 'fotos'
         ]);
         
         $userName = session('user_name');
@@ -228,8 +220,7 @@ class LaporanKerjaController extends Controller
                         "Jenis Kegiatan: " . $request->jenis_kegiatan . "\n" .
                         "Keterangan Kegiatan: " . $request->keterangan_kegiatan . "\n" .
                         "Barang: ";
-        //
-        $message = '';
+
         // Format data barang keluar untuk dikirim ke web lama
         if ($request->barang_ids != null) {
             $barangKeluar = [];
@@ -239,41 +230,47 @@ class LaporanKerjaController extends Controller
                     'jumlah' => $request->jumlah[$index], // Jumlah barang keluar
                 ];
             }
-            $message .= 'dan barang keluar ';
         } else {
             $barangKeluar = null;
         }
         
         $laporan = LaporanKerja::findOrFail($id);
-        if ($request->hasFile('fotos')) {
-            foreach ($request->file('fotos') as $foto) {
-                $path = $foto->store('dokumentasi_foto', 'public');
-                Galeri::create([
-                    'laporan_id' => $laporan->id,
-                    'file_path' => $path,
-                ]);
-            }
-            $message .= 'beserta foto ';
-        }
         $data = ['jenis_kegiatan' => $request->jenis_kegiatan,
                     'keterangan_kegiatan' => $request->keterangan_kegiatan,
-                    'alamat_kegiatan' => $request->alamat_kegiatan,
                     'tanggal_kegiatan' => $request->tanggal_kegiatan,
                     'jam_mulai' => $request->jam_mulai,
                     'jam_selesai' => $request->jam_selesai,
                     'barang' => json_encode($barangKeluar), // Simpan data barang sebagai JSON
                     'status' => $request->status,
                 ];
-        // 
+        // $laporan->update($data);
         
         // Buat link WhatsApp
         $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
+        // Jika status diubah menjadi selesai, kirim data barang ke web lama
+        // if ($request->status === 'selesai') {
+        //     if ($barangKeluar) {
+        //         $response = ApiResponse::post('/api/penjualan', [
+        //             'user_id' => $laporan->user_id,
+        //             'barang' => $barangKeluar,
+        //             'kegiatan' => $request->jenis_kegiatan
+        //         ]);
+
+        //         if ($response->failed()) {
+        //             return redirect()->back()->with('error', 'Gagal mencatat barang keluar di web lama.');
+        //         }
+        //         $laporan->update($data);
+        //         return redirect()->route('laporan.index')->with('success', 'Laporan barang berhasil di post.')->with('whatsappLink', $linkWhatsApp);
+        //     }
+        //     $laporan->update($data);
+        //     return redirect()->route('laporan.index')->with('success', 'Laporan berhasil di post.')->with('whatsappLink', $linkWhatsApp);
+        // }
         if ($request->status === 'draft') {
             $laporan->update($data);
-            return redirect()->route('laporan.index')->with('success', 'Laporan ' .$message. 'disimpan di draft.');
+            return redirect()->route('laporan.index')->with('success', 'Laporan disimpan di draft.');
         }
         $laporan->update($data);
-        return redirect()->route('laporan.index')->with('success', 'Laporan ' .$message. 'berhasil di post.');
+        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil di post.');
     }
 
     /**
@@ -292,22 +289,4 @@ class LaporanKerjaController extends Controller
 
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dihapus');
     }
-
-    public function deleteImage($id)
-    {
-        $galeri = Galeri::find($id);
-
-        if ($galeri) {
-            // Hapus file gambar dari storage
-            Storage::disk('public')->delete($galeri->file_path);
-
-            // Hapus data dari database
-            $galeri->delete();
-
-            return response()->json(['success' => true]);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Gambar tidak ditemukan'], 404);
-    }
-
 }

@@ -129,7 +129,7 @@
                   </g>
                 </svg>
               </span>
-              <span class="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
+              <span class="app-brand-text demo menu-text fw-bolder ms-2">SkyTaMa</span>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -315,6 +315,14 @@
               @if(session('error'))
                   <div class="alert alert-danger alert-dismissible fade-show" role="alert">
                     {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    </button>
+                  </div>
+              @endif
+
+              @if(session('warning'))
+                  <div class="alert alert-warning alert-dismissible fade-show" role="alert">
+                    {{ session('warning') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
                     </button>
                   </div>

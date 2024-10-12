@@ -40,22 +40,61 @@
         flex-wrap: wrap;
     }
 </style>
+<style>
+    .image-container {
+        position: relative; /* Agar elemen anak bisa diposisikan secara absolut */
+    }
+
+    .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+</style>
+<style>
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 5px; /* Jarak antar elemen */
+    }
+
+    .input-group .form-control {
+        text-align: center;
+        padding: 5px;
+        max-width: 60px; /* Sesuaikan dengan lebar input */
+    }
+
+</style>
 
 @section('content')
 <div class="row justify-content-center">
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Input Laporan</h5>
+                <h5 class="mb-0">Edit Laporan</h5>
                 <small class="text-muted float-end">Form Data Laporan</small>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('laporan.store') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('laporan.update', $laporan->id) }}" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT')
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="jenis_kegiatan">Kegiatan</label>
                         <div class="col-sm-10">
                             <select name="jenis_kegiatan" id="jenis_kegiatan" class="form-control">
+                                <option value="{{ $laporan->jenis_kegiatan }}">{{ $laporan->jenis_kegiatan }}</option>
                                 <option value="pemasangan">Pemasangan</option>
                                 <option value="perbaikan">Perbaikan</option>
                                 <option value="pemutusan">Pemutusan</option>
@@ -70,9 +109,7 @@
                             <select name="barang_id" id="barang_id" class="form-control">
                                 <option value="">Pilih Barang</option>
                                 @foreach($barangs as $b)
-                                    @if ($b['status'] === 'aktif')
-                                        <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
-                                    @endif
+                                    <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -83,7 +120,7 @@
 
                     <!-- Tabel Barang yang Ditambahkan -->
                     <div class="row mb-3">
-                        <div class="col-sm-12">
+                        <div class="table-responsive col-sm-12">
                             <table class="table table-bordered" id="daftar-barang">
                                 <thead>
                                     <tr>
@@ -92,7 +129,28 @@
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>
+                                    <!-- Tampilkan barang yang sudah ada dari JSON -->
+                                    @if($barangKeluarView)
+                                        @foreach($barangKeluarView as $barang)
+                                            <tr data-barang-id="{{ $barang['id'] }}">
+                                                <td>{{ $barang['nama'] }}</td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <button type="button" class="btn btn-secondary btn-kurang-barang">-</button>
+                                                        <input type="number" class="form-control jumlah-barang-input text-center" value="{{ $barang['jumlah'] ?? 1 }}" min="1" style="max-width: 60px;">
+                                                        <button type="button" class="btn btn-secondary btn-tambah-barang">+</button>
+                                                    </div>
+                                                    <input type="hidden" name="barang_ids[]" value="{{ $barang['id'] }}">
+                                                    <input type="hidden" name="jumlah[]" value="{{ $barang['jumlah'] }}">
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-hapus-barang">Hapus</button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -101,42 +159,48 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="tanggal_kegiatan">Tanggal Kegiatan</label>
                         <div class="col-sm-10">
-                            <input type="date" class="form-control" id="tanggal_kegiatan" name="tanggal_kegiatan" required>
+                            <input type="date" class="form-control" id="tanggal_kegiatan" name="tanggal_kegiatan" value="{{ $laporan->tanggal_kegiatan }}" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="jam_mulai">Jam Mulai</label>
                         <div class="col-sm-10">
-                            <input type="time" class="form-control" id="jam_mulai" name="jam_mulai" required>
+                            <input type="time" class="form-control" id="jam_mulai" name="jam_mulai" value="{{ $laporan->jam_mulai }}" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="jam_selesai">Jam Selesai</label>
                         <div class="col-sm-10">
-                            <input type="time" class="form-control" id="jam_selesai" name="jam_selesai" required>
+                            <input type="time" class="form-control" id="jam_selesai" name="jam_selesai" value="{{ $laporan->jam_selesai }}" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="keterangan_kegiatan">Keterangan</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" id="keterangan_kegiatan" name="keterangan_kegiatan" required></textarea>
+                            <textarea class="form-control" id="keterangan_kegiatan" name="keterangan_kegiatan" required>{{ $laporan->keterangan_kegiatan }}</textarea>
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="keterangan_kegiatan">Alamat</label>
+                        <label class="col-sm-2 col-form-label" for="alamat_kegiatan">Alamat</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" id="alamat_kegiatan" name="alamat_kegiatan" required>
+                            <input type="text" class="form-control" id="alamat_kegiatan" name="alamat_kegiatan" value="{{ $laporan->alamat_kegiatan }}" required>
                         </div>
                     </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="fotos">Dokumentasi Foto</label>
                         <div class="col-sm-10">
-                            {{-- <input type="file" class="form-control" id="fotos" name="fotos[]" multiple> --}}
                             <input type="file" name="fotos[]" id="fotos" multiple accept="image/*" onchange="previewImages()">
                         </div>
                     </div>
-                    <!-- Tempat untuk menampilkan jajaran pratinjau gambar -->
-                    <div id="imagePreview" class="image-preview"></div>
+                    <div id="imagePreview" class="image-preview">
+                        @foreach ($laporan->galeri as $foto)
+                            <div class="image-container">
+                                <img src="{{ asset('storage/' . $foto->file_path) }}" alt="Dokumentasi" width="150px">
+                                <button class="delete-btn" type="button" onclick="deleteImage({{ $foto->id }})">×</button>
+                            </div>
+                        @endforeach
+                    </div>
 
                     <div class="mt-4">
                         <button type="submit" name="status" value="pending" class="btn btn-primary me-2">Post</button>
@@ -152,24 +216,6 @@
 @endsection
 
 @section('js')
-{{-- get today --}}
-<script>
-    // Fungsi untuk mengambil tanggal sekarang dalam format YYYY-MM-DD
-    function getTodayDate() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2,   
-    '0');
-        return yyyy + '-' + mm + '-' + dd;
-    }
-
-    // Mengambil elemen input dengan ID "tanggal" dan mengisi nilainya
-    const tanggalInput = document.getElementById('tanggal_kegiatan');
-    tanggalInput.value = getTodayDate();
-</script>
-
-{{-- get barang --}}
 <script>
     $(document).ready(function() {
         // Add barang to the list
@@ -250,10 +296,7 @@
         });
     });
 </script>
-
-{{-- foto dokumentasi --}}
 <script>
-    // Inisialisasi DataTransfer untuk menyimpan file yang dipilih
     let selectedFiles = new DataTransfer();
 
     function previewImages() {
@@ -261,14 +304,10 @@
         var input = document.getElementById('fotos');
         var files = input.files;
 
-        // Loop melalui file yang baru dipilih
         for (let i = 0; i < files.length; i++) {
             let file = files[i];
-
-            // Tambahkan file ke DataTransfer
             selectedFiles.items.add(file);
 
-            // Buat pratinjau gambar
             var reader = new FileReader();
             reader.onload = function(e) {
                 var container = document.createElement('div');
@@ -282,9 +321,8 @@
                 deleteButton.textContent = '×';
                 deleteButton.classList.add('delete-image-btn');
 
-                // Event untuk menghapus gambar
+                // Event untuk menghapus gambar pratinjau
                 deleteButton.onclick = function() {
-                    // Hapus file dari DataTransfer
                     for (let j = 0; j < selectedFiles.items.length; j++) {
                         if (file.name === selectedFiles.items[j].getAsFile().name) {
                             selectedFiles.items.remove(j);
@@ -292,10 +330,7 @@
                         }
                     }
 
-                    // Update input files
                     input.files = selectedFiles.files;
-
-                    // Hapus pratinjau gambar
                     container.remove();
                 };
 
@@ -306,8 +341,29 @@
             reader.readAsDataURL(file);
         }
 
-        // Update input files dengan file yang sudah ditambahkan
         input.files = selectedFiles.files;
+    }
+
+    // Fungsi untuk menghapus gambar yang sudah ada di database
+    function deleteImage(imageId) {
+        fetch(`/delete-image/${imageId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',  // Token CSRF untuk keamanan
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hapus elemen gambar dari DOM
+                document.querySelector(`button[onclick="deleteImage(${imageId})"]`).parentElement.remove();
+            } else {
+                alert('Gagal menghapus gambar: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     }
 </script>
 
