@@ -97,7 +97,7 @@ class LaporanKerjaAdminController extends Controller
             ];
         }
         return view('admin.admin_laporan_kerja_update', [
-            'laporan' => $laporan,
+            // 'laporan' => $laporan,
             'laporanBarangView' => $laporanBarangView
         ]);
     }
