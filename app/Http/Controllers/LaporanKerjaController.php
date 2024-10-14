@@ -99,6 +99,7 @@ class LaporanKerjaController extends Controller
                         "Barang: ";
 
         $message = '';
+
         // Format data barang keluar untuk dikirim ke web lama
         if ($request->barang_ids != null) {
             $barangKeluar = [];
@@ -122,6 +123,29 @@ class LaporanKerjaController extends Controller
             $pesanWhatsApp .= ' - ';
         }
 
+        // Format data barang kembali untuk dikirim ke web lama
+        if ($request->barang_kembali_ids != null) {
+            $barangKembali = [];
+            foreach ($request->barang_kembali_ids as $index => $barangId) {
+                $barangKembali[] = [
+                    'id' => $barangId, // ID barang dari web lama
+                    'jumlah' => $request->jumlah_kembali[$index], // Jumlah barang kembali
+                ];
+            }
+            foreach ($barangKembali as $barang) {
+                // Cari data barang berdasarkan ID di array $barangs
+                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+                // Jika barang ditemukan, tambahkan ke array hasil dengan nama
+                if ($barangDetail) {
+                    $pesanWhatsApp .= "\n+ " . $barangDetail['nama_barang'] . " (x" . $barang['jumlah'] . ") [Kembali]";
+                }
+            }
+            $message .= 'dan barang kembali ';
+        } else {
+            $barangKembali = null;
+            $pesanWhatsApp .= ' - ';
+        }
+
         $laporan = [ 'user_id' => $userId,
                     'jenis_kegiatan' => $request->jenis_kegiatan,
                     'keterangan_kegiatan' => $request->keterangan_kegiatan,
@@ -130,6 +154,7 @@ class LaporanKerjaController extends Controller
                     'jam_mulai' => $request->jam_mulai,
                     'jam_selesai' => $request->jam_selesai, 
                     'barang' => json_encode($barangKeluar), // Simpan data barang sebagai JSON
+                    'barang_kembali' => json_encode($barangKembali), // Simpan data barang sebagai JSON
                     'status' => $request->status,
                 ];
                 
@@ -175,6 +200,7 @@ class LaporanKerjaController extends Controller
         }
         // Decode JSON barang ke dalam array
         $barangKeluar = json_decode($laporan->barang, true);
+        $barangKembali = json_decode($laporan->barang_kembali, true);
         // Ambil data barang dari web lama via API
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
@@ -198,7 +224,24 @@ class LaporanKerjaController extends Controller
             }
         }
 
-        return view('teknisi.laporan_kerja_edit', compact('barangs', 'laporan', 'barangKeluarView'));
+        $barangKembaliView = [];
+        if ($barangKembali) {
+            foreach ($barangKembali as $barang) {
+                // Cari data barang berdasarkan ID di array $barangs
+                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+
+                // Jika barang ditemukan, tambahkan ke array hasil dengan nama
+                if ($barangDetail) {
+                    $barangKembaliView[] = [
+                        'id' => $barang['id'],
+                        'jumlah' => $barang['jumlah'],
+                        'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama'
+                    ];
+                }
+            }
+        }
+
+        return view('teknisi.laporan_kerja_edit', compact('barangs', 'laporan', 'barangKeluarView', 'barangKembaliView'));
     }
 
     /**
@@ -206,7 +249,6 @@ class LaporanKerjaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // dd($request);
         $request->validate([
             'tanggal_kegiatan' => 'required|date',
             'jam_mulai' => 'required',
@@ -243,6 +285,20 @@ class LaporanKerjaController extends Controller
         } else {
             $barangKeluar = null;
         }
+
+        // Format data barang kembali untuk dikirim ke web lama
+        if ($request->barang_kembali_ids != null) {
+            $barangKembali = [];
+            foreach ($request->barang_kembali_ids as $index => $barangId) {
+                $barangKembali[] = [
+                    'id' => $barangId, // ID barang dari web lama
+                    'jumlah' => $request->jumlah_kembali[$index], // Jumlah barang keluar
+                ];
+            }
+            $message .= 'dan barang kembali ';
+        } else {
+            $barangKembali = null;
+        }
         
         $laporan = LaporanKerja::findOrFail($id);
         if ($request->hasFile('fotos')) {
@@ -262,6 +318,7 @@ class LaporanKerjaController extends Controller
                     'jam_mulai' => $request->jam_mulai,
                     'jam_selesai' => $request->jam_selesai,
                     'barang' => json_encode($barangKeluar), // Simpan data barang sebagai JSON
+                    'barang_kembali' => json_encode($barangKembali), // Simpan data barang sebagai JSON
                     'status' => $request->status,
                 ];
         // 

@@ -20,6 +20,7 @@ class LaporanKerja extends Model
         'jenis_kegiatan', 
         'keterangan_kegiatan',
         'barang',
+        'barang_kembali',
         'status',
         'alamat_kegiatan',
     ];
