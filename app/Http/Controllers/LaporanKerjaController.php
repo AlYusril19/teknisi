@@ -174,8 +174,10 @@ class LaporanKerjaController extends Controller
             $message .= 'beserta foto ';
         }
         return redirect()->route('laporan.index')
-                        ->with('success', 'Laporan ' .$message. 'berhasil disimpan.')
-                        ->with('whatsappLink', $linkWhatsApp);
+                        ->with('success', 'Laporan ' .$message. 'berhasil disimpan.');
+        // return redirect()->route('laporan.index')
+        //                 ->with('success', 'Laporan ' .$message. 'berhasil disimpan.')
+        //                 ->with('whatsappLink', $linkWhatsApp);
     }
 
     /**
