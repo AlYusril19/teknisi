@@ -156,8 +156,8 @@
               </a>
 
               <ul class="menu-sub">
-                <li class="menu-item {{ \Route::is('laporan-admin.index') ? 'active' : '' }}">
-                  <a href="{{ route('laporan-admin.index') }}" class="menu-link">
+                <li class="menu-item {{ \Route::is('laporan-admin.*') ? 'active' : '' }}">
+                  <a href="{{ route('laporan-admin.create') }}" class="menu-link">
                     <div data-i18n="Without menu">Daftar Kegiatan</div>
                   </a>
                 </li>

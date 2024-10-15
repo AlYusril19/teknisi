@@ -30,12 +30,30 @@
               <h6 class="mb-0 mt-3 ">Keterangan Kegiatan :</h6>
               <p class="mb-2 pb-1">{{ $data['laporan']->keterangan_kegiatan ?? '-' }}</p>
 
-              <h6 class="mb-0">Daftar Barang</h6>
-              <ul class="mb-0">
-                @foreach ($data['barangKeluarView'] as $barang)
-                  <li>{{ $barang['nama'] ?? '-' }} | {{ $barang['jumlah'] ?? '-' }}x</li>
-                @endforeach
-              </ul>
+              {{-- barang keluar --}}
+              @if ($data['barangKeluarView'])
+                  <div class="bg-info text-dark">
+                    <h6 class="mb-0 text-dark">Daftar Barang Keluar</h6>
+                    <ul class="mb-0">
+                      @foreach ($data['barangKeluarView'] as $barang)
+                        <li>{{ $barang['nama'] ?? '-' }} | {{ $barang['jumlah'] ?? '-' }}x</li>
+                      @endforeach
+                    </ul>
+                  </div>
+              @endif
+
+              {{-- barang kembali --}}
+              @if ($data['barangKembaliView'])
+                  <div class="bg-warning text-dark mt-2">
+                    <h6 class="mb-0 text-dark">Daftar Barang Kembali</h6>
+                    <ul class="mb-0">
+                      @foreach ($data['barangKembaliView'] as $barang)
+                        <li>{{ $barang['nama'] ?? '-' }} | {{ $barang['jumlah'] ?? '-' }}x</li>
+                      @endforeach
+                    </ul>
+                  </div>
+              @endif
+
             </div>
             <div class="card-body border-top">
               <div class="d-flex align-items-center">

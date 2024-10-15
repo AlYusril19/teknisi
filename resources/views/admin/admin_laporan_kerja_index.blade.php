@@ -11,8 +11,8 @@
             {{-- <a href="{{ route('laporan-admin.create') }}" class="btn btn-primary mb-0">Buat Laporan</a> --}}
             <form action="{{ route('laporan-admin.index') }}" method="GET">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Cari Barang" value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary">Cari</button>
+                    <input type="text" name="search" class="form-control" placeholder="Cari Barang" value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
                     <select name="filter" class="form-select" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>
                         <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
@@ -103,8 +103,20 @@
         <p><strong>Jam Selesai:</strong> <span id="laporanJamSelesai"></span></p>
 
         <!-- Daftar Barang -->
-        <h6 class="mb-0">Daftar Barang</h6>
-        <ul id="laporanBarang"></ul>
+        <div class="card h-100 mb-0" id="titleBarang" style="display: none;">
+            <h6 class="card-header mb-0">Daftar Barang Keluar</h6>
+            <div class="card-body">
+                <ul id="laporanBarang"></ul>
+            </div>
+        </div>
+
+        <!-- Daftar Barang Kembali -->
+        <div class="card border-warning mt-3" id="titleBarangKembali" style="display: none;">
+            <h6 class="card-header mb-0">Daftar Barang Kembali</h6>
+            <div class="card-body">
+                <ul id="laporanBarangKembali"></ul>
+            </div>
+        </div>
 
         <!-- Galeri Foto -->
         <h6 class="mt-3">Galeri Foto</h6>
@@ -175,14 +187,48 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
                 document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
 
-                // Isi daftar barang
+                // Isi daftar barang keluar
                 var barangList = document.getElementById('laporanBarang');
+                var titleBarang = document.getElementById('titleBarang');
+
+                // Kosongkan list barang
                 barangList.innerHTML = '';
-                data.barangKeluarView.forEach(function(barang) {
-                    var li = document.createElement('li');
-                    li.textContent = `${barang.nama} | ${barang.jumlah}x`;
-                    barangList.appendChild(li);
-                });
+
+                if (data.barangKeluarView.length > 0) {
+                    // Jika ada data barang kembali, tampilkan judul dan list barang
+                    titleBarang.style.display = 'block';
+
+                    data.barangKeluarView.forEach(function(barang) {
+                        var li = document.createElement('li');
+                        li.textContent = `${barang.nama} | ${barang.jumlah}x`;
+                        barangList.appendChild(li);
+                    });
+                } else {
+                    // Jika tidak ada data barang, sembunyikan judul
+                    titleBarang.style.display = 'none';
+                }
+
+                // Isi daftar barang kembali
+                var barangList = document.getElementById('laporanBarangKembali');
+                var titleBarangKembali = document.getElementById('titleBarangKembali');
+
+                // Kosongkan list barang
+                barangList.innerHTML = '';
+
+                if (data.barangKembaliView.length > 0) {
+                    // Jika ada data barang kembali, tampilkan judul dan list barang
+                    titleBarangKembali.style.display = 'block';
+
+                    data.barangKembaliView.forEach(function(barang) {
+                        var li = document.createElement('li');
+                        li.textContent = `${barang.nama} | ${barang.jumlah}x`;
+                        barangList.appendChild(li);
+                    });
+                } else {
+                    // Jika tidak ada data barang, sembunyikan judul
+                    titleBarangKembali.style.display = 'none';
+                }
+
 
                 // Isi galeri foto
                 var galeriList = document.getElementById('laporanGaleri');

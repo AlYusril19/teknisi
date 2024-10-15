@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LaporanKerja;
 use Illuminate\Http\Request;
 
 class AdminBerandaController extends Controller
@@ -11,11 +12,13 @@ class AdminBerandaController extends Controller
      */
     public function index()
     {
+        $laporan = LaporanKerja::where('status', 'pending')->count();
         $userName = session('user_name'); // Ambil nama user dari session
         $userRole = session('user_role'); // Ambil role user dari session
         return view('admin.dashboard',[
             'userName' => $userName, 
-            'userRole' => $userRole
+            'userRole' => $userRole,
+            'laporan' => $laporan
         ]);
     }
 

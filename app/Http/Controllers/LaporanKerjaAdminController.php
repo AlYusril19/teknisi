@@ -71,7 +71,9 @@ class LaporanKerjaAdminController extends Controller
         foreach ($laporans as $laporan) {
             // Decode JSON barang ke dalam array
             $barangKeluar = json_decode($laporan->barang, true);
+            $barangKembali = json_decode($laporan->barang_kembali, true);
             $barangKeluarView = [];
+            $barangKembaliView = [];
 
             // Jika laporan memiliki barang
             if ($barangKeluar) {
@@ -89,11 +91,28 @@ class LaporanKerjaAdminController extends Controller
                     }
                 }
             }
+            // Jika laporan memiliki barang
+            if ($barangKembali) {
+                foreach ($barangKembali as $barang) {
+                    // Cari data barang berdasarkan ID di array $barangs
+                    $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+
+                    // Jika barang ditemukan, tambahkan ke array hasil dengan nama
+                    if ($barangDetail) {
+                        $barangKembaliView[] = [
+                            'id' => $barang['id'],
+                            'jumlah' => $barang['jumlah'],
+                            'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama_barang'
+                        ];
+                    }
+                }
+            }
 
             // Tambahkan laporan dan barang ke array hasil
             $laporanBarangView[] = [
                 'laporan' => $laporan,
-                'barangKeluarView' => $barangKeluarView
+                'barangKeluarView' => $barangKeluarView,
+                'barangKembaliView' => $barangKembaliView
             ];
         }
         return view('admin.admin_laporan_kerja_update', [
@@ -121,6 +140,7 @@ class LaporanKerjaAdminController extends Controller
 
         // Ambil barang keluar dari laporan
         $barangKeluar = json_decode($laporan->barang, true);
+        $barangKembali = json_decode($laporan->barang_kembali, true);
 
         // Ambil data barang dari web lama via API atau sumber lain
         $response = ApiResponse::get('/api/get-barang');
@@ -128,14 +148,27 @@ class LaporanKerjaAdminController extends Controller
 
         // Inisialisasi array untuk barang yang ditampilkan
         $barangKeluarView = [];
-
         if ($barangKeluar) {
             foreach ($barangKeluar as $barang) {
                 // Cari detail barang berdasarkan ID
                 $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
-
                 if ($barangDetail) {
                     $barangKeluarView[] = [
+                        'id' => $barang['id'],
+                        'jumlah' => $barang['jumlah'],
+                        'nama' => $barangDetail['nama_barang']
+                    ];
+                }
+            }
+        }
+
+        $barangKembaliView = [];
+        if ($barangKembali) {
+            foreach ($barangKembali as $barang) {
+                // Cari detail barang berdasarkan ID
+                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+                if ($barangDetail) {
+                    $barangKembaliView[] = [
                         'id' => $barang['id'],
                         'jumlah' => $barang['jumlah'],
                         'nama' => $barangDetail['nama_barang']
@@ -151,6 +184,7 @@ class LaporanKerjaAdminController extends Controller
         return response()->json([
             'laporan' => $laporan,
             'barangKeluarView' => $barangKeluarView,
+            'barangKembaliView' => $barangKembaliView,
             'galeri' => $galeri
         ]);
     }
@@ -170,30 +204,43 @@ class LaporanKerjaAdminController extends Controller
     {
         $laporan = LaporanKerja::findOrFail($id);
         $data = $request->all();
-        // $laporan->update($request->all());
-        // dd($laporan->barang);
         $barangKeluar = json_decode($laporan->barang, true);
+        $barangKembali = json_decode($laporan->barang_kembali, true);
         
         // Jika status diubah menjadi selesai, kirim data barang ke web lama
         if ($request->status === 'selesai') {
+            $message = '';
             if ($barangKeluar) {
-                $response = ApiResponse::post('/api/penjualan', [
+                $responseKeluar = ApiResponse::post('/api/penjualan', [
                     'user_id' => $laporan->user_id,
                     'barang' => $barangKeluar,
                     'kegiatan' => $laporan->jenis_kegiatan
                 ]);
-                if ($response->failed()) {
+                if ($responseKeluar->failed()) {
                     return redirect()->back()->with('error', 'Gagal mencatat barang keluar (cek stok barang).');
                 }
+                $message .= 'barang keluar ';
+            }
+            if ($barangKembali) {
+                $responseKembali = ApiResponse::post('/api/pembelian', [
+                    'user_id' => $laporan->user_id,
+                    'barang' => $barangKembali,
+                    'kegiatan' => $laporan->jenis_kegiatan
+                ]);
+                $message .= 'dan barang kembali ';
+            }
+            if ($barangKeluar || $barangKembali) {
                 $laporan->update($data);
-                return redirect()->back()->with('success', 'Laporan dan barang berhasil di post.');
+                if ($responseKembali->failed()) {
+                    return redirect()->back()->with('error', 'Laporan berhasil di post. (ada error di barang kembali)');
+                }
+                return redirect()->back()->with('success', 'Laporan ' .$message. 'berhasil di post.');
             }
             $laporan->update($data);
             return redirect()->back()->with('success', 'Laporan berhasil di post.');
         }
         $laporan->update($data);
         return redirect()->back()->with('error', 'Laporan belum di setujui, hubungi staff bersangkutan.');
-        // dd($request);
     }
 
     /**
