@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     data.barangKeluarView.forEach(function(barang) {
                         var li = document.createElement('li');
-                        li.textContent = `${barang.nama} | ${barang.jumlah}x`;
+                        li.textContent = `${barang.nama} | x${barang.jumlah}`;
                         barangList.appendChild(li);
                     });
                 } else {
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     data.barangKembaliView.forEach(function(barang) {
                         var li = document.createElement('li');
-                        li.textContent = `${barang.nama} | ${barang.jumlah}x`;
+                        li.textContent = `${barang.nama} | x${barang.jumlah}`;
                         barangList.appendChild(li);
                     });
                 } else {

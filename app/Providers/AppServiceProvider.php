@@ -19,6 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // View::composer('layouts.app_sneat', function ($view) {
+        view()->composer('*', function ($view) {
+            $userName = session('user_name'); // Ambil nama user dari session
+            $userRole = session('user_role'); // Ambil nama user dari session
+            $view->with([
+                'userName' => $userName,
+                'userRole' => $userRole
+            ]);
+        });
     }
 }
