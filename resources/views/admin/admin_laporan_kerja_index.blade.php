@@ -11,7 +11,7 @@
             {{-- <a href="{{ route('laporan-admin.create') }}" class="btn btn-primary mb-0">Buat Laporan</a> --}}
             <form action="{{ route('laporan-admin.index') }}" method="GET">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Cari Barang" value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
                     <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
                     <select name="filter" class="form-select" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>

@@ -202,11 +202,21 @@ class LaporanKerjaAdminController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $response = ApiResponse::get('/api/get-barang');
+        $barangs = $response->json();
         $laporan = LaporanKerja::findOrFail($id);
         $data = $request->all();
         $barangKeluar = json_decode($laporan->barang, true);
         $barangKembali = json_decode($laporan->barang_kembali, true);
-        
+        $userName = UserApi::getUserById($laporan->user_id);
+
+        // Format pesan WhatsApp
+        $pesanWhatsApp = "Laporan *" . $userName['name'] . "* :\n" .
+                        "Tanggal: " . $laporan->tanggal_kegiatan . "\n" .
+                        "Jam Kerja : " . $laporan->jam_mulai . " - " . $laporan->jam_selesai . "\n".
+                        "Jenis Kegiatan: " . $laporan->jenis_kegiatan . "\n" .
+                        "Keterangan Kegiatan: " . $laporan->keterangan_kegiatan . "\n" .
+                        "Barang Keluar: ";
         // Jika status diubah menjadi selesai, kirim data barang ke web lama
         if ($request->status === 'selesai') {
             $message = '';
@@ -219,6 +229,15 @@ class LaporanKerjaAdminController extends Controller
                 if ($responseKeluar->failed()) {
                     return redirect()->back()->with('error', 'Gagal mencatat barang keluar (cek stok barang).');
                 }
+                // pesan WA 
+                foreach ($barangKeluar as $barang) {
+                    // Cari data barang berdasarkan ID di array $barangs
+                    $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+                    // Jika barang ditemukan, tambahkan ke array hasil dengan nama
+                    if ($barangDetail) {
+                        $pesanWhatsApp .= "\n- " . $barangDetail['nama_barang'] . " (" . $barang['jumlah'] . "x)";
+                    }
+                }
                 $message .= 'barang keluar ';
             }
             if ($barangKembali) {
@@ -227,17 +246,31 @@ class LaporanKerjaAdminController extends Controller
                     'barang' => $barangKembali,
                     'kegiatan' => $laporan->jenis_kegiatan
                 ]);
+                // pesan WA 
+                $pesanWhatsApp .= "\nBarang Kembali: ";
+                foreach ($barangKembali as $barang) {
+                    // Cari data barang berdasarkan ID di array $barangs
+                    $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+                    // Jika barang ditemukan, tambahkan ke array hasil dengan nama
+                    if ($barangDetail) {
+                        $pesanWhatsApp .= "\n- " . $barangDetail['nama_barang'] . " (" . $barang['jumlah'] . "x)";
+                    }
+                }
                 $message .= 'dan barang kembali ';
             }
+            $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
             if ($barangKeluar || $barangKembali) {
                 $laporan->update($data);
                 if ($responseKembali->failed()) {
-                    return redirect()->back()->with('error', 'Laporan berhasil di post. (ada error di barang kembali)');
+                    return redirect()->back()->with('error', 'Laporan berhasil di post. (ada error di barang kembali)')
+                        ->with('whatsappLink', $linkWhatsApp);
                 }
-                return redirect()->back()->with('success', 'Laporan ' .$message. 'berhasil di post.');
+                return redirect()->back()->with('success', 'Laporan ' .$message. 'berhasil di post.')
+                    ->with('whatsappLink', $linkWhatsApp);
             }
             $laporan->update($data);
-            return redirect()->back()->with('success', 'Laporan berhasil di post.');
+            return redirect()->back()->with('success', 'Laporan berhasil di post.')
+                ->with('whatsappLink', $linkWhatsApp);
         }
         $laporan->update($data);
         return redirect()->back()->with('error', 'Laporan belum di setujui, hubungi staff bersangkutan.');
