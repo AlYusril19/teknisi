@@ -2,16 +2,16 @@
 
 @section('content')
 <div class="row">
-        <div class="col-xxl-8 mb-6 order-0">
+        <div class="col-xxl-6 mb-3 order-0">
             <div class="card">
                 <div class="d-flex align-items-start row">
                     <div class="col-sm-7">
                         <div class="card-body">
                             {{-- {{ __('You are logged in!') }} --}}
                             <h5 class="card-title text-primary mb-3">Welcome {{ $userRole }} {{ $userName }} 🎉</h5>
-                            <p class="mb-6">You have {{ $laporan ?? '0' }} report pending today.<br>Check in bottom.</p>
+                            <p class="mb-6">You have {{ $laporanPending ?? '0' }} report pending today.<br>Check in bottom.</p>
                             
-                            @if ($laporan)
+                            @if ($laporanPending)
                                 <a href="{{ route('laporan-admin.create') }}" class="btn btn-sm btn-outline-primary">View Pendings</a>
                             @endif
                         </div>
@@ -28,7 +28,7 @@
         <!--/ Total Revenue -->
         <div class="col-12 col-md-8 col-lg-4 order-3 order-md-2">
             <div class="row">
-                <div class="col-6 mb-4">
+                {{-- <div class="col-6 mb-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="card-title d-flex align-items-start justify-content-between">
@@ -57,7 +57,7 @@
                             <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> -14.82%</small>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="col-6 mb-4">
                     <div class="card">
                         <div class="card-body">
@@ -77,18 +77,22 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                        <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                        <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+                                        <a class="dropdown-item" href="{{ route('laporan-admin.index') }}">View More</a>
+                                        {{-- <a class="dropdown-item" href="javascript:void(0);">Delete</a> --}}
                                     </div>
                                 </div>
                             </div>
-                            <span class="fw-semibold d-block mb-1">Transactions</span>
-                            <h3 class="card-title mb-2">$14,857</h3>
-                            <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +28.14%</small>
+                            <span class="fw-semibold d-block mb-1">Report</span>
+                            <h3 class="card-title mb-2">{{ $laporanSekarang }}</h3>
+                            @if ($bandingLaporan >=0)
+                                <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{ $bandingLaporan }}%</small>
+                            @else
+                                <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> {{ $bandingLaporan }}%</small>
+                            @endif
                         </div>
                     </div>
                 </div>
-                <div class="col-12 mb-4">
+                {{-- <div class="col-12 mb-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
@@ -108,7 +112,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

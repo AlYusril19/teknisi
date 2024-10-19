@@ -224,7 +224,8 @@ class LaporanKerjaAdminController extends Controller
                 $responseKeluar = ApiResponse::post('/api/penjualan', [
                     'user_id' => $laporan->user_id,
                     'barang' => $barangKeluar,
-                    'kegiatan' => $laporan->jenis_kegiatan
+                    'kegiatan' => $laporan->jenis_kegiatan,
+                    'tanggal_penjualan' => $laporan->tanggal_kegiatan
                 ]);
                 if ($responseKeluar->failed()) {
                     return redirect()->back()->with('error', 'Gagal mencatat barang keluar (cek stok barang).');
@@ -244,7 +245,8 @@ class LaporanKerjaAdminController extends Controller
                 $responseKembali = ApiResponse::post('/api/pembelian', [
                     'user_id' => $laporan->user_id,
                     'barang' => $barangKembali,
-                    'kegiatan' => $laporan->jenis_kegiatan
+                    'kegiatan' => $laporan->jenis_kegiatan,
+                    'tanggal_pembelian' => $laporan->tanggal_kegiatan
                 ]);
                 // pesan WA 
                 $pesanWhatsApp .= "\nBarang Kembali: ";
@@ -261,9 +263,11 @@ class LaporanKerjaAdminController extends Controller
             $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
             if ($barangKeluar || $barangKembali) {
                 $laporan->update($data);
-                if ($responseKembali->failed()) {
-                    return redirect()->back()->with('error', 'Laporan berhasil di post. (ada error di barang kembali)')
-                        ->with('whatsappLink', $linkWhatsApp);
+                if ($barangKembali) {
+                    if ($responseKembali->failed()) {
+                        return redirect()->back()->with('error', 'Laporan berhasil di post. (ada error di barang kembali)')
+                            ->with('whatsappLink', $linkWhatsApp);
+                    }
                 }
                 return redirect()->back()->with('success', 'Laporan ' .$message. 'berhasil di post.')
                     ->with('whatsappLink', $linkWhatsApp);

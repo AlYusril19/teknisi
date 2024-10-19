@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/', [LoginController::class, 'loginForm'])->name('index');
 Route::get('/login', [LoginController::class, 'loginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -36,6 +37,6 @@ Route::middleware(['auth.api', 'role:admin'])->group(function () {
 });
 
 // Default route
-Route::get('/', function () {
-    return redirect()->route('login');
-})->name('home');
+// Route::get('/', function () {
+//     return redirect()->route('login');
+// })->name('home');
