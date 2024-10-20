@@ -94,10 +94,25 @@
                         <label class="col-sm-2 col-form-label" for="jenis_kegiatan">Kegiatan</label>
                         <div class="col-sm-10">
                             <select name="jenis_kegiatan" id="jenis_kegiatan" class="form-control">
-                                <option value="{{ $laporan->jenis_kegiatan }}">{{ $laporan->jenis_kegiatan }}</option>
-                                <option value="pemasangan">Pemasangan</option>
-                                <option value="perbaikan">Perbaikan</option>
-                                <option value="pemutusan">Pemutusan</option>
+                                <option value="pemasangan" {{ $laporan->jenis_kegiatan == 'pemasangan' ? 'selected' : '' }}>Pemasangan</option>
+                                <option value="perbaikan" {{ $laporan->jenis_kegiatan == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
+                                <option value="pemutusan" {{ $laporan->jenis_kegiatan == 'pemutusan' ? 'selected' : '' }}>Pemutusan</option>
+                                <option value="mitra" {{ $laporan->jenis_kegiatan == 'mitra' ? 'selected' : '' }}>Mitra</option> <!-- Opsi mitra -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Input untuk customer yang disembunyikan -->
+                    <!-- Bagian Customer -->
+                    <div class="row mb-3" id="customer_row" style="display: none;">
+                        <label class="col-sm-2 col-form-label" for="customer_id">Customer</label>
+                        <div class="col-sm-10">
+                            <select name="customer_id" id="customer_id" class="form-control">
+                                @foreach($customers as $cust)
+                                    <option value="{{ $cust['id'] }}" {{ $laporan->customer_id == $cust['id'] ? 'selected' : '' }}>
+                                        {{ $cust['nama'] }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -558,6 +573,7 @@
 
 </script>
 
+{{-- image Preview --}}
 <script>
     let selectedFiles = new DataTransfer();
 
@@ -628,4 +644,30 @@
         });
     }
 </script>
+
+{{-- get mitra (customer) --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const jenisKegiatan = document.getElementById('jenis_kegiatan');
+        const customerRow = document.getElementById('customer_row');
+
+        // Fungsi untuk menampilkan atau menyembunyikan input customer
+        function toggleCustomerInput() {
+            if (jenisKegiatan.value === 'mitra') {
+                customerRow.style.display = 'block';
+            } else {
+                customerRow.style.display = 'none';
+            }
+        }
+
+        // Jalankan saat halaman pertama kali dimuat
+        toggleCustomerInput();
+
+        // Jalankan saat jenis kegiatan diubah
+        jenisKegiatan.addEventListener('change', function () {
+            toggleCustomerInput();
+        });
+    });
+</script>
+
 @endsection

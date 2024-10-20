@@ -61,10 +61,10 @@ class LaporanKerjaController extends Controller
     public function create()
     {
         // Ambil data barang dari web lama via API
-        $response = ApiResponse::get('/api/get-barang');
-        $barangs = $response->json();
+        $barangs = ApiResponse::get('/api/get-barang')->json();
+        $customers = ApiResponse::get('/api/get-customer')->json();
 
-        return view('teknisi.laporan_kerja_create', compact('barangs'));
+        return view('teknisi.laporan_kerja_create', compact('barangs', 'customers'));
     }
 
     /**
@@ -83,6 +83,7 @@ class LaporanKerjaController extends Controller
             'keterangan_kegiatan' => 'required|string',
             'alamat_kegiatan' => 'required|string',
             'status' => 'required|in:draft,pending',
+            'customer_id' => 'nullable',
             'fotos' => 'nullable', // Bisa kosong
             'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096', // Validasi untuk setiap file dalam array 'fotos'
         ]);
@@ -146,6 +147,10 @@ class LaporanKerjaController extends Controller
             $pesanWhatsApp .= ' - ';
         }
 
+        $customerId = null;
+        if ($request->jenis_kegiatan === 'mitra') {
+            $customerId = $request->customer_id;
+        }
         $laporan = [ 'user_id' => $userId,
                     'jenis_kegiatan' => $request->jenis_kegiatan,
                     'keterangan_kegiatan' => $request->keterangan_kegiatan,
@@ -153,11 +158,11 @@ class LaporanKerjaController extends Controller
                     'tanggal_kegiatan' => $request->tanggal_kegiatan,
                     'jam_mulai' => $request->jam_mulai,
                     'jam_selesai' => $request->jam_selesai, 
+                    'customer_id' => $customerId,
                     'barang' => json_encode($barangKeluar), // Simpan data barang sebagai JSON
                     'barang_kembali' => json_encode($barangKembali), // Simpan data barang sebagai JSON
                     'status' => $request->status,
                 ];
-                
         // 
         // Buat link WhatsApp
         $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
@@ -206,6 +211,7 @@ class LaporanKerjaController extends Controller
         // Ambil data barang dari web lama via API
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
+        $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Inisialisasi array untuk menyimpan data barang yang sudah ditambahkan nama
         $barangKeluarView = [];
@@ -243,7 +249,7 @@ class LaporanKerjaController extends Controller
             }
         }
 
-        return view('teknisi.laporan_kerja_edit', compact('barangs', 'laporan', 'barangKeluarView', 'barangKembaliView'));
+        return view('teknisi.laporan_kerja_edit', compact('barangs', 'laporan', 'barangKeluarView', 'barangKembaliView', 'customers'));
     }
 
     /**
@@ -259,6 +265,7 @@ class LaporanKerjaController extends Controller
             'keterangan_kegiatan' => 'required|string',
             'alamat_kegiatan' => 'required|string',
             'status' => 'required|in:draft,pending',
+            'customer_id' => 'nullable',
             'fotos' => 'nullable', // Bisa kosong
             'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096', // Validasi untuk setiap file dalam array 'fotos'
         ]);
@@ -313,6 +320,10 @@ class LaporanKerjaController extends Controller
             }
             $message .= 'beserta foto ';
         }
+        $customerId = null;
+        if ($request->jenis_kegiatan === 'mitra') {
+            $customerId = $request->customer_id;
+        }
         $data = ['jenis_kegiatan' => $request->jenis_kegiatan,
                     'keterangan_kegiatan' => $request->keterangan_kegiatan,
                     'alamat_kegiatan' => $request->alamat_kegiatan,
@@ -321,10 +332,10 @@ class LaporanKerjaController extends Controller
                     'jam_selesai' => $request->jam_selesai,
                     'barang' => json_encode($barangKeluar), // Simpan data barang sebagai JSON
                     'barang_kembali' => json_encode($barangKembali), // Simpan data barang sebagai JSON
+                    'customer_id' => $customerId,
                     'status' => $request->status,
                 ];
         // 
-        
         // Buat link WhatsApp
         $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
         if ($request->status === 'draft') {

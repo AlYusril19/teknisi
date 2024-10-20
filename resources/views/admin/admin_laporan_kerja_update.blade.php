@@ -24,6 +24,9 @@
                 <div class="ms-auto">
                   <p class="mb-0">Date: {{ $data['laporan']->tanggal_kegiatan ?? '-'}}</p>
                   <p class="mb-0">Time: {{ \Carbon\Carbon::parse($data['laporan']->jam_mulai)->format('H:i') ?? '-' }} - {{ \Carbon\Carbon::parse($data['laporan']->jam_selesai)->format('H:i') }}</p>
+                  @if ($data['customer'])
+                      <p class="mb-0">Mitra: {{ $data['customer'] ?? '-' }}</p>
+                  @endif
                   {{-- <p class="mb-0">Durasi: {{ $data['laporan']->jam_mulai + $data['laporan']->jam_selesai }}</p> --}}
                 </div>
               </div>

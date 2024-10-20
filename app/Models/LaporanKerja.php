@@ -19,6 +19,7 @@ class LaporanKerja extends Model
         'jam_selesai',
         'jenis_kegiatan', 
         'keterangan_kegiatan',
+        'customer_id',
         'barang',
         'barang_kembali',
         'status',

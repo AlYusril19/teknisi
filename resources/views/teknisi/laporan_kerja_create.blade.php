@@ -64,6 +64,7 @@
         padding: 0;
     }
 </style>
+
 <style>
     .input-group {
         display: flex;
@@ -97,6 +98,20 @@
                                 <option value="pemasangan">Pemasangan</option>
                                 <option value="perbaikan">Perbaikan</option>
                                 <option value="pemutusan">Pemutusan</option>
+                                <option value="mitra">Mitra</option> <!-- Opsi mitra -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Input untuk customer yang disembunyikan -->
+                    <div class="row mb-3" id="customer_input" style="display: none;">
+                        <label class="col-sm-2 col-form-label" for="customer">Customer</label>
+                        <div class="col-sm-10">
+                            <select name="customer_id" id="customer_id" class="form-control">
+                                <option value="">Pilih Customer</option>
+                                @foreach($customers as $cust)
+                                    <option value="{{ $cust['id'] }}">{{ $cust['nama'] }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -263,7 +278,6 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="fotos">Dokumentasi Foto</label>
                         <div class="col-sm-10">
-                            {{-- <input type="file" class="form-control" id="fotos" name="fotos[]" multiple> --}}
                             <input type="file" name="fotos[]" id="fotos" multiple accept="image/*" onchange="previewImages()">
                         </div>
                     </div>
@@ -583,6 +597,21 @@
         // Update input files dengan file yang sudah ditambahkan
         input.files = selectedFiles.files;
     }
+</script>
+
+{{-- get mitra (customer) --}}
+<script>
+    document.getElementById('jenis_kegiatan').addEventListener('change', function() {
+        var kegiatan = this.value;
+        var customerInput = document.getElementById('customer_input');
+        
+        // Tampilkan input customer jika kegiatan adalah mitra
+        if (kegiatan === 'mitra') {
+            customerInput.style.display = 'block';
+        } else {
+            customerInput.style.display = 'none';
+        }
+    });
 </script>
 
 @endsection

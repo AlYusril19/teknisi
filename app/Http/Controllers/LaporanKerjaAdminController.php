@@ -64,6 +64,7 @@ class LaporanKerjaAdminController extends Controller
         // Ambil data barang dari web lama via API
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
+        $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Inisialisasi array untuk menyimpan data laporan beserta barangnya
         $laporanBarangView = [];
@@ -74,6 +75,11 @@ class LaporanKerjaAdminController extends Controller
             $barangKembali = json_decode($laporan->barang_kembali, true);
             $barangKeluarView = [];
             $barangKembaliView = [];
+            $customer = '';
+            $customerId = collect($customers)->firstWhere('id', $laporan->customer_id);
+            if ($customerId) {
+                $customer = $customerId['nama'];
+            }
 
             // Jika laporan memiliki barang
             if ($barangKeluar) {
@@ -111,6 +117,7 @@ class LaporanKerjaAdminController extends Controller
             // Tambahkan laporan dan barang ke array hasil
             $laporanBarangView[] = [
                 'laporan' => $laporan,
+                'customer' => $customer,
                 'barangKeluarView' => $barangKeluarView,
                 'barangKembaliView' => $barangKembaliView
             ];
@@ -225,7 +232,8 @@ class LaporanKerjaAdminController extends Controller
                     'user_id' => $laporan->user_id,
                     'barang' => $barangKeluar,
                     'kegiatan' => $laporan->jenis_kegiatan,
-                    'tanggal_penjualan' => $laporan->tanggal_kegiatan
+                    'tanggal_penjualan' => $laporan->tanggal_kegiatan,
+                    'customer_id' => $laporan->customer_id
                 ]);
                 if ($responseKeluar->failed()) {
                     return redirect()->back()->with('error', 'Gagal mencatat barang keluar (cek stok barang).');
