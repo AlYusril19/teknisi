@@ -85,7 +85,7 @@ class LaporanKerjaController extends Controller
             'status' => 'required|in:draft,pending',
             'customer_id' => 'nullable',
             'fotos' => 'nullable', // Bisa kosong
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096', // Validasi untuk setiap file dalam array 'fotos'
+            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Validasi untuk setiap file dalam array 'fotos'
         ]);
 
         $userId = session('user_id');
@@ -267,7 +267,7 @@ class LaporanKerjaController extends Controller
             'status' => 'required|in:draft,pending',
             'customer_id' => 'nullable',
             'fotos' => 'nullable', // Bisa kosong
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096', // Validasi untuk setiap file dalam array 'fotos'
+            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Validasi untuk setiap file dalam array 'fotos'
         ]);
         
         $userName = session('user_name');
@@ -358,6 +358,13 @@ class LaporanKerjaController extends Controller
         if ($laporan->status === 'pending') {
             return redirect()->back()->with('error', 'Laporan sudah di post tidak dapat dihapus.');
         }
+        // Hapus gambar-gambar terkait
+        foreach ($laporan->galeri as $galeri) {
+            Storage::disk('public')->delete($galeri->file_path);
+        }
+
+        // Hapus data galeri dan barang
+        $laporan->galeri()->delete(); // Hapus semua data galeri terkait
         $laporan->delete();
 
         return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dihapus');
