@@ -98,6 +98,8 @@
                                 <option value="pemasangan">Pemasangan</option>
                                 <option value="perbaikan">Perbaikan</option>
                                 <option value="pemutusan">Pemutusan</option>
+                                <option value="migrasi">Migrasi</option>
+                                <option value="project">Project</option>
                                 <option value="mitra">Mitra</option> <!-- Opsi mitra -->
                             </select>
                         </div>
