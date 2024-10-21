@@ -62,9 +62,10 @@ class LaporanKerjaController extends Controller
     {
         // Ambil data barang dari web lama via API
         $barangs = ApiResponse::get('/api/get-barang')->json();
+        $barangsKembali = ApiResponse::get('/api/get-barang-kembali')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
 
-        return view('teknisi.laporan_kerja_create', compact('barangs', 'customers'));
+        return view('teknisi.laporan_kerja_create', compact('barangs', 'customers', 'barangsKembali'));
     }
 
     /**
@@ -209,8 +210,8 @@ class LaporanKerjaController extends Controller
         $barangKeluar = json_decode($laporan->barang, true);
         $barangKembali = json_decode($laporan->barang_kembali, true);
         // Ambil data barang dari web lama via API
-        $response = ApiResponse::get('/api/get-barang');
-        $barangs = $response->json();
+        $barangs = ApiResponse::get('/api/get-barang')->json();
+        $barangsKembali = ApiResponse::get('/api/get-barang-kembali')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Inisialisasi array untuk menyimpan data barang yang sudah ditambahkan nama
@@ -249,7 +250,7 @@ class LaporanKerjaController extends Controller
             }
         }
 
-        return view('teknisi.laporan_kerja_edit', compact('barangs', 'laporan', 'barangKeluarView', 'barangKembaliView', 'customers'));
+        return view('teknisi.laporan_kerja_edit', compact('barangs', 'barangsKembali', 'laporan', 'barangKeluarView', 'barangKembaliView', 'customers'));
     }
 
     /**

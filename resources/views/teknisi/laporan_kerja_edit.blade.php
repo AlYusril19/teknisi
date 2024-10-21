@@ -286,7 +286,7 @@
                                         <div class="col-sm-8 mb-2">
                                             <select name="barang_kembali_id" id="barang_kembali_id" class="form-control">
                                                 <option value="">Pilih Barang Kembali</option>
-                                                @foreach($barangs as $b)
+                                                @foreach($barangsKembali as $b)
                                                     <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
                                                 @endforeach
                                             </select>
