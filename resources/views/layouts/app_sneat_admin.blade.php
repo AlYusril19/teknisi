@@ -129,7 +129,7 @@
                   </g>
                 </svg>
               </span>
-              <span class="app-brand-text demo menu-text fw-bolder ms-2">SkyTaMa</span>
+              <span class="app-brand-text demo menu-text fw-bolder ms-2">E-Report</span>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -244,8 +244,8 @@
                             </div>
                           </div>
                           <div class="flex-grow-1">
-                            <span class="fw-semibold d-block">John Doe</span>
-                            <small class="text-muted">Admin</small>
+                            <span class="fw-semibold d-block">{{ $userName }}</span>
+                            <small class="text-muted">{{ $userRole }}</small>
                           </div>
                         </div>
                       </a>
@@ -253,7 +253,7 @@
                     <li>
                       <div class="dropdown-divider"></div>
                     </li>
-                    <li>
+                    {{-- <li>
                       <a class="dropdown-item" href="#">
                         <i class="bx bx-user me-2"></i>
                         <span class="align-middle">My Profile</span>
@@ -273,7 +273,7 @@
                           <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
                         </span>
                       </a>
-                    </li>
+                    </li> --}}
                     <li>
                       <div class="dropdown-divider"></div>
                     </li>
