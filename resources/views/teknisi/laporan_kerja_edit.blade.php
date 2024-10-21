@@ -97,6 +97,8 @@
                                 <option value="pemasangan" {{ $laporan->jenis_kegiatan == 'pemasangan' ? 'selected' : '' }}>Pemasangan</option>
                                 <option value="perbaikan" {{ $laporan->jenis_kegiatan == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
                                 <option value="pemutusan" {{ $laporan->jenis_kegiatan == 'pemutusan' ? 'selected' : '' }}>Pemutusan</option>
+                                <option value="migrasi" {{ $laporan->jenis_kegiatan == 'migrasi' ? 'selected' : '' }}>Migrasi</option>
+                                <option value="project" {{ $laporan->jenis_kegiatan == 'project' ? 'selected' : '' }}>Project</option>
                                 <option value="mitra" {{ $laporan->jenis_kegiatan == 'mitra' ? 'selected' : '' }}>Mitra</option> <!-- Opsi mitra -->
                             </select>
                         </div>
