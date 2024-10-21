@@ -745,4 +745,19 @@
     });
 </script>
 
+{{-- select2 modal --}}
+<script>
+    // Inisialisasi Select2 di dalam modal
+    $('#barangModal').on('shown.bs.modal', function () {
+        $('#barang_id').select2({
+            dropdownParent: $('#barangModal')
+        });
+    });
+    $('#barangKembaliModal').on('shown.bs.modal', function () {
+        $('#barang_kembali_id').select2({
+            dropdownParent: $('#barangKembaliModal')
+        });
+    });
+</script>
+
 @endsection

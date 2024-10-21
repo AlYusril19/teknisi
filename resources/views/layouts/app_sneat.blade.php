@@ -52,6 +52,7 @@
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/select2/select2.css" />
 
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apex-charts.css" />
 
@@ -406,6 +407,7 @@
 
     <!-- Vendors JS -->
     <script src="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="{{ asset('sneat') }}/assets/vendor/libs/select2/select2.js"></script>
 
     <!-- Main JS -->
     <script src="{{ asset('sneat') }}/assets/js/main.js"></script>
@@ -421,6 +423,12 @@
     </script>
 
     @yield('js')
+
+    <script>
+      $(document).ready(function() {
+        $('.select2').select2();
+      });
+    </script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
