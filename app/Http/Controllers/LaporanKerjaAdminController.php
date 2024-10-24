@@ -226,8 +226,8 @@ class LaporanKerjaAdminController extends Controller
         $jamSelesai = strtotime("17:00:00");
 
         $biaya = Biaya::where('customer_id', $laporan->customer_id)->first();
-        $biayaKerja = $biaya->jam_kerja / 3600 ?? '';
-        $biayaLembur = $biaya->jam_lembur / 3600 ??'';
+        $biayaKerja = $biaya->jam_kerja / 3600;
+        $biayaLembur = $biaya->jam_lembur / 3600;
 
         // Format pesan WhatsApp
         $pesanWhatsApp = "Laporan *" . $userName['name'] . "* :\n" .
