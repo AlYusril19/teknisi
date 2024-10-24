@@ -324,6 +324,8 @@ class LaporanKerjaAdminController extends Controller
             return redirect()->back()->with('success', 'Laporan berhasil di post.')
                 ->with('whatsappLink', $linkWhatsApp);
         }
+        
+        // reject laporan kerja
         $message = '';
         if ($request->status === 'cancel') {
             if ($barangKeluar) {
