@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use ApiResponse;
+use App\Models\Biaya;
 use App\Models\LaporanKerja;
+use App\Models\Tagihan;
 use App\Models\UserApi;
 use Illuminate\Http\Request;
 
@@ -62,8 +64,7 @@ class LaporanKerjaAdminController extends Controller
             $lap->user = UserApi::getUserById($lap->user_id);
         }
         // Ambil data barang dari web lama via API
-        $response = ApiResponse::get('/api/get-barang');
-        $barangs = $response->json();
+        $barangs = ApiResponse::get('/api/get-barang')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Inisialisasi array untuk menyimpan data laporan beserta barangnya
@@ -186,13 +187,15 @@ class LaporanKerjaAdminController extends Controller
 
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait
+        $tagihan = $laporan->tagihan; // Ambil tagihan
 
         // Return sebagai JSON
         return response()->json([
             'laporan' => $laporan,
             'barangKeluarView' => $barangKeluarView,
             'barangKembaliView' => $barangKembaliView,
-            'galeri' => $galeri
+            'galeri' => $galeri,
+            'tagihan' => $tagihan
         ]);
     }
 
@@ -217,6 +220,15 @@ class LaporanKerjaAdminController extends Controller
         $barangKembali = json_decode($laporan->barang_kembali, true);
         $userName = UserApi::getUserById($laporan->user_id);
 
+        $jamMulaiKerja = strtotime($laporan->jam_mulai);
+        $jamSelesaiKerja = strtotime($laporan->jam_selesai);
+        $jamMulai = strtotime("06:00:00");
+        $jamSelesai = strtotime("17:00:00");
+
+        $biaya = Biaya::where('customer_id', $laporan->customer_id)->first();
+        $biayaKerja = $biaya->jam_kerja / 3600;
+        $biayaLembur = $biaya->jam_lembur / 3600;
+
         // Format pesan WhatsApp
         $pesanWhatsApp = "Laporan *" . $userName['name'] . "* :\n" .
                         "Tanggal: " . $laporan->tanggal_kegiatan . "\n" .
@@ -226,6 +238,31 @@ class LaporanKerjaAdminController extends Controller
                         "Barang Keluar: ";
         // Jika status diubah menjadi selesai, kirim data barang ke web lama
         if ($request->status === 'selesai') {
+            // rumus hitung jam kerja
+            if ($jamMulaiKerja >= $jamMulai && $jamMulaiKerja <= $jamSelesai) {
+                if ($jamSelesaiKerja <= $jamSelesai) {
+                    // Tidak ada lembur
+                    $totalBiayaKerja = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaKerja;
+                    $this->createTagihan($laporan->id, 'Biaya Kerja', $totalBiayaKerja);
+                } else {
+                    // Ada lembur
+                    $totalBiayaKerja = ($jamSelesai - $jamMulaiKerja) * $biayaKerja;
+                    $totalBiayaLembur = ($jamSelesaiKerja - $jamSelesai) * $biayaLembur;
+                    $this->createTagihan($laporan->id, 'Biaya Kerja', $totalBiayaKerja);
+                    $this->createTagihan($laporan->id, 'Biaya Lembur', $totalBiayaLembur);
+                }
+            } else {
+                // Semua jam lembur
+                $totalBiayaLembur = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaLembur;
+                $this->createTagihan($laporan->id, 'Biaya Lembur', $totalBiayaLembur);
+            }
+
+            // biaya mitra
+            if ($biaya->customer_id) {
+                $biayaTransport = $biaya->transport;
+                $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
+            }
+
             $message = '';
             if ($barangKeluar) {
                 $responseKeluar = ApiResponse::post('/api/penjualan', [
@@ -233,7 +270,8 @@ class LaporanKerjaAdminController extends Controller
                     'barang' => $barangKeluar,
                     'kegiatan' => $laporan->jenis_kegiatan,
                     'tanggal_penjualan' => $laporan->tanggal_kegiatan,
-                    'customer_id' => $laporan->customer_id
+                    'customer_id' => $laporan->customer_id,
+                    'laporan_id' => $laporan->id,
                 ]);
                 if ($responseKeluar->failed()) {
                     return redirect()->back()->with('error', 'Gagal mencatat barang keluar (cek stok barang).');
@@ -254,7 +292,8 @@ class LaporanKerjaAdminController extends Controller
                     'user_id' => $laporan->user_id,
                     'barang' => $barangKembali,
                     'kegiatan' => $laporan->jenis_kegiatan,
-                    'tanggal_pembelian' => $laporan->tanggal_kegiatan
+                    'tanggal_pembelian' => $laporan->tanggal_kegiatan,
+                    'laporan_id' => $laporan->id
                 ]);
                 // pesan WA 
                 $pesanWhatsApp .= "\nBarang Kembali: ";
@@ -268,6 +307,7 @@ class LaporanKerjaAdminController extends Controller
                 }
                 $message .= 'dan barang kembali ';
             }
+            
             $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
             if ($barangKeluar || $barangKembali) {
                 $laporan->update($data);
@@ -284,8 +324,36 @@ class LaporanKerjaAdminController extends Controller
             return redirect()->back()->with('success', 'Laporan berhasil di post.')
                 ->with('whatsappLink', $linkWhatsApp);
         }
-        $laporan->update($data);
-        return redirect()->back()->with('error', 'Laporan belum di setujui, hubungi staff bersangkutan.');
+        $message = '';
+        if ($request->status === 'cancel') {
+            if ($barangKeluar) {
+                $responseKeluar = ApiResponse::post('/api/penjualan-destroy', [
+                    'laporan_id' => $laporan->id,
+                ]);
+                if ($responseKeluar->failed()) {
+                    if (session('user_role') != 'superadmin') {
+                        return redirect()->back()->with('error', 'Gagal reject data, terjadi error dibagian web gudang.');
+                    }
+                    $message .= 'harap cek data barang, ada error dibagian web gudang';
+                }
+            }
+            if ($barangKembali) {
+                $responseKembali = ApiResponse::post('/api/pembelian-destroy', [
+                    'laporan_id' => $laporan->id,
+                ]);
+                if ($responseKembali->failed()) {
+                    if (session('user_role') != 'superadmin') {
+                        return redirect()->back()->with('error', 'Gagal reject data, terjadi error dibagian web gudang.');
+                    }
+                    $message .= 'harap cek data barang, ada error dibagian web gudang';
+                }
+            }
+            $laporan->tagihan()->delete();
+            $laporan->update(['status' => 'pending']);
+        }else {
+            $laporan->update($data);
+        }
+        return redirect()->back()->with('error', 'Laporan dibatalkan.'. $message);
     }
 
     /**
@@ -295,4 +363,14 @@ class LaporanKerjaAdminController extends Controller
     {
         //
     }
+
+    private function createTagihan($laporanId, $namaBiaya, $totalBiaya)
+    {
+        Tagihan::create([
+            'laporan_id' => $laporanId,
+            'nama_biaya' => $namaBiaya,
+            'total_biaya' => $totalBiaya
+        ]);
+    }
+
 }

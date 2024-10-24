@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminBerandaController;
+use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\LaporanKerjaAdminController;
 use App\Http\Controllers\LaporanKerjaController;
 use App\Http\Controllers\LoginController;
@@ -31,9 +32,10 @@ Route::middleware(['auth.api', 'role:staff'])->group(function () {
     Route::delete('/delete-image/{id}', [LaporanKerjaController::class, 'deleteImage'])->name('delete-image');
 });
 
-Route::middleware(['auth.api', 'role:admin'])->group(function () {
+Route::middleware(['auth.api', 'role:admin,superadmin'])->group(function () {
     Route::resource('/admin', AdminBerandaController::class);
     Route::resource('/laporan-admin', LaporanKerjaAdminController::class);
+    Route::resource('/biaya-admin', BiayaController::class);
 });
 
 // Default route

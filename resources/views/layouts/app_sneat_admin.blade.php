@@ -151,7 +151,7 @@
             <!-- Layouts -->
             <li class="menu-item {{ \Route::is('laporan-admin.*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-layout"></i>
+                <i class="menu-icon tf-icons bx bx-notepad"></i>
                 <div data-i18n="Layouts">Kegiatan</div>
               </a>
 
@@ -159,6 +159,21 @@
                 <li class="menu-item {{ \Route::is('laporan-admin.*') ? 'active' : '' }}">
                   <a href="{{ route('laporan-admin.create') }}" class="menu-link">
                     <div data-i18n="Without menu">Daftar Kegiatan</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="menu-item {{ \Route::is('biaya-admin.*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
+                <div data-i18n="Layouts">Biaya</div>
+              </a>
+
+              <ul class="menu-sub">
+                <li class="menu-item {{ \Route::is('biaya-admin.*') ? 'active' : '' }}">
+                  <a href="{{ route('biaya-admin.index') }}" class="menu-link">
+                    <div data-i18n="Without menu">Daftar Biaya</div>
                   </a>
                 </li>
               </ul>
@@ -410,6 +425,14 @@
           $(this).remove(); 
         });
       }, 3500);
+    </script>
+    <script>
+      function formatRupiahJS(angka) {
+          var reverse = angka.toString().split('').reverse().join('');
+          var ribuan = reverse.match(/\d{1,3}/g);
+          ribuan = ribuan.join('.').split('').reverse().join('');
+          return 'Rp ' + ribuan;
+      }
     </script>
 
     @yield('js')

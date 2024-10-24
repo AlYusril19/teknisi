@@ -56,9 +56,18 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         {{-- <a class="dropdown-item" href="{{ route('laporan-admin.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
-                                            Show
+                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
+                                            <i class="bx bx-show-alt me-2"></i> Show
                                         </button>
+                                        <div class="ms-auto">
+                                            <form method="POST" action="{{ route('laporan-admin.update', $data->id) ?? '-' }}" enctype="multipart/form-data">
+                                                @csrf
+                                                @method('PUT')
+                                                <button type="submit" name="status" value="cancel" class="dropdown-item" data-bs-toggle="modal">
+                                                    <i class="bx bx-x-circle me-2"></i> Reject
+                                                </button>
+                                            </form>
+                                        </div>
                                         {{-- <a class="dropdown-item" href="{{ route('laporan-admin.edit', $data->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a> --}}
                                         {{-- <form action="{{ route('laporan-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                             @csrf
@@ -111,17 +120,36 @@
         </div>
 
         <!-- Daftar Barang Kembali -->
-        <div class="card border-warning mt-3" id="titleBarangKembali" style="display: none;">
+        <div class="card border-warning mt-0" id="titleBarangKembali" style="display: none;">
             <h6 class="card-header mb-0">Daftar Barang Kembali</h6>
             <div class="card-body">
                 <ul id="laporanBarangKembali"></ul>
             </div>
         </div>
 
+        <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
+        <h6 class="card-header">Jumlah Biaya Kerja</h6>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr align="center">
+                        <th width="5%">No</th>
+                        <th>Jenis Biaya</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="laporanTagihan" class="table-border-bottom-0">
+                    {{-- isi tagihan --}}
+                </tbody>
+            </table>
+        </div>
+      </div>
+
         <!-- Galeri Foto -->
         <h6 class="mt-3">Galeri Foto</h6>
         <ul id="laporanGaleri" class="list-unstyled d-flex align-items-center avatar-group mb-0 z-2"></ul>
       </div>
+      
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
@@ -254,6 +282,51 @@ document.addEventListener('DOMContentLoaded', function () {
                     li.appendChild(img);
                     galeriList.appendChild(li);
                 });
+
+                // Isi daftar barang kembali
+                var tagihanList = document.getElementById('laporanTagihan');
+                var titleTagihan = document.getElementById('titleTagihan');
+
+                // Kosongkan list barang
+                tagihanList.innerHTML = '';
+
+                if (data.tagihan.length > 0) {
+                    // Jika ada data barang kembali, tampilkan judul dan list barang
+                    titleTagihan.style.display = 'block';
+
+                    let totalBiaya = 0;
+                    let no = 0;
+                    data.tagihan.forEach(function(tagihan) {
+                        var tr = document.createElement('tr');
+                        tagihanList.appendChild(tr);
+                        var tdNo = document.createElement('td');
+                        tdNo.setAttribute('align', 'center');
+                        tdNo.textContent = no+=1;
+                        tagihanList.appendChild(tdNo);
+                        var tdNama = document.createElement('td');
+                        tdNama.textContent = tagihan.nama_biaya;
+                        tagihanList.appendChild(tdNama);
+                        var tdBiaya = document.createElement('td');
+                        tdBiaya.setAttribute('align', 'right');
+                        tdBiaya.textContent = formatRupiahJS(tagihan.total_biaya);
+                        tagihanList.appendChild(tdBiaya);
+                        totalBiaya += parseInt(tagihan.total_biaya);
+                    });
+                    var trTotal = document.createElement('tr');
+                    tagihanList.appendChild(trTotal);
+                    var td = document.createElement('td');
+                    td.setAttribute('colspan', '2');
+                    td.setAttribute('align', 'right');
+                    td.textContent = 'Total Biaya';
+                    tagihanList.appendChild(td);
+                    var tdTotalBiaya = document.createElement('td');
+                    tdTotalBiaya.setAttribute('align', 'right');
+                    tdTotalBiaya.textContent = formatRupiahJS(totalBiaya);
+                    tagihanList.appendChild(tdTotalBiaya);
+                } else {
+                    // Jika tidak ada data barang, sembunyikan judul
+                    titleTagihan.style.display = 'none';
+                }
             });
     });
 });

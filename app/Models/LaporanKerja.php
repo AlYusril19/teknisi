@@ -30,6 +30,11 @@ class LaporanKerja extends Model
     {
         return $this->hasMany(Galeri::class, 'laporan_id');
     }
+
+    public function tagihan()
+    {
+        return $this->hasMany(Tagihan::class, 'laporan_id');
+    }
     protected static function boot()
     {
         parent::boot();

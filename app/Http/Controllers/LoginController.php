@@ -43,7 +43,7 @@ class LoginController extends Controller
             if ($user['role'] === 'staff') {
                 return redirect()->route('teknisi.index')->with('success', 'Login successful');
             }
-            if ($user['role'] === 'admin') {
+            if ($user['role'] === 'admin' || $user['role'] === 'superadmin') {
                 return redirect()->route('admin.index')->with('success', 'Login successful');
             }
         } else {
