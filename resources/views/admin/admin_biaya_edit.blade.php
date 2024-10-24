@@ -15,11 +15,14 @@
                     <div class="row mb-3" id="customer_input">
                         <label class="col-sm-2 col-form-label" for="customer">Customer</label>
                         <div class="col-sm-10">
-                            <select name="customer_id" id="customer_id" class="form-control">
-                                <option value="">Pilih Customer</option>
-                                @foreach($customers as $cust)
-                                    <option value="{{ $cust['id'] }}" {{ $cust['id'] == $biaya->customer_id ? 'selected' : '' }}>{{ $cust['nama'] }}</option>
-                                @endforeach
+                            <select name="customer_id" id="customer_id" class="form-control" disabled>
+                                @if ($biaya->customer_id === null)
+                                    <option value="">Pilih Customer</option>
+                                @else
+                                    @foreach($customers as $cust)
+                                        <option value="{{ $cust['id'] }}" {{ $cust['id'] == $biaya->customer_id ? 'selected' : '' }}>{{ $cust['nama'] }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                     </div>

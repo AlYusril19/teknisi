@@ -114,34 +114,27 @@ class BiayaController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $biaya = Biaya::findOrFail($id);
         $request->validate([
-            'customer_id' => 'nullable',
+            // 'customer_id' => 'nullable'.$id,
             'jam_kerja' => 'required',
             'jam_lembur' => 'required',
             'kabel' => 'nullable',
             'transport' => 'required'
         ]);
+        $customerId = $biaya->customer_id;
+        // dd($customerId);
 
         try {
             DB::beginTransaction();
 
             // Cek apakah sudah ada laporan dengan customer_id yang sama
-            if ($request->customer_id) {
-                $existingLaporan = Biaya::where('customer_id', $request->customer_id)
-                    ->exists();
-                if ($existingLaporan) {
-                    return back()->withErrors(['customer_id' => 'Biaya customer ini sudah ada, silahkan lakukan pengeditan.']);
-                }
-            } else {
-                $existingLaporan = Biaya::whereNull('customer_id')
-                    ->exists();
-                if ($existingLaporan) {
-                    return back()->withErrors(['customer_id' => 'Biaya ini sudah ada, lakukan pengeditan.']);
-                }
+            if ($request->customer_id != null) {
+                return back()->withErrors(['customer_id' => 'Silahkan edit biaya sesuai ketentuan.']);
             }
 
-            Biaya::update([
-                'customer_id' => $request->customer_id,
+            $biaya->update([
+                'customer_id' => $customerId,
                 'jam_kerja' => $request->jam_kerja,
                 'jam_lembur' => $request->jam_lembur,
                 'kabel' => $request->kabel,
