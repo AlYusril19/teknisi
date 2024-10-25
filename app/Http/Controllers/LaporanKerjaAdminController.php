@@ -18,12 +18,18 @@ class LaporanKerjaAdminController extends Controller
     {
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()->where('status', 'selesai');
-
         // Cek apakah filter lembur dipilih
         if ($request->filter === 'lembur') {
             $laporanQuery->where(function($query) {
                 $query->where('jam_selesai', '>', '17:00:00')
                     ->orWhere('jam_selesai', '<', '03:00:00');
+            });
+        }
+
+        // Cek apakah filter transport dipilih
+        if ($request->filter === 'transport') {
+            $laporanQuery->whereHas('tagihan', function($query) {
+                    $query->where('nama_biaya', 'like', '%Biaya Transport%');
             });
         }
 

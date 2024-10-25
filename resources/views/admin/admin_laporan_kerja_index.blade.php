@@ -16,6 +16,7 @@
                     <select name="filter" class="form-select" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>
                         <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
+                        <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option>
                     </select>
                 </div>
             </form>
@@ -110,40 +111,47 @@
         <p><strong>Keterangan Kegiatan:</strong> <span id="laporanKeterangan"></span></p>
         <p><strong>Jam Mulai:</strong> <span id="laporanJamMulai"></span></p>
         <p><strong>Jam Selesai:</strong> <span id="laporanJamSelesai"></span></p>
+        <p><strong>Alamat:</strong> <span id="laporanAlamat"></span></p>
 
         <!-- Daftar Barang -->
-        <div class="card h-100 mb-0" id="titleBarang" style="display: none;">
-            <h6 class="card-header mb-0">Daftar Barang Keluar</h6>
-            <div class="card-body">
-                <ul id="laporanBarang"></ul>
+        <div class="col-md-6">
+            <div class="card h-100 mb-0" id="titleBarang" style="display: none;">
+                <h6 class="card-header mb-0">Daftar Barang Keluar</h6>
+                <div class="card-body">
+                    <ul id="laporanBarang"></ul>
+                </div>
             </div>
         </div>
 
         <!-- Daftar Barang Kembali -->
-        <div class="card border-warning mt-0" id="titleBarangKembali" style="display: none;">
-            <h6 class="card-header mb-0">Daftar Barang Kembali</h6>
-            <div class="card-body">
-                <ul id="laporanBarangKembali"></ul>
+        <div class="col-md-6">
+            <div class="card border-warning mt-1" id="titleBarangKembali" style="display: none;">
+                <h6 class="card-header mb-0">Daftar Barang Kembali</h6>
+                <div class="card-body">
+                    <ul id="laporanBarangKembali"></ul>
+                </div>
             </div>
         </div>
 
-        <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
-        <h6 class="card-header">Jumlah Biaya Kerja</h6>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr align="center">
-                        <th width="5%">No</th>
-                        <th>Jenis Biaya</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody id="laporanTagihan" class="table-border-bottom-0">
-                    {{-- isi tagihan --}}
-                </tbody>
-            </table>
+        <div class="col-md-6 mt-1">
+            <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
+                <h6 class="card-header">Jumlah Biaya Kerja</h6>
+                <div class="card-body">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr align="center">
+                                <th width="5%">No</th>
+                                <th>Jenis Biaya</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="laporanTagihan" class="table-border-bottom-0">
+                            {{-- isi tagihan --}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
 
         <!-- Galeri Foto -->
         <h6 class="mt-3">Galeri Foto</h6>
@@ -214,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
                 document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
                 document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
+                document.getElementById('laporanAlamat').textContent = data.laporan.alamat_kegiatan;
 
                 // Isi daftar barang keluar
                 var barangList = document.getElementById('laporanBarang');
