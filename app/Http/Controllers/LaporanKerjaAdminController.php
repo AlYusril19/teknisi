@@ -257,8 +257,13 @@ class LaporanKerjaAdminController extends Controller
                 $this->createTagihan($laporan->id, 'Biaya Lembur', $totalBiayaLembur);
             }
 
-            // biaya mitra
+            // biaya transport mitra
             if ($biaya->customer_id) {
+                $biayaTransport = $biaya->transport;
+                $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
+            }
+
+            if ($request->transport) {
                 $biayaTransport = $biaya->transport;
                 $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
             }

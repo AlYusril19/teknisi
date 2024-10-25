@@ -56,7 +56,6 @@
                     </ul>
                   </div>
               @endif
-
             </div>
             <div class="card-body border-top">
               <div class="d-flex align-items-center">
@@ -78,6 +77,11 @@
                   <form method="POST" action="{{ route('laporan-admin.update', $data['laporan']->id) ?? '-' }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+                    @if (!$data['laporan']->customer_id)
+                        <div class="mt-0">
+                          <input type="checkbox" name="transport"> <span>Transport</span>
+                        </div>
+                    @endif
                     <button type="submit" name="status" value="selesai" class="btn badge bg-label-success">Accept</button>
                     <button type="submit" name="status" value="reject" class="btn badge bg-label-danger">Reject</button>
                   </form>
