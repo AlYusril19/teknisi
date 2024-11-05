@@ -194,151 +194,150 @@
 
 @section('js')
 <script>
-function timeFormat(timeString) {
-    // Asumsikan timeString dalam format "HH:MM:SS"
-    var timeParts = timeString.split(':');
-    var hour = timeParts[0];
-    var minute = timeParts[1];
-    return `${hour}:${minute}`;  // format 24 jam, hanya jam dan menit
-}
-document.addEventListener('DOMContentLoaded', function () {
-    var laporanModal = document.getElementById('laporanModal');
-    var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-    var popupImage = document.getElementById('popupImage');
-    
-    laporanModal.addEventListener('show.bs.modal', function (event) {
-        // Ambil tombol yang memicu modal
-        var button = event.relatedTarget;
-        var laporanId = button.getAttribute('data-id');
+    function timeFormat(timeString) {
+        // Asumsikan timeString dalam format "HH:MM:SS"
+        var timeParts = timeString.split(':');
+        var hour = timeParts[0];
+        var minute = timeParts[1];
+        return `${hour}:${minute}`;  // format 24 jam, hanya jam dan menit
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var laporanModal = document.getElementById('laporanModal');
+        var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        var popupImage = document.getElementById('popupImage');
         
-        // Lakukan ajax untuk mengambil data laporan
-        fetch(`/laporan-admin/${laporanId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Isi data laporan
-                document.getElementById('laporanUser').textContent = data.laporan.user.name;
-                document.getElementById('laporanTanggal').textContent = data.laporan.tanggal_kegiatan;
-                document.getElementById('laporanJenis').textContent = data.laporan.jenis_kegiatan;
-                document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
-                document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
-                document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
-                document.getElementById('laporanAlamat').textContent = data.laporan.alamat_kegiatan;
+        laporanModal.addEventListener('show.bs.modal', function (event) {
+            // Ambil tombol yang memicu modal
+            var button = event.relatedTarget;
+            var laporanId = button.getAttribute('data-id');
+            
+            // Lakukan ajax untuk mengambil data laporan
+            fetch(`/laporan-admin/${laporanId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Isi data laporan
+                    document.getElementById('laporanUser').textContent = data.laporan.user.name;
+                    document.getElementById('laporanTanggal').textContent = data.laporan.tanggal_kegiatan;
+                    document.getElementById('laporanJenis').textContent = data.laporan.jenis_kegiatan;
+                    document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
+                    document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
+                    document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
+                    document.getElementById('laporanAlamat').textContent = data.laporan.alamat_kegiatan;
 
-                // Isi daftar barang keluar
-                var barangList = document.getElementById('laporanBarang');
-                var titleBarang = document.getElementById('titleBarang');
+                    // Isi daftar barang keluar
+                    var barangList = document.getElementById('laporanBarang');
+                    var titleBarang = document.getElementById('titleBarang');
 
-                // Kosongkan list barang
-                barangList.innerHTML = '';
+                    // Kosongkan list barang
+                    barangList.innerHTML = '';
 
-                if (data.barangKeluarView.length > 0) {
-                    // Jika ada data barang kembali, tampilkan judul dan list barang
-                    titleBarang.style.display = 'block';
+                    if (data.barangKeluarView.length > 0) {
+                        // Jika ada data barang kembali, tampilkan judul dan list barang
+                        titleBarang.style.display = 'block';
 
-                    data.barangKeluarView.forEach(function(barang) {
+                        data.barangKeluarView.forEach(function(barang) {
+                            var li = document.createElement('li');
+                            li.textContent = `${barang.nama} | x${barang.jumlah}`;
+                            barangList.appendChild(li);
+                        });
+                    } else {
+                        // Jika tidak ada data barang, sembunyikan judul
+                        titleBarang.style.display = 'none';
+                    }
+
+                    // Isi daftar barang kembali
+                    var barangList = document.getElementById('laporanBarangKembali');
+                    var titleBarangKembali = document.getElementById('titleBarangKembali');
+
+                    // Kosongkan list barang
+                    barangList.innerHTML = '';
+
+                    if (data.barangKembaliView.length > 0) {
+                        // Jika ada data barang kembali, tampilkan judul dan list barang
+                        titleBarangKembali.style.display = 'block';
+
+                        data.barangKembaliView.forEach(function(barang) {
+                            var li = document.createElement('li');
+                            li.textContent = `${barang.nama} | x${barang.jumlah}`;
+                            barangList.appendChild(li);
+                        });
+                    } else {
+                        // Jika tidak ada data barang, sembunyikan judul
+                        titleBarangKembali.style.display = 'none';
+                    }
+
+
+                    // Isi galeri foto
+                    var galeriList = document.getElementById('laporanGaleri');
+                    galeriList.innerHTML = '';
+                    data.galeri.forEach(function(foto) {
                         var li = document.createElement('li');
-                        li.textContent = `${barang.nama} | x${barang.jumlah}`;
-                        barangList.appendChild(li);
+                        li.setAttribute('data-bs-toggle', 'tooltip');
+                        li.setAttribute('data-popup', 'tooltip-custom');
+                        li.setAttribute('data-bs-placement', 'top');
+                        li.setAttribute('aria-label', 'Dokumentasi');
+                        li.setAttribute('data-bs-original-title', 'Dokumentasi');
+                        li.classList.add('avatar', 'avatar-sm', 'pull-up');
+
+                        var img = document.createElement('img');
+                        img.src = `/storage/${foto.file_path}`;
+                        img.alt = 'Dokumentasi';
+                        img.style.cursor = 'pointer';
+                        img.onclick = function() {
+                            popupImage.src = img.src;  // Set gambar di modal
+                            imageModal.show();  // Tampilkan modal
+                        };
+
+                        li.appendChild(img);
+                        galeriList.appendChild(li);
                     });
-                } else {
-                    // Jika tidak ada data barang, sembunyikan judul
-                    titleBarang.style.display = 'none';
-                }
 
-                // Isi daftar barang kembali
-                var barangList = document.getElementById('laporanBarangKembali');
-                var titleBarangKembali = document.getElementById('titleBarangKembali');
+                    // Isi daftar barang kembali
+                    var tagihanList = document.getElementById('laporanTagihan');
+                    var titleTagihan = document.getElementById('titleTagihan');
 
-                // Kosongkan list barang
-                barangList.innerHTML = '';
+                    // Kosongkan list barang
+                    tagihanList.innerHTML = '';
 
-                if (data.barangKembaliView.length > 0) {
-                    // Jika ada data barang kembali, tampilkan judul dan list barang
-                    titleBarangKembali.style.display = 'block';
+                    if (data.tagihan.length > 0) {
+                        // Jika ada data barang kembali, tampilkan judul dan list barang
+                        titleTagihan.style.display = 'block';
 
-                    data.barangKembaliView.forEach(function(barang) {
-                        var li = document.createElement('li');
-                        li.textContent = `${barang.nama} | x${barang.jumlah}`;
-                        barangList.appendChild(li);
-                    });
-                } else {
-                    // Jika tidak ada data barang, sembunyikan judul
-                    titleBarangKembali.style.display = 'none';
-                }
-
-
-                // Isi galeri foto
-                var galeriList = document.getElementById('laporanGaleri');
-                galeriList.innerHTML = '';
-                data.galeri.forEach(function(foto) {
-                    var li = document.createElement('li');
-                    li.setAttribute('data-bs-toggle', 'tooltip');
-                    li.setAttribute('data-popup', 'tooltip-custom');
-                    li.setAttribute('data-bs-placement', 'top');
-                    li.setAttribute('aria-label', 'Dokumentasi');
-                    li.setAttribute('data-bs-original-title', 'Dokumentasi');
-                    li.classList.add('avatar', 'avatar-sm', 'pull-up');
-
-                    var img = document.createElement('img');
-                    img.src = `/storage/${foto.file_path}`;
-                    img.alt = 'Dokumentasi';
-                    img.style.cursor = 'pointer';
-                    img.onclick = function() {
-                        popupImage.src = img.src;  // Set gambar di modal
-                        imageModal.show();  // Tampilkan modal
-                    };
-
-                    li.appendChild(img);
-                    galeriList.appendChild(li);
+                        let totalBiaya = 0;
+                        let no = 0;
+                        data.tagihan.forEach(function(tagihan) {
+                            var tr = document.createElement('tr');
+                            tagihanList.appendChild(tr);
+                            var tdNo = document.createElement('td');
+                            tdNo.setAttribute('align', 'center');
+                            tdNo.textContent = no+=1;
+                            tagihanList.appendChild(tdNo);
+                            var tdNama = document.createElement('td');
+                            tdNama.textContent = tagihan.nama_biaya;
+                            tagihanList.appendChild(tdNama);
+                            var tdBiaya = document.createElement('td');
+                            tdBiaya.setAttribute('align', 'right');
+                            tdBiaya.textContent = formatRupiahJS(tagihan.total_biaya);
+                            tagihanList.appendChild(tdBiaya);
+                            totalBiaya += parseInt(tagihan.total_biaya);
+                        });
+                        var trTotal = document.createElement('tr');
+                        tagihanList.appendChild(trTotal);
+                        var td = document.createElement('td');
+                        td.setAttribute('colspan', '2');
+                        td.setAttribute('align', 'right');
+                        td.textContent = 'Total Biaya';
+                        tagihanList.appendChild(td);
+                        var tdTotalBiaya = document.createElement('td');
+                        tdTotalBiaya.setAttribute('align', 'right');
+                        tdTotalBiaya.textContent = formatRupiahJS(totalBiaya);
+                        tagihanList.appendChild(tdTotalBiaya);
+                    } else {
+                        // Jika tidak ada data barang, sembunyikan judul
+                        titleTagihan.style.display = 'none';
+                    }
                 });
-
-                // Isi daftar barang kembali
-                var tagihanList = document.getElementById('laporanTagihan');
-                var titleTagihan = document.getElementById('titleTagihan');
-
-                // Kosongkan list barang
-                tagihanList.innerHTML = '';
-
-                if (data.tagihan.length > 0) {
-                    // Jika ada data barang kembali, tampilkan judul dan list barang
-                    titleTagihan.style.display = 'block';
-
-                    let totalBiaya = 0;
-                    let no = 0;
-                    data.tagihan.forEach(function(tagihan) {
-                        var tr = document.createElement('tr');
-                        tagihanList.appendChild(tr);
-                        var tdNo = document.createElement('td');
-                        tdNo.setAttribute('align', 'center');
-                        tdNo.textContent = no+=1;
-                        tagihanList.appendChild(tdNo);
-                        var tdNama = document.createElement('td');
-                        tdNama.textContent = tagihan.nama_biaya;
-                        tagihanList.appendChild(tdNama);
-                        var tdBiaya = document.createElement('td');
-                        tdBiaya.setAttribute('align', 'right');
-                        tdBiaya.textContent = formatRupiahJS(tagihan.total_biaya);
-                        tagihanList.appendChild(tdBiaya);
-                        totalBiaya += parseInt(tagihan.total_biaya);
-                    });
-                    var trTotal = document.createElement('tr');
-                    tagihanList.appendChild(trTotal);
-                    var td = document.createElement('td');
-                    td.setAttribute('colspan', '2');
-                    td.setAttribute('align', 'right');
-                    td.textContent = 'Total Biaya';
-                    tagihanList.appendChild(td);
-                    var tdTotalBiaya = document.createElement('td');
-                    tdTotalBiaya.setAttribute('align', 'right');
-                    tdTotalBiaya.textContent = formatRupiahJS(totalBiaya);
-                    tagihanList.appendChild(tdTotalBiaya);
-                } else {
-                    // Jika tidak ada data barang, sembunyikan judul
-                    titleTagihan.style.display = 'none';
-                }
-            });
+        });
     });
-});
-
 </script>
 @endsection

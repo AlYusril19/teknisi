@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use ApiResponse;
 use App\Models\Galeri;
 use App\Models\LaporanKerja;
+use App\Models\UserApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -191,7 +192,61 @@ class LaporanKerjaController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // Ambil laporan berdasarkan ID
+        $laporan = LaporanKerja::findOrFail($id);
+        $laporan->user = UserApi::getUserById($laporan->user_id);
+
+        // Ambil barang keluar dari laporan
+        $barangKeluar = json_decode($laporan->barang, true);
+        $barangKembali = json_decode($laporan->barang_kembali, true);
+
+        // Ambil data barang dari web lama via API atau sumber lain
+        $response = ApiResponse::get('/api/get-barang');
+        $barangs = $response->json();
+
+        // Inisialisasi array untuk barang yang ditampilkan
+        $barangKeluarView = [];
+        if ($barangKeluar) {
+            foreach ($barangKeluar as $barang) {
+                // Cari detail barang berdasarkan ID
+                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+                if ($barangDetail) {
+                    $barangKeluarView[] = [
+                        'id' => $barang['id'],
+                        'jumlah' => $barang['jumlah'],
+                        'nama' => $barangDetail['nama_barang']
+                    ];
+                }
+            }
+        }
+
+        $barangKembaliView = [];
+        if ($barangKembali) {
+            foreach ($barangKembali as $barang) {
+                // Cari detail barang berdasarkan ID
+                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+                if ($barangDetail) {
+                    $barangKembaliView[] = [
+                        'id' => $barang['id'],
+                        'jumlah' => $barang['jumlah'],
+                        'nama' => $barangDetail['nama_barang']
+                    ];
+                }
+            }
+        }
+
+        // Ambil galeri foto
+        $galeri = $laporan->galeri; // Ambil galeri terkait
+        $tagihan = $laporan->tagihan; // Ambil tagihan
+
+        // Return sebagai JSON
+        return response()->json([
+            'laporan' => $laporan,
+            'barangKeluarView' => $barangKeluarView,
+            'barangKembaliView' => $barangKembaliView,
+            'galeri' => $galeri,
+            'tagihan' => $tagihan
+        ]);
     }
 
     /**
