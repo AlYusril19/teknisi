@@ -4,8 +4,19 @@
     {{-- <h5 class="pb-1 mb-6">Data Peserta</h5> --}}
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Daftar Laporan Kerja</h5>
+            {{-- <h5 class="mb-0">Daftar Laporan Kerja</h5> --}}
             <a href="{{ route('laporan.create') }}" class="btn btn-primary mb-0">Buat Laporan</a>
+            <form action="{{ route('laporan.index') }}" method="GET">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
+                    {{-- <select name="filter" class="form-select" onchange="this.form.submit()">
+                        <option value="">Semua Laporan</option>
+                        <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
+                        <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option>
+                    </select> --}}
+                </div>
+            </form>
         </div>
         <div class="table-responsive">
             <table class="table">

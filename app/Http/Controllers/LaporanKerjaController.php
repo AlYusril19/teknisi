@@ -15,42 +15,59 @@ class LaporanKerjaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $userId=session('user_id');
+        $userId = session('user_id');
+        $search = $request->input('search');
+
+        // Ambil laporan berdasarkan status, urutan, dan filter pencarian jika ada
         $reject = LaporanKerja::where('user_id', $userId)
             ->where('status', 'reject')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('jenis_kegiatan', 'like', "%$search%")
+                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
+                });
+            })
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
-        // Ambil laporan dengan status 'draft' dan urutkan berdasarkan tanggal terlama
         $drafts = LaporanKerja::where('user_id', $userId)
             ->where('status', 'draft')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('jenis_kegiatan', 'like', "%$search%")
+                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
+                });
+            })
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
-        // Ambil laporan dengan status 'selesai' dan urutkan berdasarkan tanggal terbaru
         $pending = LaporanKerja::where('user_id', $userId)
             ->where('status', 'pending')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('jenis_kegiatan', 'like', "%$search%")
+                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
+                });
+            })
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
         $selesai = LaporanKerja::where('user_id', $userId)
             ->where('status', 'selesai')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('jenis_kegiatan', 'like', "%$search%")
+                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
+                });
+            })
             ->orderBy('tanggal_kegiatan', 'desc')
             ->get();
 
-        // Gabungkan kedua koleksi
+        // Gabungkan koleksi laporan sesuai status dan urutan
         $laporan = $reject->concat($drafts)->concat($pending)->concat($selesai);
-        // $page = request()->get('page', 1);
-        // $perPage = 10;
-        // $laporan = new \Illuminate\Pagination\LengthAwarePaginator(
-        //     $laporan->forPage($page, $perPage),
-        //     $laporan->count(),
-        //     $perPage,
-        //     $page,
-        //     ['path' => request()->url(), 'query' => request()->query()]
-        // );
+
         return view('teknisi.laporan_kerja_index', [
             'laporan' => $laporan
         ]);
@@ -237,7 +254,7 @@ class LaporanKerjaController extends Controller
 
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait
-        $tagihan = $laporan->tagihan; // Ambil tagihan
+        // $tagihan = $laporan->tagihan; // Ambil tagihan
 
         // Return sebagai JSON
         return response()->json([
@@ -245,7 +262,7 @@ class LaporanKerjaController extends Controller
             'barangKeluarView' => $barangKeluarView,
             'barangKembaliView' => $barangKembaliView,
             'galeri' => $galeri,
-            'tagihan' => $tagihan
+            // 'tagihan' => $tagihan
         ]);
     }
 
