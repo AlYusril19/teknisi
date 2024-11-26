@@ -9,12 +9,11 @@
             <h5 class="mb-0">Daftar Laporan Kerja</h5>
             <form action="{{ route('laporan-mitra.index') }}" method="GET">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="kegiatan" value="{{ request('search') }}">
                     <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
                     <select name="filter" class="form-select" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>
                         <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
-                        <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option>
                     </select>
                 </div>
             </form>
@@ -29,9 +28,7 @@
                         <th width="5%">No</th>
                         <th>Teknisi</th>
                         <th>Tanggal</th>
-                        <th>Jenis</th>
                         <th>Kegiatan</th>
-                        <th>status</th>
                         <th>Jam Kerja</th>
                         <th>Aksi</th>
                     </tr>
@@ -41,13 +38,10 @@
                         <tr>
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                             <td align="center">{{ $data->user['name'] ?? '-' }}</td>
-                            <td>{{ $data->tanggal_kegiatan }}</td>
-                            <td>{{ $data->jenis_kegiatan }}</td>
+                            <td align="center">{{ $data->tanggal_kegiatan }}</td>
                             <td>{{ $data->keterangan_kegiatan }}</td>
-                            <td align="center">
-                                <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : ($data->status === 'pending' ? 'warning' : 'success') }}">{{ $data->status ?? 'null' }}</span>
-                            </td>
-                            <td>{{ formatTime($data->jam_mulai) }} - {{  formatTime($data->jam_selesai) }}</td>
+                            
+                            <td align="center">{{ formatTime($data->jam_mulai) }} - {{  formatTime($data->jam_selesai) }}</td>
                             <td align="center">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">

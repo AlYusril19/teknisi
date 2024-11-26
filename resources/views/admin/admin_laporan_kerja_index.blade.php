@@ -13,10 +13,16 @@
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
                     <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
-                    <select name="filter" class="form-select" onchange="this.form.submit()">
+                    <select name="filter" class="form-select me-2" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>
                         <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
                         <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option>
+                    </select>
+                    <select name="mitra" class="form-select" onchange="this.form.submit()">
+                        <option value="">Pilih Mitra</option>
+                        @foreach ($customers as $cust)
+                            <option value="{{ $cust['id'] }}" {{ request('mitra') == $cust['id'] ? 'selected' : '' }}>{{ $cust['nama'] }}</option>
+                        @endforeach
                     </select>
                 </div>
             </form>

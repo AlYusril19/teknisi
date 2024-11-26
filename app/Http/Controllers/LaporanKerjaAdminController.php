@@ -16,6 +16,7 @@ class LaporanKerjaAdminController extends Controller
      */
     public function index(Request $request)
     {
+        $customers = ApiResponse::get('/api/get-customer')->json();
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()->where('status', 'selesai');
         // Cek apakah filter lembur dipilih
@@ -41,6 +42,13 @@ class LaporanKerjaAdminController extends Controller
             });
         }
 
+        // Cek apakah mitra dipilih
+        if ($request->mitra) {
+            $laporanQuery->where(function($query) use ($request) {
+                $query->where('customer_id', $request->mitra);
+            });
+        }
+
         // Ambil data laporan yang sudah difilter
         $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
 
@@ -51,7 +59,8 @@ class LaporanKerjaAdminController extends Controller
 
         // Tampilkan ke view
         return view('admin.admin_laporan_kerja_index', [
-            'laporan' => $laporan
+            'laporan' => $laporan,
+            'customers' => $customers
         ]);
     }
 

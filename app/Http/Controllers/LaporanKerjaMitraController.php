@@ -40,18 +40,10 @@ class LaporanKerjaMitraController extends Controller
             });
         }
 
-        // Cek apakah filter transport dipilih
-        if ($request->filter === 'transport') {
-            $laporanQuery->whereHas('tagihan', function($query) {
-                    $query->where('nama_biaya', 'like', '%Biaya Transport%');
-            });
-        }
-
         // Cek apakah ada pencarian berdasarkan nama barang atau laporan
         if ($request->search) {
             $laporanQuery->where(function ($query) use ($request) {
-                $query->where('jenis_kegiatan', 'like', '%' . $request->search . '%')
-                    ->orWhere('keterangan_kegiatan', 'like', '%' . $request->search . '%');
+                $query->Where('keterangan_kegiatan', 'like', '%' . $request->search . '%');
             });
         }
 
