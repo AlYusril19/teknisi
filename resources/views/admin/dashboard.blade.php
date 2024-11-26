@@ -63,7 +63,7 @@
                         <div class="card-body">
                             <div class="card-title d-flex align-items-start justify-content-between">
                                 <div class="avatar flex-shrink-0">
-                                    <img src="{{ asset('sneat') }}/assets/img/icons/unicons/cc-primary.png" alt="Credit Card" class="rounded" />
+                                    <img src="{{ asset('sneat') }}/assets/img/icons/unicons/report.png" alt="Credit Card" class="rounded" />
                                 </div>
                                 <div class="dropdown">
                                     <button

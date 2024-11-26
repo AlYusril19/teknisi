@@ -40,6 +40,9 @@ class LoginController extends Controller
             ]);
 
             // Redirect ke dashboard atau halaman lain
+            if ($user['role'] === 'mitra') {
+                return redirect()->route('mitra.index')->with('success', 'Login successful');
+            }
             if ($user['role'] === 'staff') {
                 return redirect()->route('teknisi.index')->with('success', 'Login successful');
             }

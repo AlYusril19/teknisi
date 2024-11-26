@@ -4,7 +4,9 @@ use App\Http\Controllers\AdminBerandaController;
 use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\LaporanKerjaAdminController;
 use App\Http\Controllers\LaporanKerjaController;
+use App\Http\Controllers\LaporanKerjaMitraController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MitraBerandaController;
 use App\Http\Controllers\TeknisiBerandaController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,8 +26,13 @@ Route::get('/login', [LoginController::class, 'loginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Protected route for technicians
 // role didaftarkan di kernel dan middleware
+
+Route::middleware(['auth.api', 'role:mitra'])->group(function () {
+    Route::resource('/mitra', MitraBerandaController::class);
+    Route::resource('/laporan-mitra', LaporanKerjaMitraController::class);
+});
+
 Route::middleware(['auth.api', 'role:staff'])->group(function () {
     Route::resource('/teknisi', TeknisiBerandaController::class);
     Route::resource('/laporan', LaporanKerjaController::class);
