@@ -37,6 +37,7 @@ class LoginController extends Controller
                 'user_id' => $user['id'],
                 'user_name' => $user['name'],
                 'user_role' => $user['role'],
+                'user_email' => $user['email'],
             ]);
 
             // Redirect ke dashboard atau halaman lain

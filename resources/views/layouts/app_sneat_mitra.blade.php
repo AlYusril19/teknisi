@@ -168,19 +168,19 @@
             <li class="menu-header small text-uppercase">
               <span class="menu-header-text">Pages</span>
             </li>
-            {{-- <li class="menu-item {{ \Route::is('teknisi.create') ? 'active open' : '' }}">
+            <li class="menu-item {{ \Route::is('mitra.create') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-dock-top"></i>
                 <div data-i18n="Account Settings">Account Settings</div>
               </a>
               <ul class="menu-sub">
-                <li class="menu-item {{ \Route::is('teknisi.create') ? 'active' : '' }}">
-                  <a href="{{ route('teknisi.create') }}" class="menu-link">
+                <li class="menu-item {{ \Route::is('mitra.create') ? 'active' : '' }}">
+                  <a href="{{ route('mitra.create') }}" class="menu-link">
                     <div data-i18n="Account">Account</div>
                   </a>
                 </li>
               </ul>
-            </li> --}}
+            </li>
           </ul>
         </aside>
         <!-- / Menu -->
