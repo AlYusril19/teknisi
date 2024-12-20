@@ -26,39 +26,10 @@
         </div>
 
         <!--/ Total Revenue -->
-        <div class="col-12 col-md-8 col-lg-4 order-3 order-md-2">
+        <div class="col-xxl-6 col-lg-12 col-md-4 order-1">
             <div class="row">
-                {{-- <div class="col-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="card-title d-flex align-items-start justify-content-between">
-                                <div class="avatar flex-shrink-0">
-                                    <img src="{{ asset('sneat') }}/assets/img/icons/unicons/paypal.png" alt="Credit Card" class="rounded" />
-                                </div>
-                                <div class="dropdown">
-                                    <button
-                                        class="btn p-0"
-                                        type="button"
-                                        id="cardOpt4"
-                                        data-bs-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
-                                    >
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                                        <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                        <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="d-block mb-1">Payments</span>
-                            <h3 class="card-title text-nowrap mb-2">$2,456</h3>
-                            <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> -14.82%</small>
-                        </div>
-                    </div>
-                </div> --}}
-                <div class="col-6 mb-4">
+                {{-- Banding Jumlah Laporan --}}
+                <div class="col-lg-4 col-md-12 col-6 mb-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="card-title d-flex align-items-start justify-content-between">
@@ -92,27 +63,44 @@
                         </div>
                     </div>
                 </div>
-                {{-- <div class="col-12 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
-                                <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
-                                    <div class="card-title">
-                                        <h5 class="text-nowrap mb-2">Profile Report</h5>
-                                        <span class="badge bg-label-warning rounded-pill">Year 2021</span>
+
+                {{-- Banding Jam Kerja --}}
+                @foreach ($bandingJamKerjaPerUser  as $data)
+                    <div class="col-lg-4 col-md-12 col-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-title d-flex align-items-start justify-content-between">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('sneat') }}/assets/img/icons/unicons/hard-work.png" alt="Credit Card" class="rounded" />
                                     </div>
-                                    <div class="mt-sm-auto">
-                                        <small class="text-success text-nowrap fw-semibold">
-                                            <i class="bx bx-chevron-up"></i> 68.2%
-                                        </small>
-                                        <h3 class="mb-0">$84,686k</h3>
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn p-0"
+                                            type="button"
+                                            id="cardOpt1"
+                                            data-bs-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false"
+                                        >
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="cardOpt1">
+                                            <a class="dropdown-item" href="{{ route('laporan-admin.index') }}">View More</a>
+                                            {{-- <a class="dropdown-item" href="javascript:void(0);">Delete</a> --}}
+                                        </div>
                                     </div>
                                 </div>
-                                <div id="reportChart"></div>
+                                <span class="fw-semibold d-block mb-1">{{ $data['name'] }}</span>
+                                <h3 class="card-title mb-2">{{ $data['total_jam'] }} Hours</h3>
+                                @if ($data['perbandingan'] >=0)
+                                    <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> {{ $data['perbandingan'] }}%</small>
+                                @else
+                                    <small class="text-danger fw-semibold"><i class="bx bx-down-arrow-alt"></i> {{ $data['perbandingan'] }}%</small>
+                                @endif
                             </div>
                         </div>
                     </div>
-                </div> --}}
+                @endforeach
             </div>
         </div>
     </div>

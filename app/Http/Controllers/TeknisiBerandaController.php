@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LaporanKerja;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
 class TeknisiBerandaController extends Controller
@@ -12,9 +14,25 @@ class TeknisiBerandaController extends Controller
      */
     public function index()
     {
+        $now = Carbon::now();
+
         // dd(auth()->id());
         $userName = session('user_name'); // Ambil nama user dari session
         $userRole = session('user_role'); // Ambil role user dari session
+
+        $bulanSekarang = $now->month;
+        $tahunSekarang = $now->year;
+        // $laporanSekarang = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanSekarang)
+        //                     ->whereYear('tanggal_kegiatan', $tahunSekarang)
+        //                     ->where('status', 'selesai')
+        //                     ->count();
+        // // get laporan bulan kemarin
+        // $bulanKemarin = $now->subMonth()->month;
+        // $tahunKemarin = $now->subMonth()->year;
+        // $laporanKemarin = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanKemarin)
+        //                     ->whereYear('tanggal_kegiatan', $tahunKemarin)
+        //                     ->where('status', 'selesai')
+        //                     ->count();
         return view('teknisi.dashboard',[
             'userName' => $userName, 
             'userRole' => $userRole
