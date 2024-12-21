@@ -94,8 +94,13 @@ class AdminBerandaController extends Controller
             $totalJam = $laporanPerUser->reduce(function ($carry, $laporan) {
                 $jamMulai = Carbon::parse($laporan->jam_mulai);
                 $jamSelesai = Carbon::parse($laporan->jam_selesai);
-                return $carry + $jamMulai->diffInMinutes($jamSelesai) / 60;
-            }, 0);
+                // Jika jam selesai lebih kecil, tambahkan 1 hari
+                if ($jamSelesai->lessThan($jamMulai)) {
+                    $jamSelesai->addDay();
+                }
+
+                return $carry + $jamMulai->diffInSeconds($jamSelesai);
+            }, 0) / 3600; // Konversi detik ke jam
             return [
                 'user_id' => $user['id'],
                 'name' => $namaUser,
