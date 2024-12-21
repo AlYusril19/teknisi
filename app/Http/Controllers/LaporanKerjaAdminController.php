@@ -49,6 +49,13 @@ class LaporanKerjaAdminController extends Controller
             });
         }
 
+        // Cek apakah mitra dipilih
+        if ($request->teknisi) {
+            $laporanQuery->where(function($query) use ($request) {
+                $query->where('user_id', $request->teknisi);
+            });
+        }
+
         // Ambil data laporan yang sudah difilter
         $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
 

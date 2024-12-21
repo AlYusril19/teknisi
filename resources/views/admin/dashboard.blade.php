@@ -14,6 +14,34 @@
                             @if ($laporanPending)
                                 <a href="{{ route('laporan-admin.create') }}" class="btn btn-sm btn-outline-primary">View Pendings</a>
                             @endif
+
+                            <h6 class="mt-5 mb-1">Cek data pada bulan yang dipilih</h6>
+                            <!-- Dropdown Pemilihan Bulan dan Tahun -->
+                            <form action="{{ route('admin.index') }}" method="GET">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label for="bulan" class="form-label">Pilih Bulan</label>
+                                        <select name="bulan" id="bulan" class="form-select">
+                                            @for ($i = 1; $i <= 12; $i++)
+                                                <option value="{{ $i }}" {{ request('bulan', date('n')) == $i ? 'selected' : '' }}>
+                                                    {{ DateTime::createFromFormat('!m', $i)->format('F') }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="tahun" class="form-label">Pilih Tahun</label>
+                                        <select name="tahun" id="tahun" class="form-select">
+                                            @for ($y = date('Y') - 5; $y <= date('Y'); $y++)
+                                                <option value="{{ $y }}" {{ request('tahun', date('Y')) == $y ? 'selected' : '' }}>
+                                                    {{ $y }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-3">Terapkan</button>
+                            </form>
                         </div>
                     </div>
                     <div class="col-sm-5 text-center text-sm-left">
@@ -85,7 +113,10 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                            <a class="dropdown-item" href="{{ route('laporan-admin.index') }}">View More</a>
+                                            <form action="{{ route('laporan-admin.index') }}" method="GET">
+                                                <button type="submit" name="teknisi" value="{{ $data['user_id'] }}" class="dropdown-item">View More</button>
+                                            </form>
+                                                {{-- <a class="dropdown-item" href="{{ route('laporan-admin.index') }}">View More {{ $data['user_id'] }}</a> --}}
                                             {{-- <a class="dropdown-item" href="javascript:void(0);">Delete</a> --}}
                                         </div>
                                     </div>

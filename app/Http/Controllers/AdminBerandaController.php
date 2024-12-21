@@ -12,28 +12,30 @@ class AdminBerandaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $userName = session('user_name');
         $userRole = session('user_role');
         $now = Carbon::now();
 
+        // Jika ada filter bulan dan tahun dari request, gunakan itu
+        $bulanDipilih = $request->input('bulan', $now->month); // Default bulan sekarang
+        $tahunDipilih = $request->input('tahun', $now->year); // Default tahun sekarang
+
+        // Bulan sebelumnya untuk perbandingan
+        $bulanSebelumnya = Carbon::createFromDate($tahunDipilih, $bulanDipilih)->subMonth()->month;
+        $tahunSebelumnya = Carbon::createFromDate($tahunDipilih, $bulanDipilih)->subMonth()->year;
+
         // Get laporan pending
         $laporanPending = LaporanKerja::where('status', 'pending')->count();
 
-        // Get jumlah laporan bulan berjalan dan kemarin
-        $bulanSekarang = $now->month;
-        $tahunSekarang = $now->year;
-        $bulanKemarin = $now->copy()->subMonth()->month;
-        $tahunKemarin = $now->copy()->subMonth()->year;
-
-        $laporanSekarang = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanSekarang)
-            ->whereYear('tanggal_kegiatan', $tahunSekarang)
+        $laporanSekarang = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanDipilih)
+            ->whereYear('tanggal_kegiatan', $tahunDipilih)
             ->where('status', 'selesai')
             ->get();
 
-        $laporanKemarin = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanKemarin)
-            ->whereYear('tanggal_kegiatan', $tahunKemarin)
+        $laporanKemarin = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanSebelumnya)
+            ->whereYear('tanggal_kegiatan', $tahunSebelumnya)
             ->where('status', 'selesai')
             ->get();
 
@@ -59,6 +61,7 @@ class AdminBerandaController extends Controller
             $persentase = $jamKemarin > 0 ? round((($jamSekarang - $jamKemarin) / $jamKemarin) * 100, 2) : 0;
 
             return [
+                'user_id' => $data['user_id'],
                 'name' => $data['name'],
                 'total_jam' => $jamSekarang,
                 'perbandingan' => $persentase,
@@ -93,8 +96,8 @@ class AdminBerandaController extends Controller
                 $jamSelesai = Carbon::parse($laporan->jam_selesai);
                 return $carry + $jamMulai->diffInHours($jamSelesai);
             }, 0);
-
             return [
+                'user_id' => $user['id'],
                 'name' => $namaUser,
                 'total_jam' => $totalJam,
             ];
