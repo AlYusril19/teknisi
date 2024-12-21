@@ -57,7 +57,11 @@ class LaporanKerjaAdminController extends Controller
         }
 
         // Ambil data laporan yang sudah difilter
-        $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
+        // $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
+        $laporan = $laporanQuery
+            ->orderBy('tanggal_kegiatan', 'desc')
+            ->orderBy('jam_mulai', 'desc') // Menambahkan urutan berdasarkan jam_mulai secara ascending
+            ->get();
 
         // Mengambil data user
         foreach ($laporan as $lap) {

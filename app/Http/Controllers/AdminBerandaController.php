@@ -56,7 +56,7 @@ class AdminBerandaController extends Controller
 
         // Hitung perbandingan jam kerja per user
         $bandingJamKerjaPerUser = $jamKerjaPerUser->map(function ($data, $userId) use ($jamKerjaPerUserKemarin) {
-            $jamSekarang = $data['total_jam'];
+            $jamSekarang = round($data['total_jam'],1);
             $jamKemarin = $jamKerjaPerUserKemarin->get($userId)['total_jam'] ?? 0;
             $persentase = $jamKemarin > 0 ? round((($jamSekarang - $jamKemarin) / $jamKemarin) * 100, 2) : 0;
 
@@ -94,7 +94,7 @@ class AdminBerandaController extends Controller
             $totalJam = $laporanPerUser->reduce(function ($carry, $laporan) {
                 $jamMulai = Carbon::parse($laporan->jam_mulai);
                 $jamSelesai = Carbon::parse($laporan->jam_selesai);
-                return $carry + $jamMulai->diffInHours($jamSelesai);
+                return $carry + $jamMulai->diffInMinutes($jamSelesai) / 60;
             }, 0);
             return [
                 'user_id' => $user['id'],
