@@ -88,6 +88,16 @@ class AdminBerandaController extends Controller
 
     private function hitungJamKerja($laporanKerja)
     {
+        // Tentukan tanggal 28 bulan sebelumnya dan 28 bulan saat ini
+        $tanggalAwal = Carbon::now()->subMonths(28)->startOfMonth()->addDays(27);
+        $tanggalAkhir = Carbon::now()->startOfMonth()->addDays(27);
+
+        // Filter laporan kerja berdasarkan rentang tanggal
+        $laporanKerja = $laporanKerja->filter(function ($laporan) use ($tanggalAwal, $tanggalAkhir) {
+            $tanggalKegiatan = Carbon::parse($laporan->tanggal_kegiatan);
+            return $tanggalKegiatan->between($tanggalAwal, $tanggalAkhir);
+        });
+
         return $laporanKerja->groupBy('user_id')->map(function ($laporanPerUser) {
             $user = $laporanPerUser->first()->user;
             $namaUser = $user['name'] ?? 'Unknown User';
