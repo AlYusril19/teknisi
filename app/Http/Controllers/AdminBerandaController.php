@@ -22,20 +22,24 @@ class AdminBerandaController extends Controller
         $bulanDipilih = $request->input('bulan', $now->month); // Default bulan sekarang
         $tahunDipilih = $request->input('tahun', $now->year); // Default tahun sekarang
 
-        // Bulan sebelumnya untuk perbandingan
-        $bulanSebelumnya = Carbon::createFromDate($tahunDipilih, $bulanDipilih)->subMonth()->month;
-        $tahunSebelumnya = Carbon::createFromDate($tahunDipilih, $bulanDipilih)->subMonth()->year;
+        // Tentukan tanggal awal dan akhir periode
+        $tanggalAwal = Carbon::createFromDate($tahunDipilih, $bulanDipilih, 28)->subMonth()->startOfDay();
+        $tanggalAkhir = Carbon::createFromDate($tahunDipilih, $bulanDipilih, 28)->endOfDay();
+
+        // Tentukan tanggal awal dan akhir periode bulan sebelumnya
+        $tanggalAwalBulanLalu = $tanggalAwal->copy()->subMonth();
+        $tanggalAkhirBulanLalu = $tanggalAkhir->copy()->subMonth();
 
         // Get laporan pending
         $laporanPending = LaporanKerja::where('status', 'pending')->count();
 
-        $laporanSekarang = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanDipilih)
-            ->whereYear('tanggal_kegiatan', $tahunDipilih)
+        // Laporan untuk periode sekarang
+        $laporanSekarang = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
             ->where('status', 'selesai')
             ->get();
 
-        $laporanKemarin = LaporanKerja::whereMonth('tanggal_kegiatan', $bulanSebelumnya)
-            ->whereYear('tanggal_kegiatan', $tahunSebelumnya)
+        // Laporan untuk periode bulan sebelumnya
+        $laporanKemarin = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
             ->where('status', 'selesai')
             ->get();
 
@@ -56,7 +60,7 @@ class AdminBerandaController extends Controller
 
         // Hitung perbandingan jam kerja per user
         $bandingJamKerjaPerUser = $jamKerjaPerUser->map(function ($data, $userId) use ($jamKerjaPerUserKemarin) {
-            $jamSekarang = round($data['total_jam'],1);
+            $jamSekarang = round($data['total_jam'], 1);
             $jamKemarin = $jamKerjaPerUserKemarin->get($userId)['total_jam'] ?? 0;
             $persentase = $jamKemarin > 0 ? round((($jamSekarang - $jamKemarin) / $jamKemarin) * 100, 2) : 0;
 
@@ -88,16 +92,6 @@ class AdminBerandaController extends Controller
 
     private function hitungJamKerja($laporanKerja)
     {
-        // Tentukan tanggal 28 bulan sebelumnya dan 28 bulan saat ini
-        $tanggalAwal = Carbon::now()->subMonths(28)->startOfMonth()->addDays(27);
-        $tanggalAkhir = Carbon::now()->startOfMonth()->addDays(27);
-
-        // Filter laporan kerja berdasarkan rentang tanggal
-        $laporanKerja = $laporanKerja->filter(function ($laporan) use ($tanggalAwal, $tanggalAkhir) {
-            $tanggalKegiatan = Carbon::parse($laporan->tanggal_kegiatan);
-            return $tanggalKegiatan->between($tanggalAwal, $tanggalAkhir);
-        });
-
         return $laporanKerja->groupBy('user_id')->map(function ($laporanPerUser) {
             $user = $laporanPerUser->first()->user;
             $namaUser = $user['name'] ?? 'Unknown User';
