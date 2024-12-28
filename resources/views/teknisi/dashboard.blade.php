@@ -14,10 +14,10 @@
                             
                             @if ($laporanReject)
                                 <p class="mb-6">You have {{ $laporanReject ?? '0' }} report reject.<br>Check in bottom.</p>
-                                <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary">View Report</a>
+                                <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary mb-5">View Report</a>
                             @endif
 
-                            <h6 class="mt-5 mb-1">Cek data pada bulan yang dipilih</h6>
+                            <h6 class="mb-1">Cek data pada bulan yang dipilih</h6>
                             <!-- Dropdown Pemilihan Bulan dan Tahun -->
                             <form action="{{ route('teknisi.index') }}" method="GET">
                                 <div class="row g-2">
