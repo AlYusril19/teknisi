@@ -60,7 +60,7 @@ class TeknisiBerandaController extends Controller
             }
 
             // Kondisi: jam selesai lebih dari 17:00 atau di antara 00:00 dan 06:00
-            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < '06:00:00';
         });
 
         $jamLemburKemarin = $laporanKemarin->filter(function ($laporan) {
@@ -73,7 +73,7 @@ class TeknisiBerandaController extends Controller
             }
 
             // Kondisi: jam selesai lebih dari 17:00 atau di antara 00:00 dan 06:00
-            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < '06:00:00';
         });
 
         // Hitung jumlah laporan bulan berjalan dan kemarin
