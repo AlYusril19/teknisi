@@ -54,26 +54,16 @@ class TeknisiBerandaController extends Controller
             $jamSelesai = Carbon::parse($laporan->jam_selesai);
             $jamMulai = Carbon::parse($laporan->jam_mulai);
 
-            // Tambahkan 1 hari jika jam selesai lebih kecil dari jam mulai
-            if ($jamSelesai < $jamMulai) {
-                $jamSelesai->addDay();
-            }
-
             // Kondisi: jam selesai lebih dari 17:00 atau di antara 00:00 dan 06:00
-            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < '06:00:00';
+            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
         });
 
         $jamLemburKemarin = $laporanKemarin->filter(function ($laporan) {
             $jamSelesai = Carbon::parse($laporan->jam_selesai);
             $jamMulai = Carbon::parse($laporan->jam_mulai);
 
-            // Tambahkan 1 hari jika jam selesai lebih kecil dari jam mulai
-            if ($jamSelesai < $jamMulai) {
-                $jamSelesai->addDay();
-            }
-
             // Kondisi: jam selesai lebih dari 17:00 atau di antara 00:00 dan 06:00
-            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < '06:00:00';
+            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
         });
 
         // Hitung jumlah laporan bulan berjalan dan kemarin
