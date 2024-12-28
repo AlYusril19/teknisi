@@ -9,7 +9,10 @@
     <div class="row g-6 mt-3">
       @foreach($laporanBarangView as $data)
         <div class="col-xl-4 col-lg-6 col-md-6 mb-3">
-          <div class="card">
+          <div class="card 
+          {{ $data['customer'] ? 'alert-primary' : '' }}
+          {{ $data['laporan']->jam_selesai < $data['laporan']->jam_mulai ? 'alert-danger' : '' }}
+          ">
             <div class="card-body">
               <div class="d-flex align-items-start">
                 <div class="d-flex align-items-center">
@@ -23,7 +26,7 @@
                 </div>
                 <div class="ms-auto">
                   <p class="mb-0">Date: {{ $data['laporan']->tanggal_kegiatan ?? '-'}}</p>
-                  <p class="mb-0">Time: {{ \Carbon\Carbon::parse($data['laporan']->jam_mulai)->format('H:i') ?? '-' }} - {{ \Carbon\Carbon::parse($data['laporan']->jam_selesai)->format('H:i') }}</p>
+                  <p class="mb-0 {{ $data['laporan']->jam_selesai < $data['laporan']->jam_mulai ? 'alert-danger' : '' }}">Time: {{ \Carbon\Carbon::parse($data['laporan']->jam_mulai)->format('H:i') ?? '-' }} - {{ \Carbon\Carbon::parse($data['laporan']->jam_selesai)->format('H:i') }}</p>
                   @if ($data['customer'])
                       <p class="mb-0">Mitra: {{ $data['customer'] ?? '-' }}</p>
                   @endif

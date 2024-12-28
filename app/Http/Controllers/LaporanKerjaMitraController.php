@@ -87,43 +87,44 @@ class LaporanKerjaMitraController extends Controller
         $laporan->user = UserApi::getUserById($laporan->user_id);
 
         // Ambil barang keluar dari laporan
-        $barangKeluar = json_decode($laporan->barang, true);
-        $barangKembali = json_decode($laporan->barang_kembali, true);
+        // $barangKeluar = json_decode($laporan->barang, true);
+        // $barangKembali = json_decode($laporan->barang_kembali, true);
 
         // Ambil data barang dari web lama via API atau sumber lain
-        $response = ApiResponse::get('/api/get-barang');
-        $barangs = $response->json();
+        // $barangs = ApiResponse::get('/api/get-barang')->json();
+        $penjualan = ApiResponse::get('/api/get-penjualan/' . $id)->json();
 
         // Inisialisasi array untuk barang yang ditampilkan
         $barangKeluarView = [];
-        if ($barangKeluar) {
-            foreach ($barangKeluar as $barang) {
-                // Cari detail barang berdasarkan ID
-                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+        if (isset($penjualan['penjualan_barang'])) {
+            foreach ($penjualan['penjualan_barang'] as $barang) {
+                $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
                 if ($barangDetail) {
                     $barangKeluarView[] = [
-                        'id' => $barang['id'],
+                        'id' => $barangDetail['id'],
                         'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang']
+                        'nama' => $barangDetail['nama_barang'],
+                        'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
                     ];
                 }
             }
         }
 
-        $barangKembaliView = [];
-        if ($barangKembali) {
-            foreach ($barangKembali as $barang) {
-                // Cari detail barang berdasarkan ID
-                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
-                if ($barangDetail) {
-                    $barangKembaliView[] = [
-                        'id' => $barang['id'],
-                        'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang']
-                    ];
-                }
-            }
-        }
+        // $barangKembaliView = [];
+        // if ($barangKembali) {
+        //     foreach ($barangKembali as $barang) {
+        //         // Cari detail barang berdasarkan ID
+        //         $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+        //         if ($barangDetail) {
+        //             $barangKembaliView[] = [
+        //                 'id' => $barang['id'],
+        //                 'jumlah' => $barang['jumlah'],
+        //                 'nama' => $barangDetail['nama_barang'],
+        //                 'harga_jual' => $barangDetail['harga_jual'] * $barang['jumlah']
+        //             ];
+        //         }
+        //     }
+        // }
 
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait
@@ -133,9 +134,9 @@ class LaporanKerjaMitraController extends Controller
         return response()->json([
             'laporan' => $laporan,
             'barangKeluarView' => $barangKeluarView,
-            'barangKembaliView' => $barangKembaliView,
+            // 'barangKembaliView' => $barangKembaliView,
             'galeri' => $galeri,
-            'tagihan' => $tagihan
+            'tagihan' => $tagihan,
         ]);
     }
 

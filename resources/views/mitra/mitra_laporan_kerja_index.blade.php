@@ -108,7 +108,7 @@
         <!-- Daftar Barang -->
         <div class="col-md-6">
             <div class="card h-100 mb-0" id="titleBarang" style="display: none;">
-                <h6 class="card-header mb-0">Daftar Barang Keluar</h6>
+                <h6 class="card-header mb-0">Daftar Barang</h6>
                 <div class="card-body">
                     <ul id="laporanBarang"></ul>
                 </div>
@@ -116,18 +116,18 @@
         </div>
 
         <!-- Daftar Barang Kembali -->
-        <div class="col-md-6">
+        {{-- <div class="col-md-6">
             <div class="card border-warning mt-1" id="titleBarangKembali" style="display: none;">
                 <h6 class="card-header mb-0">Daftar Barang Kembali</h6>
                 <div class="card-body">
                     <ul id="laporanBarangKembali"></ul>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <div class="col-md-6 mt-1">
             <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
-                <h6 class="card-header">Jumlah Biaya Kerja</h6>
+                <h6 class="card-header">Jumlah Biaya Kerja & Barang</h6>
                 <div class="card-body">
                     <table class="table table-bordered table-sm">
                         <thead>
@@ -229,7 +229,7 @@
 
                         data.barangKeluarView.forEach(function(barang) {
                             var li = document.createElement('li');
-                            li.textContent = `${barang.nama} | x${barang.jumlah}`;
+                            li.textContent = `${barang.nama} | x${barang.jumlah} = ${formatRupiahJS(barang.harga_jual)}`;
                             barangList.appendChild(li);
                         });
                     } else {
@@ -238,25 +238,25 @@
                     }
 
                     // Isi daftar barang kembali
-                    var barangList = document.getElementById('laporanBarangKembali');
-                    var titleBarangKembali = document.getElementById('titleBarangKembali');
+                    // var barangList = document.getElementById('laporanBarangKembali');
+                    // var titleBarangKembali = document.getElementById('titleBarangKembali');
 
-                    // Kosongkan list barang
-                    barangList.innerHTML = '';
+                    // // Kosongkan list barang
+                    // barangList.innerHTML = '';
 
-                    if (data.barangKembaliView.length > 0) {
-                        // Jika ada data barang kembali, tampilkan judul dan list barang
-                        titleBarangKembali.style.display = 'block';
+                    // if (data.barangKembaliView.length > 0) {
+                    //     // Jika ada data barang kembali, tampilkan judul dan list barang
+                    //     titleBarangKembali.style.display = 'block';
 
-                        data.barangKembaliView.forEach(function(barang) {
-                            var li = document.createElement('li');
-                            li.textContent = `${barang.nama} | x${barang.jumlah}`;
-                            barangList.appendChild(li);
-                        });
-                    } else {
-                        // Jika tidak ada data barang, sembunyikan judul
-                        titleBarangKembali.style.display = 'none';
-                    }
+                    //     data.barangKembaliView.forEach(function(barang) {
+                    //         var li = document.createElement('li');
+                    //         li.textContent = `${barang.nama} | x${barang.jumlah}`;
+                    //         barangList.appendChild(li);
+                    //     });
+                    // } else {
+                    //     // Jika tidak ada data barang, sembunyikan judul
+                    //     titleBarangKembali.style.display = 'none';
+                    // }
 
 
                     // Isi galeri foto
@@ -291,18 +291,20 @@
                     // Kosongkan list barang
                     tagihanList.innerHTML = '';
 
-                    if (data.tagihan.length > 0) {
-                        // Jika ada data barang kembali, tampilkan judul dan list barang
+                    if (data.tagihan.length > 0 || data.barangKeluarView.length > 0) {
+                        // Tampilkan judul tagihan jika ada data barang kembali atau barang keluar
                         titleTagihan.style.display = 'block';
 
                         let totalBiaya = 0;
                         let no = 0;
+                        
+                        // Iterasi data tagihan
                         data.tagihan.forEach(function(tagihan) {
                             var tr = document.createElement('tr');
                             tagihanList.appendChild(tr);
                             var tdNo = document.createElement('td');
                             tdNo.setAttribute('align', 'center');
-                            tdNo.textContent = no+=1;
+                            tdNo.textContent = no += 1;
                             tagihanList.appendChild(tdNo);
                             var tdNama = document.createElement('td');
                             tdNama.textContent = tagihan.nama_biaya;
@@ -313,19 +315,21 @@
                             tagihanList.appendChild(tdBiaya);
                             totalBiaya += parseInt(tagihan.total_biaya);
                         });
+
+                        // Tambahkan total keseluruhan biaya
                         var trTotal = document.createElement('tr');
                         tagihanList.appendChild(trTotal);
-                        var td = document.createElement('td');
-                        td.setAttribute('colspan', '2');
-                        td.setAttribute('align', 'right');
-                        td.textContent = 'Total Biaya';
-                        tagihanList.appendChild(td);
+                        var tdTotalLabel = document.createElement('td');
+                        tdTotalLabel.setAttribute('colspan', '2');
+                        tdTotalLabel.setAttribute('align', 'right');
+                        tdTotalLabel.textContent = 'Total Biaya';
+                        tagihanList.appendChild(tdTotalLabel);
                         var tdTotalBiaya = document.createElement('td');
                         tdTotalBiaya.setAttribute('align', 'right');
                         tdTotalBiaya.textContent = formatRupiahJS(totalBiaya);
                         tagihanList.appendChild(tdTotalBiaya);
                     } else {
-                        // Jika tidak ada data barang, sembunyikan judul
+                        // Jika tidak ada data, sembunyikan judul tagihan
                         titleTagihan.style.display = 'none';
                     }
                 });

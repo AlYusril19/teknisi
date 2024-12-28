@@ -10,11 +10,11 @@
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
                     <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
-                    {{-- <select name="filter" class="form-select" onchange="this.form.submit()">
+                    <select name="filter" class="form-select" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>
                         <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
-                        <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option>
-                    </select> --}}
+                        {{-- <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option> --}}
+                    </select>
                 </div>
             </form>
         </div>

@@ -67,7 +67,7 @@ class AdminBerandaController extends Controller
             return [
                 'user_id' => $data['user_id'],
                 'name' => $data['name'],
-                'total_jam' => $jamSekarang,
+                'total_jam' => formatDuration($jamSekarang),
                 'perbandingan' => $persentase,
             ];
         });
@@ -104,7 +104,7 @@ class AdminBerandaController extends Controller
                 }
 
                 return $carry + $jamMulai->diffInSeconds($jamSelesai);
-            }, 0) / 3600; // Konversi detik ke jam
+            }, 0); // Konversi detik ke jam
             return [
                 'user_id' => $user['id'],
                 'name' => $namaUser,

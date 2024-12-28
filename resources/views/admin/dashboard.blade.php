@@ -1,13 +1,12 @@
 @extends('layouts.app_sneat_admin')
 
 @section('content')
-<div class="row">
+    <div class="row">
         <div class="col-xxl-6 mb-3 order-0">
             <div class="card">
                 <div class="d-flex align-items-start row">
                     <div class="col-sm-7">
                         <div class="card-body">
-                            {{-- {{ __('You are logged in!') }} --}}
                             <h5 class="card-title text-primary mb-3">Welcome {{ $userRole }} {{ $userName }} 🎉</h5>
                             <p class="mb-6">You have {{ $laporanPending ?? '0' }} report pending today.<br>Check in bottom.</p>
                             
@@ -195,9 +194,9 @@
             show: false
         }
         };
-    if (typeof profileReportChartEl !== undefined && profileReportChartEl !== null) {
-        const reportChart = new ApexCharts(profileReportChartEl, profileReportChartConfig);
-        reportChart.render();
-    }
+        if (typeof profileReportChartEl !== undefined && profileReportChartEl !== null) {
+            const reportChart = new ApexCharts(profileReportChartEl, profileReportChartConfig);
+            reportChart.render();
+        }
     </script>
 @endsection

@@ -23,7 +23,7 @@ class LaporanKerjaAdminController extends Controller
         if ($request->filter === 'lembur') {
             $laporanQuery->where(function($query) {
                 $query->where('jam_selesai', '>', '17:00:00')
-                    ->orWhere('jam_selesai', '<', '03:00:00');
+                    ->orWhere('jam_selesai', '<', '05:00:00');
             });
         }
 
@@ -57,7 +57,6 @@ class LaporanKerjaAdminController extends Controller
         }
 
         // Ambil data laporan yang sudah difilter
-        // $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
         $laporan = $laporanQuery
             ->orderBy('tanggal_kegiatan', 'desc')
             ->orderBy('jam_mulai', 'desc') // Menambahkan urutan berdasarkan jam_mulai secara ascending
@@ -172,40 +171,35 @@ class LaporanKerjaAdminController extends Controller
         $laporan = LaporanKerja::findOrFail($id);
         $laporan->user = UserApi::getUserById($laporan->user_id);
 
-        // Ambil barang keluar dari laporan
-        $barangKeluar = json_decode($laporan->barang, true);
-        $barangKembali = json_decode($laporan->barang_kembali, true);
-
-        // Ambil data barang dari web lama via API atau sumber lain
-        $response = ApiResponse::get('/api/get-barang');
-        $barangs = $response->json();
+        $penjualan = ApiResponse::get('/api/get-penjualan/' . $id)->json();
+        $pembelian = ApiResponse::get('/api/get-pembelian/' . $id)->json();
 
         // Inisialisasi array untuk barang yang ditampilkan
         $barangKeluarView = [];
-        if ($barangKeluar) {
-            foreach ($barangKeluar as $barang) {
-                // Cari detail barang berdasarkan ID
-                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+        if (isset($penjualan['penjualan_barang'])) {
+            foreach ($penjualan['penjualan_barang'] as $barang) {
+                $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
                 if ($barangDetail) {
                     $barangKeluarView[] = [
-                        'id' => $barang['id'],
+                        'id' => $barangDetail['id'],
                         'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang']
+                        'nama' => $barangDetail['nama_barang'],
+                        'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
                     ];
                 }
             }
         }
 
         $barangKembaliView = [];
-        if ($barangKembali) {
-            foreach ($barangKembali as $barang) {
-                // Cari detail barang berdasarkan ID
-                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
+        if (isset($pembelian['pembelian_barang'])) {
+            foreach ($pembelian['pembelian_barang'] as $barang) {
+                $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
                 if ($barangDetail) {
                     $barangKembaliView[] = [
-                        'id' => $barang['id'],
+                        'id' => $barangDetail['id'],
                         'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang']
+                        'nama' => $barangDetail['nama_barang'],
+                        // 'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
                     ];
                 }
             }
@@ -250,6 +244,9 @@ class LaporanKerjaAdminController extends Controller
         $jamSelesaiKerja = strtotime($laporan->jam_selesai);
         $jamMulai = strtotime("06:00:00");
         $jamSelesai = strtotime("17:00:00");
+        if ($jamSelesaiKerja <= $jamMulaiKerja) {
+            $jamSelesaiKerja += 86400; //Tambah 1 hari
+        }
 
         $biaya = Biaya::where('customer_id', $laporan->customer_id)->first();
         $biayaKerja = $biaya->jam_kerja / 3600;
@@ -266,16 +263,15 @@ class LaporanKerjaAdminController extends Controller
         if ($request->status === 'selesai') {
             // rumus hitung jam kerja
             if ($jamMulaiKerja >= $jamMulai && $jamMulaiKerja <= $jamSelesai) {
-                if ($jamSelesaiKerja <= $jamSelesai) {
-                    // Tidak ada lembur
+                if ($jamSelesaiKerja <= $jamSelesai && $jamSelesaiKerja >= $jamMulai) { // Tidak ada lembur
                     $totalBiayaKerja = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaKerja;
                     $this->createTagihan($laporan->id, 'Biaya Kerja', $totalBiayaKerja);
-                } else {
-                    // Ada lembur
+                } else { // Ada Lembur
                     $totalBiayaKerja = ($jamSelesai - $jamMulaiKerja) * $biayaKerja;
                     $totalBiayaLembur = ($jamSelesaiKerja - $jamSelesai) * $biayaLembur;
                     $this->createTagihan($laporan->id, 'Biaya Kerja', $totalBiayaKerja);
                     $this->createTagihan($laporan->id, 'Biaya Lembur', $totalBiayaLembur);
+                    
                 }
             } else {
                 // Semua jam lembur
@@ -337,6 +333,20 @@ class LaporanKerjaAdminController extends Controller
                     }
                 }
                 $message .= 'dan barang kembali ';
+            }
+
+            if ($laporan->customer_id) {
+                $penjualan = ApiResponse::get('/api/get-penjualan/' . $id)->json();
+                $biayaBarang = 0;
+                if (isset($penjualan['penjualan_barang'])) {
+                    foreach ($penjualan['penjualan_barang'] as $barang) {
+                        $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
+                        if ($barangDetail) {
+                            $biayaBarang += $barang['harga_jual'] * $barang['jumlah'];
+                        }
+                    }
+                    $this->createTagihan($laporan->id, 'Biaya Barang', $biayaBarang);
+                }
             }
             
             $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);

@@ -46,10 +46,18 @@
                 </thead>
                 <tbody class="table-border-bottom-0">
                     @foreach($laporan as $data)
-                        <tr>
+                        <tr class="
+                         {{ $data->jam_selesai < $data->jam_mulai ? 'table-danger' : '' }}
+                         {{ $data->jenis_kegiatan === 'mitra' ? 'table-primary' : '' }}
+                         ">
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                             <td align="center">{{ $data->user['name'] ?? '-' }}</td>
-                            <td>{{ $data->tanggal_kegiatan }}</td>
+                            @if ($data->jam_selesai < $data->jam_mulai)
+                                <td>{{ $data->tanggal_kegiatan }} <br> {{ \Carbon\Carbon::parse($data->tanggal_kegiatan)->addDay()->format('Y-m-d') }}</td> {{-- Tanggal ditambah 1 --}}
+                            @else
+                                <td>{{ $data->tanggal_kegiatan }}</td>
+                            @endif
+
                             <td>{{ $data->jenis_kegiatan }}</td>
                             <td>{{ $data->keterangan_kegiatan }}</td>
                             <td align="center">
@@ -221,14 +229,52 @@
             fetch(`/laporan-admin/${laporanId}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Isi data laporan
+                    // isi data laporan
+                    let tanggalKegiatan = new Date(data.laporan.tanggal_kegiatan);
+                    let jamMulai = data.laporan.jam_mulai;
+                    let jamSelesai = data.laporan.jam_selesai;
+
+                    // Konversi waktu ke format jam:menit
+                    let jamMulaiDate = new Date(`1970-01-01T${jamMulai}`);
+                    let jamSelesaiDate = new Date(`1970-01-01T${jamSelesai}`);
+
+                    // Tentukan tanggal awal dan tanggal akhir
+                    let tanggalAwal = new Date(tanggalKegiatan);
+                    let tanggalAkhir = new Date(tanggalKegiatan);
+
+                    // Jika jam selesai lebih kecil dari jam mulai, tambahkan satu hari ke tanggal akhir
+                    if (jamSelesaiDate < jamMulaiDate) {
+                        tanggalAkhir.setDate(tanggalAkhir.getDate() + 1);
+                    }
+
+                    // Format tanggal menjadi "DD-MM-YYYY"
+                    const formatTanggal = (date) => {
+                        let day = date.getDate().toString().padStart(2, '0');
+                        let month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+                        let year = date.getFullYear();
+                        return `${day}-${month}-${year}`;
+                    };
+
+                    // Buat rentang tanggal
+                    let rentangTanggal;
+                    if (tanggalAwal.getTime() !== tanggalAkhir.getTime()) {
+                        // Jika melewati hari, tambahkan kata "sampai"
+                        rentangTanggal = `${formatTanggal(tanggalAwal)} sampai ${formatTanggal(tanggalAkhir)}`;
+                    } else {
+                        // Jika tidak melewati hari, tampilkan satu tanggal saja
+                        rentangTanggal = `${formatTanggal(tanggalAwal)}`;
+                    }
+
+                    // Tampilkan data
+                    document.getElementById('laporanTanggal').textContent = rentangTanggal;
                     document.getElementById('laporanUser').textContent = data.laporan.user.name;
-                    document.getElementById('laporanTanggal').textContent = data.laporan.tanggal_kegiatan;
                     document.getElementById('laporanJenis').textContent = data.laporan.jenis_kegiatan;
                     document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
                     document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
                     document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
                     document.getElementById('laporanAlamat').textContent = data.laporan.alamat_kegiatan;
+
+
 
                     // Isi daftar barang keluar
                     var barangList = document.getElementById('laporanBarang');
@@ -243,7 +289,7 @@
 
                         data.barangKeluarView.forEach(function(barang) {
                             var li = document.createElement('li');
-                            li.textContent = `${barang.nama} | x${barang.jumlah}`;
+                            li.textContent = `${barang.nama} | x${barang.jumlah} = ${formatRupiahJS(barang.harga_jual)}`;
                             barangList.appendChild(li);
                         });
                     } else {
