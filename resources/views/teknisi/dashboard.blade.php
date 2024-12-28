@@ -11,10 +11,9 @@
                             <p>Keterangan Laporan per periode kerja</p>
 
                             <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary mb-3">Buat Laporan</a>
-
-                            <p class="mb-6">You have {{ $laporanReject ?? '0' }} report reject.<br>Check in bottom.</p>
                             
                             @if ($laporanReject)
+                                <p class="mb-6">You have {{ $laporanReject ?? '0' }} report reject.<br>Check in bottom.</p>
                                 <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary">View Report</a>
                             @endif
 
