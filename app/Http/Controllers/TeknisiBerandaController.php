@@ -25,7 +25,7 @@ class TeknisiBerandaController extends Controller
         $tahunDipilih = $request->input('tahun', $now->year); // Default tahun sekarang
 
         // Tentukan tanggal awal dan akhir periode
-        $tanggalAwal = Carbon::createFromDate($tahunDipilih, $bulanDipilih, 28)->subMonth()->startOfDay();
+        $tanggalAwal = Carbon::createFromDate($tahunDipilih, $bulanDipilih, 29)->subMonth()->startOfDay();
         $tanggalAkhir = Carbon::createFromDate($tahunDipilih, $bulanDipilih, 28)->endOfDay();
 
         // Tentukan tanggal awal dan akhir periode bulan sebelumnya
