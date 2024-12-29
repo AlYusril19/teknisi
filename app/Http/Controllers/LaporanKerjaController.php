@@ -20,17 +20,6 @@ class LaporanKerjaController extends Controller
         $userId = session('user_id');
         $search = $request->input('search');
 
-        // Inisialisasi query
-        $laporanQuery = LaporanKerja::query()->where('user_id', $userId)
-            ->where('status', 'selesai');
-        // Cek apakah filter lembur dipilih
-        if ($request->filter === 'lembur') {
-            $laporanQuery->where(function($query) {
-                $query->where('jam_selesai', '>', '17:00:00')
-                    ->orWhere('jam_selesai', '<', '05:00:00');
-            });
-        }
-
         // Ambil laporan berdasarkan status, urutan, dan filter pencarian jika ada
         $reject = LaporanKerja::where('user_id', $userId)
             ->where('status', 'reject')
@@ -76,15 +65,18 @@ class LaporanKerjaController extends Controller
             ->orderBy('tanggal_kegiatan', 'desc')
             ->get();
 
-        // Gabungkan koleksi laporan sesuai status dan urutan
-        $laporan = $reject->merge($drafts)->merge($pending)->merge($selesai);
-
-        // Melakukan query untuk mendapatkan hasil yang diinginkan
-        $laporan = $laporanQuery
-            ->whereIn('id', $laporan->pluck('id')) // Menggunakan pluck untuk mendapatkan ID dari koleksi yang digabung
-            ->orderBy('tanggal_kegiatan', 'desc')
-            ->orderBy('jam_mulai', 'desc') // Menambahkan urutan berdasarkan jam_mulai secara descending
-            ->get();
+        // Inisialisasi query
+        $laporanQuery = LaporanKerja::query()->where('user_id', $userId);
+        // Cek apakah filter lembur dipilih
+        if ($request->filter === 'lembur') {
+            $laporanQuery->where(function($query) {
+                $query->where('jam_selesai', '>', '17:00:00')
+                    ->orWhere('jam_selesai', '<', '05:00:00');
+            });
+            $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
+        }else {
+            $laporan = $reject->merge($drafts)->merge($pending)->merge($selesai);
+        }
 
         return view('teknisi.laporan_kerja_index', [
             'laporan' => $laporan

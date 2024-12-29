@@ -118,7 +118,11 @@ class TeknisiBerandaController extends Controller
             }
 
             // Hitung durasi dan tambahkan ke total
-            $totalJamLemburSekarang += $jamSelesai->diffInSeconds($jamLembur);
+            if ($jamMulai > $jamLembur) {
+                $totalJamLemburSekarang += $jamSelesai->diffInSeconds($jamMulai);
+            }else {
+                $totalJamLemburSekarang += $jamSelesai->diffInSeconds($jamLembur);
+            }
         }
         foreach ($jamLemburKemarin as $laporan) {
             $jamMulai = Carbon::parse($laporan->jam_mulai);
