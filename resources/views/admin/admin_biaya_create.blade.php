@@ -47,7 +47,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="transport">Biaya Transport</label>
                         <div class="col-sm-10">
-                            <input type="number" class="form-control" id="transport" name="transport" placeholder="biaya penarikan fiber optik"required>
+                            <input type="number" class="form-control" id="transport" name="transport" placeholder="biaya penarikan fiber optik" value="0">
                         </div>
                     </div>
 

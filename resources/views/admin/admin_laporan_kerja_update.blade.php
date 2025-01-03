@@ -42,7 +42,7 @@
                     <h6 class="mb-0 text-dark">Daftar Barang Keluar</h6>
                     <ul class="mb-0">
                       @foreach ($data['barangKeluarView'] as $barang)
-                        <li>{{ $barang['nama'] ?? '-' }} | {{ $barang['jumlah'] ?? '-' }}x</li>
+                        <li>{{ $barang['nama'] ?? '-' }} | x{{ $barang['jumlah'] ?? '-' }} {{ $barang['satuan'] ?? '' }}</li>
                       @endforeach
                     </ul>
                   </div>
@@ -54,7 +54,7 @@
                     <h6 class="mb-0 text-dark">Daftar Barang Kembali</h6>
                     <ul class="mb-0">
                       @foreach ($data['barangKembaliView'] as $barang)
-                        <li>{{ $barang['nama'] ?? '-' }} | {{ $barang['jumlah'] ?? '-' }}x</li>
+                        <li>{{ $barang['nama'] ?? '-' }} | x{{ $barang['jumlah'] ?? '-' }} {{ $barang['satuan'] ?? '' }}</li>
                       @endforeach
                     </ul>
                   </div>

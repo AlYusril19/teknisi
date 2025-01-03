@@ -53,7 +53,7 @@ class BiayaController extends Controller
             'jam_kerja' => 'required',
             'jam_lembur' => 'required',
             'kabel' => 'nullable',
-            'transport' => 'required'
+            'transport' => 'nullable'
         ]);
         try {
             DB::beginTransaction();
@@ -120,7 +120,7 @@ class BiayaController extends Controller
             'jam_kerja' => 'required',
             'jam_lembur' => 'required',
             'kabel' => 'nullable',
-            'transport' => 'required'
+            'transport' => 'nullable'
         ]);
         $customerId = $biaya->customer_id;
         // dd($customerId);

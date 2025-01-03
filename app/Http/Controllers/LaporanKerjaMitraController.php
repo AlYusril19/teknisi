@@ -103,6 +103,7 @@ class LaporanKerjaMitraController extends Controller
                     $barangKeluarView[] = [
                         'id' => $barangDetail['id'],
                         'jumlah' => $barang['jumlah'],
+                        'satuan' => $barangDetail['kategori']['satuan'],
                         'nama' => $barangDetail['nama_barang'],
                         'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
                     ];

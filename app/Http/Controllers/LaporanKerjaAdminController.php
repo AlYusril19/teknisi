@@ -119,6 +119,7 @@ class LaporanKerjaAdminController extends Controller
                             'id' => $barang['id'],
                             'jumlah' => $barang['jumlah'],
                             'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama_barang'
+                            'satuan' => $barangDetail['kategori']['satuan'] ?? '', // Asumsikan kategori barang ada di field 'kategori'
                         ];
                     }
                 }
@@ -135,6 +136,7 @@ class LaporanKerjaAdminController extends Controller
                             'id' => $barang['id'],
                             'jumlah' => $barang['jumlah'],
                             'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama_barang'
+                            'satuan' => $barangDetail['kategori']['satuan'] ?? '', // Asumsikan kategori barang ada di field 'kategori'
                         ];
                     }
                 }
@@ -184,6 +186,7 @@ class LaporanKerjaAdminController extends Controller
                         'id' => $barangDetail['id'],
                         'jumlah' => $barang['jumlah'],
                         'nama' => $barangDetail['nama_barang'],
+                        'satuan' => $barangDetail['kategori']['satuan'] ?? '',
                         'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
                     ];
                 }
@@ -199,7 +202,7 @@ class LaporanKerjaAdminController extends Controller
                         'id' => $barangDetail['id'],
                         'jumlah' => $barang['jumlah'],
                         'nama' => $barangDetail['nama_barang'],
-                        // 'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
+                        'satuan' => $barangDetail['kategori']['satuan'] ?? '',
                     ];
                 }
             }

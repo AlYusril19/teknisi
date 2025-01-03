@@ -289,7 +289,7 @@
 
                         data.barangKeluarView.forEach(function(barang) {
                             var li = document.createElement('li');
-                            li.textContent = `${barang.nama} | x${barang.jumlah} = ${formatRupiahJS(barang.harga_jual)}`;
+                            li.textContent = `${barang.nama} | x${barang.jumlah} ${barang.satuan} = ${formatRupiahJS(barang.harga_jual)}`;
                             barangList.appendChild(li);
                         });
                     } else {
@@ -310,7 +310,7 @@
 
                         data.barangKembaliView.forEach(function(barang) {
                             var li = document.createElement('li');
-                            li.textContent = `${barang.nama} | x${barang.jumlah}`;
+                            li.textContent = `${barang.nama} | x${barang.jumlah} ${barang.satuan}`;
                             barangList.appendChild(li);
                         });
                     } else {
