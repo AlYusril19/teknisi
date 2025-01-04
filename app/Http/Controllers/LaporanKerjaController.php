@@ -241,7 +241,8 @@ class LaporanKerjaController extends Controller
                     $barangKeluarView[] = [
                         'id' => $barang['id'],
                         'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang']
+                        'nama' => $barangDetail['nama_barang'],
+                        'satuan' => $barangDetail['kategori']['satuan'] ?? '', // Asumsikan kategori barang ada di field 'kategori'
                     ];
                 }
             }
@@ -256,7 +257,8 @@ class LaporanKerjaController extends Controller
                     $barangKembaliView[] = [
                         'id' => $barang['id'],
                         'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang']
+                        'nama' => $barangDetail['nama_barang'],
+                        'satuan' => $barangDetail['kategori']['satuan'] ?? '', // Asumsikan kategori barang ada di field 'kategori'
                     ];
                 }
             }
