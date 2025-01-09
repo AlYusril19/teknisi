@@ -150,7 +150,7 @@
             </li>
 
             <!-- Layouts -->
-            <li class="menu-item {{ \Route::is('laporan.*') ? 'active open' : '' }}">
+            <li class="menu-item {{ \Route::is('laporan-mitra.*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-layout"></i>
                 <div data-i18n="Layouts">Kegiatan</div>
@@ -160,6 +160,23 @@
                 <li class="menu-item {{ \Route::is('laporan-mitra.index') ? 'active' : '' }}">
                   <a href="{{ route('laporan-mitra.index') }}" class="menu-link">
                     <div data-i18n="Without menu">Daftar Kegiatan</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="menu-header small text-uppercase">
+              <span class="menu-header-text">Transaction</span>
+            </li>
+            <li class="menu-item {{ \Route::is('penagihan-mitra.*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-dock-top"></i>
+                <div data-i18n="Account Settings">Transaksi</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ \Route::is('penagihan-mitra.index') ? 'active' : '' }}">
+                  <a href="{{ route('penagihan-mitra.index') }}" class="menu-link">
+                    <div data-i18n="Account">Daftar Tagihan</div>
                   </a>
                 </li>
               </ul>

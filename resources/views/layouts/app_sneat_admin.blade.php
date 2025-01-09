@@ -52,6 +52,7 @@
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/select2/select2.css" />
 
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apex-charts.css" />
 
@@ -164,6 +165,10 @@
               </ul>
             </li>
 
+            <li class="menu-header small text-uppercase">
+              <span class="menu-header-text">Administration</span>
+            </li>
+
             <li class="menu-item {{ \Route::is('biaya-admin.*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
@@ -179,22 +184,26 @@
               </ul>
             </li>
 
-            {{-- <li class="menu-header small text-uppercase">
-              <span class="menu-header-text">Pages</span>
-            </li>
-            <li class="menu-item {{ \Route::is('teknisi.create') ? 'active open' : '' }}">
+            <li class="menu-item {{ \Route::is('penagihan-admin.*') || \Route::is('pembayaran-admin.*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Account Settings</div>
+                <div data-i18n="Account Settings">Administrasi</div>
               </a>
               <ul class="menu-sub">
-                <li class="menu-item {{ \Route::is('teknisi.create') ? 'active' : '' }}">
-                  <a href="{{ route('teknisi.create') }}" class="menu-link">
-                    <div data-i18n="Account">Account</div>
+                <li class="menu-item {{ \Route::is('penagihan-admin.index') ? 'active' : '' }}">
+                  <a href="{{ route('penagihan-admin.index') }}" class="menu-link">
+                    <div data-i18n="Account">Penagihan</div>
                   </a>
                 </li>
               </ul>
-            </li> --}}
+              {{-- <ul class="menu-sub">
+                <li class="menu-item {{ \Route::is('pembayaran-admin.index') ? 'active' : '' }}">
+                  <a href="{{ route('pembayaran-admin.index') }}" class="menu-link">
+                    <div data-i18n="Account">Pembayaran</div>
+                  </a>
+                </li>
+              </ul> --}}
+            </li>
           </ul>
         </aside>
         <!-- / Menu -->
@@ -413,6 +422,7 @@
 
     <!-- Vendors JS -->
     <script src="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="{{ asset('sneat') }}/assets/vendor/libs/select2/select2.js"></script>
 
     <!-- Main JS -->
     <script src="{{ asset('sneat') }}/assets/js/main.js"></script>
@@ -436,6 +446,12 @@
     </script>
 
     @yield('js')
+
+    <script>
+      $(document).ready(function() {
+        $('.select2').select2();
+      });
+    </script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

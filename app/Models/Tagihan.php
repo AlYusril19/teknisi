@@ -10,5 +10,9 @@ class Tagihan extends Model
     use HasFactory;
     protected $table = 'tagihan';
 
-    protected $fillable = ['laporan_id', 'nama_biaya', 'total_biaya'];
+    protected $fillable = [
+        'laporan_id', 
+        'nama_biaya', 
+        'total_biaya'
+    ];
 }

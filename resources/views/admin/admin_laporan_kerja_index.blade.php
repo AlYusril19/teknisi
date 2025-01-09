@@ -8,7 +8,6 @@
     <div class="card mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Laporan Kerja</h5>
-            {{-- <a href="{{ route('laporan-admin.create') }}" class="btn btn-primary mb-0">Buat Laporan</a> --}}
             <form action="{{ route('laporan-admin.index') }}" method="GET">
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
@@ -70,7 +69,6 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
-                                        {{-- <a class="dropdown-item" href="{{ route('laporan-admin.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
                                         <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
                                             <i class="bx bx-show-alt me-2"></i> Show
                                         </button>
@@ -83,12 +81,6 @@
                                                 </button>
                                             </form>
                                         </div>
-                                        {{-- <a class="dropdown-item" href="{{ route('laporan-admin.edit', $data->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a> --}}
-                                        {{-- <form action="{{ route('laporan-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                        </form> --}}
                                     </div>
                                 </div>
                             </td>

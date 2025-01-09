@@ -26,8 +26,6 @@ class LaporanKerjaMitraController extends Controller
         // Ambil customer_id dari data customer yang sudah difilter
         $customerIds = $filteredCustomers->pluck('id'); // Ambil semua customer_id
 
-        // dd($customerIds);
-
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()
             ->where('status', 'selesai')
@@ -44,6 +42,13 @@ class LaporanKerjaMitraController extends Controller
         if ($request->search) {
             $laporanQuery->where(function ($query) use ($request) {
                 $query->Where('keterangan_kegiatan', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Cek apakah ada pencarian berdasarkan nama barang atau laporan
+        if ($request->transaksi) {
+            $laporanQuery->where(function ($query) use ($request) {
+                $query->Where('penagihan_id', $request->transaksi);
             });
         }
 

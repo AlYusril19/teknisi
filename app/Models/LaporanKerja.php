@@ -14,6 +14,7 @@ class LaporanKerja extends Model
 
     protected $fillable = [
         'user_id', 
+        'penagihan_id',
         'tanggal_kegiatan', 
         'jam_mulai', 
         'jam_selesai',
@@ -34,6 +35,9 @@ class LaporanKerja extends Model
     public function tagihan()
     {
         return $this->hasMany(Tagihan::class, 'laporan_id');
+    }
+    public function penagihan() {
+        return $this->belongsTo(Penagihan::class, 'penagihan_id', 'id');
     }
     protected static function boot()
     {

@@ -7,6 +7,10 @@ use App\Http\Controllers\LaporanKerjaController;
 use App\Http\Controllers\LaporanKerjaMitraController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MitraBerandaController;
+use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\PembayaranMitraController;
+use App\Http\Controllers\PenagihanController;
+use App\Http\Controllers\PenagihanMitraController;
 use App\Http\Controllers\TeknisiBerandaController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +35,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth.api', 'role:mitra'])->group(function () {
     Route::resource('/mitra', MitraBerandaController::class);
     Route::resource('/laporan-mitra', LaporanKerjaMitraController::class);
+    Route::resource('/penagihan-mitra', PenagihanMitraController::class);
+    Route::resource('/pembayaran-mitra', PembayaranMitraController::class);
 });
 
 Route::middleware(['auth.api', 'role:staff'])->group(function () {
@@ -43,6 +49,8 @@ Route::middleware(['auth.api', 'role:admin,superadmin'])->group(function () {
     Route::resource('/admin', AdminBerandaController::class);
     Route::resource('/laporan-admin', LaporanKerjaAdminController::class);
     Route::resource('/biaya-admin', BiayaController::class);
+    Route::resource('/penagihan-admin', PenagihanController::class);
+    Route::resource('/pembayaran-admin', PembayaranController::class);
 });
 
 // Default route

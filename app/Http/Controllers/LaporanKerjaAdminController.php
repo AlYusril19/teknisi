@@ -237,7 +237,7 @@ class LaporanKerjaAdminController extends Controller
     {
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
-        $laporan = LaporanKerja::findOrFail($id);
+        $laporan = LaporanKerja::with('penagihan')->findOrFail($id);
         $data = $request->all();
         $barangKeluar = json_decode($laporan->barang, true);
         $barangKembali = json_decode($laporan->barang_kembali, true);
@@ -372,6 +372,14 @@ class LaporanKerjaAdminController extends Controller
         // reject laporan kerja
         $message = '';
         if ($request->status === 'cancel') {
+            // validasi penagihan
+            if ($laporan->penagihan != null) {
+                if ($laporan->penagihan->status === 'baru') {
+                    return redirect()->back()->with('error', 'Laporan sudah masuk data penagihan. (harap hapus penagihan terlebih dahulu)');
+                }
+                return redirect()->back()->with('error', 'Laporan sudah ada penagihan dan telah dibayar (harap hubungi SPV).');
+            }
+            
             if ($barangKeluar) {
                 $responseKeluar = ApiResponse::post('/api/penjualan-destroy', [
                     'laporan_id' => $laporan->id,
