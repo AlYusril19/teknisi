@@ -65,6 +65,13 @@ class LaporanKerjaAdminController extends Controller
         // Mengambil data user
         foreach ($laporan as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
+            $lap->support = $lap->teknisi->map(function ($teknisi) {
+                $teknisi = UserApi::getUserById($teknisi->teknisi_id);
+                return [
+                    // 'id' => $teknisi['id'],
+                    'name' => $teknisi['name'],
+                ];
+            });
         }
 
         // Tampilkan ke view
@@ -80,13 +87,20 @@ class LaporanKerjaAdminController extends Controller
     public function create()
     {
         // Ambil laporan dengan status 'selesai' dan urutkan berdasarkan tanggal terbaru
-        $pending = LaporanKerja::where('status', 'pending')
+        $pending = LaporanKerja::with('teknisi')->where('status', 'pending')
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
         $laporans = $pending;
         // Ambil nama user dari API eksternal dan lampirkan ke laporan
         foreach ($laporans as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
+            $lap->support = $lap->teknisi->map(function ($teknisi) {
+                    $teknisi = UserApi::getUserById($teknisi->teknisi_id);
+                    return [
+                        // 'id' => $teknisi['id'],
+                        'name' => $teknisi['name'],
+                    ];
+                });
         }
         // Ambil data barang dari web lama via API
         $barangs = ApiResponse::get('/api/get-barang')->json();
@@ -237,7 +251,7 @@ class LaporanKerjaAdminController extends Controller
     {
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
-        $laporan = LaporanKerja::with('penagihan')->findOrFail($id);
+        $laporan = LaporanKerja::with('penagihan', 'teknisi')->findOrFail($id);
         $data = $request->all();
         $barangKeluar = json_decode($laporan->barang, true);
         $barangKembali = json_decode($laporan->barang_kembali, true);
@@ -254,6 +268,13 @@ class LaporanKerjaAdminController extends Controller
         $biaya = Biaya::where('customer_id', $laporan->customer_id)->first();
         $biayaKerja = $biaya->jam_kerja / 3600;
         $biayaLembur = $biaya->jam_lembur / 3600;
+        $biayaTransport = $biaya->transport;
+        if ($laporan->teknisi()->count() != null) {
+            $jumlahTeknisi = $laporan->teknisi()->count() + 1;
+            $biayaKerja *= $jumlahTeknisi;
+            $biayaLembur *= $jumlahTeknisi;
+            $biayaTransport *= $jumlahTeknisi;
+        }
 
         // Format pesan WhatsApp
         $pesanWhatsApp = "Laporan *" . $userName['name'] . "* :\n" .
@@ -284,12 +305,10 @@ class LaporanKerjaAdminController extends Controller
 
             // biaya transport mitra
             if ($biaya->customer_id) {
-                $biayaTransport = $biaya->transport;
                 $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
             }
 
             if ($request->transport) {
-                $biayaTransport = $biaya->transport;
                 $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
             }
 
@@ -379,7 +398,7 @@ class LaporanKerjaAdminController extends Controller
                 }
                 return redirect()->back()->with('error', 'Laporan sudah ada penagihan dan telah dibayar (harap hubungi SPV).');
             }
-            
+
             if ($barangKeluar) {
                 $responseKeluar = ApiResponse::post('/api/penjualan-destroy', [
                     'laporan_id' => $laporan->id,

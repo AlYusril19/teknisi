@@ -57,7 +57,12 @@
                                 <td>{{ $data->tanggal_kegiatan }}</td>
                             @endif
 
-                            <td>{{ $data->jenis_kegiatan }}</td>
+                            <td>
+                                {{ $data->jenis_kegiatan }}
+                                @foreach ($data->support as $item)
+                                    <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                                @endforeach
+                            </td>
                             <td>{{ $data->keterangan_kegiatan }}</td>
                             <td align="center">
                                 <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : ($data->status === 'pending' ? 'warning' : 'success') }}">{{ $data->status ?? 'null' }}</span>

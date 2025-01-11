@@ -139,113 +139,6 @@
                         </div>
                     </div>
 
-                    <!-- Modal untuk Tabel Barang dan Pilihan Barang -->
-                    <!-- Tabel Barang yang Ditambahkan -->
-                    <div class="modal fade" id="barangModal" tabindex="-1" aria-labelledby="barangModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="barangModalLabel">Daftar Barang</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Barang Selection -->
-                                    <div class="row d-flex align-items-center">
-                                        <div class="col-sm-2 mb-2">
-                                            <label class="col-form-label" for="barang_id">Barang</label>
-                                        </div>
-                                        <div class="col-sm-8 mb-2">
-                                            <select name="barang_id" id="barang_id" class="form-control">
-                                                <option value="">Pilih Barang</option>
-                                                    @foreach($barangs as $b)
-                                                        <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
-                                                    @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 mb-2">
-                                            <button type="button" id="btn-tambah-barang" class="btn btn-light">
-                                                <i class="menu-icon tf-icons bx bx-cart">+</i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <!-- Tabel Barang -->
-                                    <div class="table-responsive mt-2">
-                                        <table class="table table-bordered" id="daftar-barang">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nama Barang</th>
-                                                    <th>Jumlah</th>
-                                                    <th>Aksi</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Daftar barang akan muncul di sini -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                    <button type="button" class="btn btn-primary" id="btn-simpan-barang">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- End Modal Barang --}}
-
-                    <!-- Modal Tabel Barang Kembali -->
-                    <div class="modal fade" id="barangKembaliModal" tabindex="-1" aria-labelledby="barangKembaliModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="barangKembaliModalLabel">Daftar Barang Kembali</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Barang Selection -->
-                                    <div class="row d-flex align-items-center">
-                                        <div class="col-sm-2 mb-2">
-                                            <label class="col-form-label" for="barang_kembali_id">Barang Kembali</label>
-                                        </div>
-                                        <div class="col-sm-8 mb-2">
-                                            <select name="barang_kembali_id" id="barang_kembali_id" class="form-control">
-                                                <option value="">Pilih Barang Kembali</option>
-                                                @foreach($barangsKembali as $b)
-                                                    <option value="{{ $b['id'] }}">{{ $b['nama_barang'] }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 mb-2">
-                                            <button type="button" id="btn-tambah-barang-kembali" class="btn btn-light">
-                                                <i class="menu-icon tf-icons bx bx-cart">+</i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <!-- Tabel Barang -->
-                                    <div class="table-responsive mt-2">
-                                        <table class="table table-bordered" id="daftar-barang-kembali">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nama Barang</th>
-                                                    <th>Jumlah</th>
-                                                    <th>Aksi</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Daftar barang akan muncul di sini -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                    <button type="button" class="btn btn-primary" id="btn-simpan-barang-kembali">Simpan</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- End Modal Barang --}}
-
                     <!-- Tanggal, Jam, Keterangan -->
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="tanggal_kegiatan">Tanggal Kegiatan</label>
@@ -277,6 +170,18 @@
                             <input type="text" class="form-control" id="alamat_kegiatan" name="alamat_kegiatan" required>
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="teknisi">Tag Teknisi</label>
+                        <div class="col-sm-10">
+                            <!-- Tombol untuk memunculkan modal -->
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#teknisiModal">
+                                <i class="menu-icon tf-icons bx bx-user"></i>
+                                <span class="badge badge-center rounded-pill bg-primary w-px-20 h-px-20" id="total-teknisi">0</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="fotos">Upload Gambar <br><span class="text-muted">(Max: 5MB)</span></label>
                         <div class="col-sm-10">
@@ -293,12 +198,12 @@
                         <button type="submit" name="status" value="draft" class="btn btn-secondary me-2">Draft</button>
                         {{-- <button type="reset" class="btn btn-outline-secondary">Batal</button> --}}
                     </div>
+                    @include('teknisi.modal_laporan_kerja_create')
                 </form>
             </div>
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('js')
@@ -690,5 +595,68 @@
         });
     });
 </script>
+
+{{-- get tag teknisi --}}
+<script>
+    $(document).ready(function () {
+        // Update daftar teknisi yang sudah di-tag saat halaman dimuat
+        function updateDaftarTeknisi() {
+            var totalTeknisi = 0;
+            $('#daftar-teknisi tbody tr').each(function () {
+                totalTeknisi++;
+            });
+            $('#total-teknisi').text(totalTeknisi);
+        }
+
+        // Tambahkan teknisi ke daftar
+        $('#btn-tambah-teknisi').on('click', function () {
+            var teknisiId = $('#teknisi_id').val();
+            var teknisiNama = $('#teknisi_id option:selected').text();
+
+            if (teknisiId) {
+                // Periksa apakah teknisi sudah ada di daftar
+                var exists = false;
+                $('#daftar-teknisi tbody tr').each(function () {
+                    if ($(this).data('teknisi-id') == teknisiId) {
+                        exists = true;
+                        return false;
+                    }
+                });
+
+                // Jika belum ada, tambahkan ke tabel
+                if (!exists) {
+                    var row = `<tr data-teknisi-id="${teknisiId}">
+                        <td>${teknisiNama}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-hapus-teknisi">Hapus</button>
+                            <input type="hidden" name="teknisi_ids[]" value="${teknisiId}">
+                        </td>
+                    </tr>`;
+                    $('#daftar-teknisi tbody').append(row);
+                    updateDaftarTeknisi()
+                } else {
+                    alert('Teknisi sudah ditambahkan!');
+                }
+            } else {
+                alert('Pilih teknisi terlebih dahulu!');
+            }
+        });
+
+        // Hapus teknisi dari daftar
+        $(document).on('click', '.btn-hapus-teknisi', function () {
+            $(this).closest('tr').remove();
+            updateDaftarTeknisi()
+        });
+
+        // Simpan teknisi yang ditambahkan
+        $('#btn-simpan-teknisi').on('click', function () {
+            $('#teknisiModal').modal('hide'); // Tutup modal
+        });
+
+        // Update daftar teknisi pada halaman load
+        updateDaftarTeknisi();
+    });
+</script>
+
 
 @endsection

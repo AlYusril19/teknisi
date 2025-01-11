@@ -39,6 +39,11 @@ class LaporanKerja extends Model
     public function penagihan() {
         return $this->belongsTo(Penagihan::class, 'penagihan_id', 'id');
     }
+
+    public function teknisi()
+    {
+        return $this->hasMany(Teknisi::class, 'laporan_id');
+    }
     protected static function boot()
     {
         parent::boot();

@@ -39,7 +39,12 @@
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                             <td>{{ $data->tanggal_kegiatan }}</td>
                             <td>{{ $data->jenis_kegiatan }}</td>
-                            <td>{{ $data->keterangan_kegiatan }}</td>
+                            <td>
+                                {{ $data->keterangan_kegiatan }}
+                                @foreach ($data->support as $item)
+                                    <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                                @endforeach
+                            </td>
                             <td align="center">
                                 <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : 
                                                             ($data->status === 'pending' ? 'warning' : 
@@ -96,6 +101,7 @@
       <div class="modal-body">
         <!-- Data Laporan -->
         <p><strong>Teknisi:</strong> <span id="laporanUser"></span></p>
+        <p id="titleTeknisi" style="display: none;" class="mb-0"><strong>Team Support:</strong> <ul id="laporanTeknisi"></ul></p>
         <p><strong>Tanggal:</strong> <span id="laporanTanggal"></span></p>
         <p><strong>Jenis Kegiatan:</strong> <span id="laporanJenis"></span></p>
         <p><strong>Keterangan Kegiatan:</strong> <span id="laporanKeterangan"></span></p>
@@ -193,6 +199,27 @@
                     document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
                     document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
                     document.getElementById('laporanAlamat').textContent = data.laporan.alamat_kegiatan;
+
+                    // Isi daftar barang keluar
+                    var teknisiList = document.getElementById('laporanTeknisi');
+                    var titleTeknisi = document.getElementById('titleTeknisi');
+
+                    // Kosongkan list barang
+                    teknisiList.innerHTML = '';
+
+                    if (data.teknisi.length > 0) {
+                        // Jika ada data barang kembali, tampilkan judul dan list barang
+                        titleTeknisi.style.display = 'block';
+
+                        data.teknisi.forEach(function(teknisi) {
+                            var li = document.createElement('li');
+                            li.textContent = `${teknisi.name}`;
+                            teknisiList.appendChild(li);
+                        });
+                    } else {
+                        // Jika tidak ada data barang, sembunyikan judul
+                        titleTeknisi.style.display = 'none';
+                    }
 
                     // Isi daftar barang keluar
                     var barangList = document.getElementById('laporanBarang');

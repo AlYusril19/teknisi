@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use ApiResponse;
 use App\Models\Galeri;
 use App\Models\LaporanKerja;
+use App\Models\Teknisi;
 use App\Models\UserApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -21,7 +22,10 @@ class LaporanKerjaController extends Controller
         $search = $request->input('search');
 
         // Ambil laporan berdasarkan status, urutan, dan filter pencarian jika ada
-        $reject = LaporanKerja::where('user_id', $userId)
+        $reject = LaporanKerja::with('teknisi')
+            ->whereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })->orWhere('user_id', $userId)
             ->where('status', 'reject')
             ->when($search, function ($query) use ($search) {
                 $query->where(function($q) use ($search) {
@@ -32,7 +36,10 @@ class LaporanKerjaController extends Controller
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
-        $drafts = LaporanKerja::where('user_id', $userId)
+        $drafts = LaporanKerja::with('teknisi')
+            ->whereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })->orWhere('user_id', $userId)
             ->where('status', 'draft')
             ->when($search, function ($query) use ($search) {
                 $query->where(function($q) use ($search) {
@@ -43,7 +50,10 @@ class LaporanKerjaController extends Controller
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
-        $pending = LaporanKerja::where('user_id', $userId)
+        $pending = LaporanKerja::with('teknisi')
+            ->whereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })->orWhere('user_id', $userId)
             ->where('status', 'pending')
             ->when($search, function ($query) use ($search) {
                 $query->where(function($q) use ($search) {
@@ -54,8 +64,10 @@ class LaporanKerjaController extends Controller
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
-        $selesai = LaporanKerja::where('user_id', $userId)
-            ->where('status', 'selesai')
+        $selesai = LaporanKerja::with('teknisi')
+            ->whereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })->orWhere('user_id', $userId)->where('status', 'selesai')
             ->when($search, function ($query) use ($search) {
                 $query->where(function($q) use ($search) {
                     $q->where('jenis_kegiatan', 'like', "%$search%")
@@ -66,7 +78,10 @@ class LaporanKerjaController extends Controller
             ->get();
 
         // Inisialisasi query
-        $laporanQuery = LaporanKerja::query()->where('user_id', $userId);
+        $laporanQuery = LaporanKerja::query()->with('teknisi')->whereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })->orWhere('user_id', $userId);
+        
         // Cek apakah filter lembur dipilih
         if ($request->filter === 'lembur') {
             $laporanQuery->where(function($query) {
@@ -75,7 +90,22 @@ class LaporanKerjaController extends Controller
             });
             $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
         }else {
-            $laporan = $reject->merge($drafts)->merge($pending)->merge($selesai);
+            $laporan = $reject
+                ->merge($drafts)
+                ->merge($pending)
+                ->merge($selesai);
+        }
+
+        // Mengambil data user
+        foreach ($laporan as $lap) {
+            // dd($lap->teknisi->toArray());
+            $lap->support = $lap->teknisi->map(function ($teknisi) {
+                $teknisi = UserApi::getUserById($teknisi->teknisi_id);
+                return [
+                    // 'id' => $teknisi['id'],
+                    'name' => $teknisi['name'],
+                ];
+            });
         }
 
         return view('teknisi.laporan_kerja_index', [
@@ -88,12 +118,19 @@ class LaporanKerjaController extends Controller
      */
     public function create()
     {
+        $userId = session('user_id');
         // Ambil data barang dari web lama via API
         $barangs = ApiResponse::get('/api/get-barang')->json();
         $barangsKembali = ApiResponse::get('/api/get-barang-kembali')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
+        $teknisi = ApiResponse::get('/api/get-teknisi/'.$userId)->json();
 
-        return view('teknisi.laporan_kerja_create', compact('barangs', 'customers', 'barangsKembali'));
+        return view('teknisi.laporan_kerja_create', compact([
+            'barangs', 
+            'customers', 
+            'barangsKembali',
+            'teknisi'
+        ]));
     }
 
     /**
@@ -192,9 +229,7 @@ class LaporanKerjaController extends Controller
                     'barang_kembali' => json_encode($barangKembali), // Simpan data barang sebagai JSON
                     'status' => $request->status,
                 ];
-        // 
-        // Buat link WhatsApp
-        $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
+
         // Simpan laporan kerja di database web baru
         $laporan = LaporanKerja::create($laporan);
         if ($request->hasFile('fotos')) {
@@ -207,11 +242,21 @@ class LaporanKerjaController extends Controller
             }
             $message .= 'beserta foto ';
         }
+
+        // Tag teknisi di database teknisi
+        $teknisi_ids = $request->input('teknisi_ids');
+        if ($request->teknisi_ids != null) {
+            foreach ($teknisi_ids as $teknisi_id) {
+                Teknisi::create([
+                    'teknisi_id' => $teknisi_id,
+                    'laporan_id' => $laporan->id,
+                ]);
+            }
+            $message .= 'dan tag teknisi ';
+        }
+
         return redirect()->route('laporan.index')
                         ->with('success', 'Laporan ' .$message. 'berhasil disimpan.');
-        // return redirect()->route('laporan.index')
-        //                 ->with('success', 'Laporan ' .$message. 'berhasil disimpan.')
-        //                 ->with('whatsappLink', $linkWhatsApp);
     }
 
     /**
@@ -220,7 +265,7 @@ class LaporanKerjaController extends Controller
     public function show(string $id)
     {
         // Ambil laporan berdasarkan ID
-        $laporan = LaporanKerja::findOrFail($id);
+        $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
         $laporan->user = UserApi::getUserById($laporan->user_id);
 
         // Ambil barang keluar dari laporan
@@ -264,9 +309,17 @@ class LaporanKerjaController extends Controller
             }
         }
 
+        // teknisi support (tag)
+        $teknisi = $laporan->teknisi->map(function ($teknisi) {
+            $teknisi = UserApi::getUserById($teknisi->teknisi_id);
+            return [
+                'id' => $teknisi['id'],
+                'name' => $teknisi['name'],
+            ];
+        });
+
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait
-        // $tagihan = $laporan->tagihan; // Ambil tagihan
 
         // Return sebagai JSON
         return response()->json([
@@ -274,7 +327,7 @@ class LaporanKerjaController extends Controller
             'barangKeluarView' => $barangKeluarView,
             'barangKembaliView' => $barangKembaliView,
             'galeri' => $galeri,
-            // 'tagihan' => $tagihan
+            'teknisi' => $teknisi //teknisi support
         ]);
     }
 
@@ -283,12 +336,17 @@ class LaporanKerjaController extends Controller
      */
     public function edit(string $id)
     {
-        $laporan = LaporanKerja::findOrFail($id);
-        // $fotos = Galeri::where('laporan_id', $laporan->id)->get();
-        if ($laporan->status === 'selesai') {
-            return redirect()->route('laporan.index')->with('error', 'Laporan selesai tidak dapat diedit.');
-        } elseif ($laporan->status === 'pending') {
-            return redirect()->route('laporan.index')->with('error', 'Laporan pending tidak dapat diedit.');
+        $userId = session('user_id');
+        $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
+
+        // validasi kepemilikan
+        if ($laporan->user_id != $userId) {
+            return redirect()->back()->with('error', 'Anda tidak diizinkan.');
+        }
+
+        // validasi status laporan
+        if ($laporan->status === 'selesai' || $laporan->status === 'pending') {
+            return redirect()->back()->with('error', 'Laporan sudah di post tidak dapat diedit.');
         }
         // Decode JSON barang ke dalam array
         $barangKeluar = json_decode($laporan->barang, true);
@@ -297,6 +355,7 @@ class LaporanKerjaController extends Controller
         $barangs = ApiResponse::get('/api/get-barang')->json();
         $barangsKembali = ApiResponse::get('/api/get-barang-kembali')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
+        $teknisi = ApiResponse::get('/api/get-teknisi/'.$userId)->json();
 
         // Inisialisasi array untuk menyimpan data barang yang sudah ditambahkan nama
         $barangKeluarView = [];
@@ -334,7 +393,25 @@ class LaporanKerjaController extends Controller
             }
         }
 
-        return view('teknisi.laporan_kerja_edit', compact('barangs', 'barangsKembali', 'laporan', 'barangKeluarView', 'barangKembaliView', 'customers'));
+        // Data teknisi yang sudah ditambahkan ke laporan
+        $existingTeknisi = $laporan->teknisi->map(function ($teknisi) {
+            $teknisi = UserApi::getUserById($teknisi->teknisi_id);
+            return [
+                'id' => $teknisi['id'],
+                'name' => $teknisi['name'],
+            ];
+        });
+
+        return view('teknisi.laporan_kerja_edit', compact([
+            'barangs', 
+            'barangsKembali', 
+            'laporan', 
+            'barangKeluarView', 
+            'barangKembaliView', 
+            'customers',
+            'teknisi',
+            'existingTeknisi'
+        ]));
     }
 
     /**
@@ -357,14 +434,6 @@ class LaporanKerjaController extends Controller
         
         $userName = session('user_name');
 
-        // Format pesan WhatsApp
-        $pesanWhatsApp = "Laporan *" . $userName . "* :\n" .
-                        "Tanggal: " . $request->tanggal_kegiatan . "\n" .
-                        "Jam Kerja : " . $request->jam_mulai . " - " . $request->jam_selesai . "\n".
-                        "Jenis Kegiatan: " . $request->jenis_kegiatan . "\n" .
-                        "Keterangan Kegiatan: " . $request->keterangan_kegiatan . "\n" .
-                        "Barang: ";
-        //
         $message = '';
         // Format data barang keluar untuk dikirim ke web lama
         if ($request->barang_ids != null) {
@@ -421,8 +490,21 @@ class LaporanKerjaController extends Controller
                     'status' => $request->status,
                 ];
         // 
-        // Buat link WhatsApp
-        $linkWhatsApp = "https://wa.me/6285755556574?text=" . urlencode($pesanWhatsApp);
+
+        $laporan->teknisi()->delete();
+
+        // Tag teknisi di database teknisi
+        $teknisi_ids = $request->input('teknisi_ids');
+        if ($request->teknisi_ids != null) {
+            foreach ($teknisi_ids as $teknisi_id) {
+                Teknisi::create([
+                    'teknisi_id' => $teknisi_id,
+                    'laporan_id' => $laporan->id,
+                ]);
+            }
+            $message .= 'dan tag teknisi ';
+        }
+
         if ($request->status === 'draft') {
             $laporan->update($data);
             return redirect()->route('laporan.index')->with('success', 'Laporan ' .$message. 'disimpan di draft.');
@@ -436,19 +518,26 @@ class LaporanKerjaController extends Controller
      */
     public function destroy(string $id)
     {
-        $laporan = LaporanKerja::findOrFail($id);
-        if ($laporan->status === 'selesai') {
+        $userId = session('user_id');
+        $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
+        // dd($laporan->teknisi());
+
+        // validasi kepemilikan
+        if ($laporan->user_id != $userId) {
+            return redirect()->back()->with('error', 'Anda tidak diizinkan.');
+        }
+
+        if ($laporan->status === 'selesai' || $laporan->status === 'pending') {
             return redirect()->back()->with('error', 'Laporan sudah di post tidak dapat dihapus.');
         }
-        if ($laporan->status === 'pending') {
-            return redirect()->back()->with('error', 'Laporan sudah di post tidak dapat dihapus.');
-        }
+
         // Hapus gambar-gambar terkait
         foreach ($laporan->galeri as $galeri) {
             Storage::disk('public')->delete($galeri->file_path);
         }
 
-        // Hapus data galeri dan barang
+        // Hapus data galeri dan teknisi
+        $laporan->teknisi()->delete();
         $laporan->galeri()->delete(); // Hapus semua data galeri terkait
         $laporan->delete();
 

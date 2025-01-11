@@ -20,6 +20,12 @@
                     <h5 class="mb-0 text-heading">{{ $data['laporan']->jenis_kegiatan }}</h5>
                     <small class="fw-medium">Staff: </small><small>{{ $data['laporan']->user['name'] ?? '-'}}</small>
                     <div class="client-info text-body">
+                      {{-- <small class="fw-medium">Support: </small> --}}
+                      @foreach ($data['laporan']->support as $item)
+                        <small class="mb-0 text-primary">&commat;{{ $item['name'] }}</small>
+                      @endforeach
+                    </div>
+                    <div class="client-info text-body">
                       <small class="fw-medium">Alamat: </small><small> {{ $data['laporan']->alamat_kegiatan ?? '-' }}</small>
                     </div>
                   </div>
