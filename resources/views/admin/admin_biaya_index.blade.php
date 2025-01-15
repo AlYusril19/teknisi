@@ -20,7 +20,7 @@
                         <th>Customer</th>
                         <th>Jam Kerja</th>
                         <th>Jam Lembur</th>
-                        <th>Jasa Penarikan Kabel</th>
+                        {{-- <th>Jasa Penarikan Kabel</th> --}}
                         <th>Transport</th>
                         <th>Jarak Tempuh</th>
                         <th>Aksi</th>
@@ -33,7 +33,7 @@
                             <td align="center">{{ $data['customer'] ?? '-' }}</td>
                             <td align="center">{{ formatRupiah($data['biaya']->jam_kerja) }}</td>
                             <td align="center">{{ formatRupiah($data['biaya']->jam_lembur) }}</td>
-                            <td align="center">{{ formatRupiah($data['biaya']->kabel) }}</td>
+                            {{-- <td align="center">{{ formatRupiah($data['biaya']->kabel) }}</td> --}}
                             <td align="center">{{ formatRupiah($data['biaya']->transport) }}</td>
                             <td align="center">{{ $data['biaya']->jarak_tempuh ?? 0 }} KM</td>
                             <td align="center">

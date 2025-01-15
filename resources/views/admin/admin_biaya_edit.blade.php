@@ -41,12 +41,12 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    {{-- <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="kabel">Biaya Penarikan Fiber</label>
                         <div class="col-sm-10">
                             <input type="number" class="form-control" id="kabel" name="kabel" placeholder="biaya penarikan fiber optik" value="{{ $biaya->kabel }}" required>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="transport">Biaya Transport</label>
