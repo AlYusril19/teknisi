@@ -4,7 +4,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <div class="card mt-3">
+    <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="input-group">
                 @if (request('transaksi'))
@@ -44,17 +44,23 @@
                         <tr class="
                          {{ $data->jam_selesai < $data->jam_mulai ? 'table-danger' : '' }}
                          {{ $data->jam_selesai > "17:00" ? 'table-warning' : '' }}
-                         {{-- {{ $data->jenis_kegiatan === 'mitra' ? 'table-primary' : '' }} --}}
                          ">
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                            <td align="center">{{ $data->user['name'] ?? '-' }}</td>
-                            {{-- <td align="center">{{ $data->tanggal_kegiatan }}</td> --}}
+                            <td>{{ $data->user['name'] ?? '-' }}</td>
                             @if ($data->jam_selesai < $data->jam_mulai)
-                                <td>{{ $data->tanggal_kegiatan }} <br> {{ \Carbon\Carbon::parse($data->tanggal_kegiatan)->addDay()->format('Y-m-d') }}</td> {{-- Tanggal ditambah 1 --}}
+                                <td align="center">{{ $data->tanggal_kegiatan }} <br> {{ \Carbon\Carbon::parse($data->tanggal_kegiatan)->addDay()->format('Y-m-d') }}</td> {{-- Tanggal ditambah 1 --}}
                             @else
-                                <td>{{ $data->tanggal_kegiatan }}</td>
+                                <td align="center">{{ $data->tanggal_kegiatan }}</td>
                             @endif
-                            <td>{{ $data->keterangan_kegiatan }}</td>
+                            <td>
+                                {{ $data->keterangan_kegiatan }}
+                                @foreach ($data->support as $item)
+                                    <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                                @endforeach
+                                @if ($data->diskon != null)
+                                    <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
+                                @endif
+                            </td>
                             
                             <td align="center">{{ formatTime($data->jam_mulai) }} - {{  formatTime($data->jam_selesai) }}</td>
                             <td align="center">
@@ -67,21 +73,6 @@
                                         <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
                                             <i class="bx bx-show-alt me-2"></i> Show
                                         </button>
-                                        {{-- <div class="ms-auto">
-                                            <form method="POST" action="{{ route('laporan-admin.update', $data->id) ?? '-' }}" enctype="multipart/form-data">
-                                                @csrf
-                                                @method('PUT')
-                                                <button type="submit" name="status" value="cancel" class="dropdown-item" data-bs-toggle="modal">
-                                                    <i class="bx bx-x-circle me-2"></i> Reject
-                                                </button>
-                                            </form>
-                                        </div> --}}
-                                        {{-- <a class="dropdown-item" href="{{ route('laporan-admin.edit', $data->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a> --}}
-                                        {{-- <form action="{{ route('laporan-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                        </form> --}}
                                     </div>
                                 </div>
                             </td>
@@ -91,14 +82,6 @@
             </table>
         </div>
     </div>
-    {{-- <div class="row">
-        <div class="col-sm-12">
-            <div class="card">
-                {{ $laporan->links() }}
-            </div>
-        </div>
-    </div> --}}
-    {{-- <hr class="my-12"> --}}
   </div>
 </div>
 
@@ -129,16 +112,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Daftar Barang Kembali -->
-        {{-- <div class="col-md-6">
-            <div class="card border-warning mt-1" id="titleBarangKembali" style="display: none;">
-                <h6 class="card-header mb-0">Daftar Barang Kembali</h6>
-                <div class="card-body">
-                    <ul id="laporanBarangKembali"></ul>
-                </div>
-            </div>
-        </div> --}}
 
         <div class="col-md-6 mt-1">
             <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
@@ -192,12 +165,6 @@
 {{-- end modal image --}}
 
 @endsection
-{{-- Redirect to Chat Whastapp --}}
-@if (session('whatsappLink'))
-    <script>
-        window.open('{{ session('whatsappLink') }}', '_blank');
-    </script>
-@endif
 
 @section('js')
 <script>
@@ -261,7 +228,6 @@
                     // Isi data laporan
                     document.getElementById('laporanUser').textContent = data.laporan.user.name;
                     document.getElementById('laporanTanggal').textContent = rentangTanggal;
-                    // document.getElementById('laporanTanggal').textContent = data.laporan.tanggal_kegiatan;
                     document.getElementById('laporanJenis').textContent = data.laporan.jenis_kegiatan;
                     document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
                     document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
@@ -288,28 +254,6 @@
                         // Jika tidak ada data barang, sembunyikan judul
                         titleBarang.style.display = 'none';
                     }
-
-                    // Isi daftar barang kembali
-                    // var barangList = document.getElementById('laporanBarangKembali');
-                    // var titleBarangKembali = document.getElementById('titleBarangKembali');
-
-                    // // Kosongkan list barang
-                    // barangList.innerHTML = '';
-
-                    // if (data.barangKembaliView.length > 0) {
-                    //     // Jika ada data barang kembali, tampilkan judul dan list barang
-                    //     titleBarangKembali.style.display = 'block';
-
-                    //     data.barangKembaliView.forEach(function(barang) {
-                    //         var li = document.createElement('li');
-                    //         li.textContent = `${barang.nama} | x${barang.jumlah}`;
-                    //         barangList.appendChild(li);
-                    //     });
-                    // } else {
-                    //     // Jika tidak ada data barang, sembunyikan judul
-                    //     titleBarangKembali.style.display = 'none';
-                    // }
-
 
                     // Isi galeri foto
                     var galeriList = document.getElementById('laporanGaleri');

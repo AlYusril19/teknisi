@@ -25,6 +25,7 @@ class LaporanKerja extends Model
         'barang_kembali',
         'status',
         'alamat_kegiatan',
+        'diskon',
     ];
 
     public function galeri()

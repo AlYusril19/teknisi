@@ -59,11 +59,17 @@
 
                             <td>
                                 {{ $data->jenis_kegiatan }}
+                                {{ $data->mitra['nama'] ?? '' }}
+                            </td>
+                            <td>
+                                {{ $data->keterangan_kegiatan }}
                                 @foreach ($data->support as $item)
                                     <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
                                 @endforeach
+                                @if ($data->diskon != null)
+                                    <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
+                                @endif
                             </td>
-                            <td>{{ $data->keterangan_kegiatan }}</td>
                             <td align="center">
                                 <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : ($data->status === 'pending' ? 'warning' : 'success') }}">{{ $data->status ?? 'null' }}</span>
                             </td>

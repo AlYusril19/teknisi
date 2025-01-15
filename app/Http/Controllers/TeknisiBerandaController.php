@@ -38,15 +38,21 @@ class TeknisiBerandaController extends Controller
             ->count();
 
         // Laporan untuk periode sekarang
-        $laporanSekarang = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
+        $laporanSekarang = LaporanKerja::with('teknisi')->whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
             ->where('user_id', $userId)
             ->where('status', 'selesai')
+            ->orWhereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })
             ->get();
 
         // Laporan untuk periode bulan sebelumnya
         $laporanKemarin = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
             ->where('user_id', $userId)
             ->where('status', 'selesai')
+            ->orWhereHas('teknisi', function ($query) use ($userId) {
+                $query->where('teknisi_id', $userId);
+            })
             ->get();
 
         // laporan lembur

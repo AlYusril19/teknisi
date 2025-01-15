@@ -35,11 +35,13 @@ class AdminBerandaController extends Controller
 
         // Laporan untuk periode sekarang
         $laporanSekarang = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
+            ->orWhereHas('teknisi')
             ->where('status', 'selesai')
             ->get();
 
         // Laporan untuk periode bulan sebelumnya
         $laporanKemarin = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
+            ->orWhereHas('teknisi')
             ->where('status', 'selesai')
             ->get();
 

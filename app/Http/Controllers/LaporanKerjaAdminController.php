@@ -65,10 +65,10 @@ class LaporanKerjaAdminController extends Controller
         // Mengambil data user
         foreach ($laporan as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
+            $lap->mitra = collect($customers)->firstWhere('id', $lap->customer_id);
             $lap->support = $lap->teknisi->map(function ($teknisi) {
                 $teknisi = UserApi::getUserById($teknisi->teknisi_id);
                 return [
-                    // 'id' => $teknisi['id'],
                     'name' => $teknisi['name'],
                 ];
             });
@@ -249,6 +249,7 @@ class LaporanKerjaAdminController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $this->validateRequest($request);
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
         $laporan = LaporanKerja::with('penagihan', 'teknisi')->findOrFail($id);
@@ -266,15 +267,56 @@ class LaporanKerjaAdminController extends Controller
         }
 
         $biaya = Biaya::where('customer_id', $laporan->customer_id)->first();
+        $biayaJarakTempuh = 0;
+
+        // rumus biaya jarak tempuh
+        if ($biaya->jarak_tempuh != null) {
+            $jarakTempuh = $biaya->jarak_tempuh * 1.05; // toleransi 5%
+            // jika pakai mobil
+            if ($request->mobil) {
+                $durasiTempuh = $jarakTempuh * 1.76; // hitung waktu tempuh
+                $bbm = 667 * ($jarakTempuh * 2);
+                $commentMobil = ' dan mobil';
+            }else {
+                $durasiTempuh = $jarakTempuh * 1.56; // hitung waktu tempuh
+                $bbm = 232 * ($jarakTempuh * 2); // hitung konsumsi BBM
+            }
+            $biayaDurasi = 274 * ($durasiTempuh * 2); // biaya jarak tempuh teknisi
+            $biayaJarakTempuh = $bbm + $biayaDurasi;
+        }
+
+        // rumus jika kendaraan lebih dari 1
+        if ($request->kendaraan > 1) {
+            $biayaJarakTempuh *= $request->kendaraan;
+        }
+
         $biayaKerja = $biaya->jam_kerja / 3600;
         $biayaLembur = $biaya->jam_lembur / 3600;
         $biayaTransport = $biaya->transport;
+
+        $comment = '';
+        // jika tag teknisi lain
         if ($laporan->teknisi()->count() != null) {
             $jumlahTeknisi = $laporan->teknisi()->count() + 1;
+            $comment .= ' '.$jumlahTeknisi.'x';
             $biayaKerja *= $jumlahTeknisi;
             $biayaLembur *= $jumlahTeknisi;
             $biayaTransport *= $jumlahTeknisi;
         }
+
+        // jika ada diskon
+        if ($request->diskon > 0) {
+            $laporan->update(['diskon' => $request->diskon]);
+            $diskon = (100-$request->diskon) / 100;
+            $biayaKerja *= $diskon;
+            $biayaLembur *= $diskon;
+            $biayaTransport *= $diskon;
+            $comment .= ' ('.$request->diskon. '% Off)';
+        }
+        $commentTagihan = $comment ?? '';
+        $commentTransport = $commentMobil ?? '';
+
+        $biayaTransport += $biayaJarakTempuh; // biaya transport + biaya kendaraan
 
         // Format pesan WhatsApp
         $pesanWhatsApp = "Laporan *" . $userName['name'] . "* :\n" .
@@ -289,27 +331,27 @@ class LaporanKerjaAdminController extends Controller
             if ($jamMulaiKerja >= $jamMulai && $jamMulaiKerja <= $jamSelesai) {
                 if ($jamSelesaiKerja <= $jamSelesai && $jamSelesaiKerja >= $jamMulai) { // Tidak ada lembur
                     $totalBiayaKerja = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaKerja;
-                    $this->createTagihan($laporan->id, 'Biaya Kerja', $totalBiayaKerja);
+                    $this->createTagihan($laporan->id, 'Biaya Kerja' . $commentTagihan, $totalBiayaKerja);
                 } else { // Ada Lembur
                     $totalBiayaKerja = ($jamSelesai - $jamMulaiKerja) * $biayaKerja;
                     $totalBiayaLembur = ($jamSelesaiKerja - $jamSelesai) * $biayaLembur;
-                    $this->createTagihan($laporan->id, 'Biaya Kerja', $totalBiayaKerja);
-                    $this->createTagihan($laporan->id, 'Biaya Lembur', $totalBiayaLembur);
+                    $this->createTagihan($laporan->id, 'Biaya Kerja' . $commentTagihan, $totalBiayaKerja);
+                    $this->createTagihan($laporan->id, 'Biaya Lembur' . $commentTagihan, $totalBiayaLembur);
                     
                 }
             } else {
                 // Semua jam lembur
                 $totalBiayaLembur = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaLembur;
-                $this->createTagihan($laporan->id, 'Biaya Lembur', $totalBiayaLembur);
+                $this->createTagihan($laporan->id, 'Biaya Lembur' . $commentTagihan, $totalBiayaLembur);
             }
 
             // biaya transport mitra
             if ($biaya->customer_id) {
-                $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
+                $this->createTagihan($laporan->id, 'Biaya Transport' . $commentTagihan.$commentTransport, $biayaTransport);
             }
 
             if ($request->transport) {
-                $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
+                $this->createTagihan($laporan->id, 'Biaya Transport' . $commentTagihan, $biayaTransport);
             }
 
             $message = '';
@@ -323,6 +365,7 @@ class LaporanKerjaAdminController extends Controller
                     'laporan_id' => $laporan->id,
                 ]);
                 if ($responseKeluar->failed()) {
+                    $laporan->tagihan()->delete();
                     return redirect()->back()->with('error', 'Gagal mencatat barang keluar (cek stok barang).');
                 }
                 // pesan WA 
@@ -444,6 +487,18 @@ class LaporanKerjaAdminController extends Controller
             'nama_biaya' => $namaBiaya,
             'total_biaya' => $totalBiaya
         ]);
+    }
+
+    private function validateRequest($request) {
+        $request->validate([  
+            'diskon' => 'nullable|numeric|min:0|max:100',  
+            'kendaraan' => 'nullable|numeric|min:0|max:10', 
+        ], [  
+            'diskon.min' => 'Diskon tidak boleh kurang dari 0.',  
+            'diskon.max' => 'Diskon tidak boleh lebih dari 100.',  
+            'kendaraan.min' => 'Kendaraan tidak boleh kurang dari 0.',  
+            'kendaraan.max' => 'Kendaraan tidak boleh lebih dari 10.',  
+        ]); 
     }
 
 }

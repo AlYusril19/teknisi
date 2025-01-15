@@ -67,8 +67,24 @@
               @endif
             </div>
             <div class="card-body border-top">
-              <div class="d-flex align-items-center">
+              <form method="POST" action="{{ route('laporan-admin.update', $data['laporan']->id) ?? '-' }}" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                @if ($data['laporan']->customer_id)
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="input-group mt-0">
+                        <input type="number" class="form-control" id="diskon" name="diskon" placeholder="diskon" min="0" max="100" value="{{ $data['laporan']->diskon ?? '' }}">
+                        <span class="input-group-text">%</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <input type="number" class="form-control" id="kendaraan" name="kendaraan" placeholder="kendaraan" min="0" max="10">
+                    </div>
+                  </div>
+                @endif
                 <div class="d-flex align-items-center">
+                  <div class="d-flex align-items-center">
                     <ul class="list-unstyled d-flex align-items-center avatar-group mb-0 z-2">
                       @if ($data['laporan'])
                           @foreach ($data['laporan']->galeri as $foto)
@@ -79,94 +95,32 @@
                             </div>
                           @endforeach
                       @endif
-                      {{-- <li><small class="text-muted">280 Members</small></li> --}}
                     </ul>
-                </div>
-                <div class="ms-auto">
-                  <form method="POST" action="{{ route('laporan-admin.update', $data['laporan']->id) ?? '-' }}" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    @if (!$data['laporan']->customer_id)
+                  </div>
+                  <div class="ms-auto">
+                    {{-- <form method="POST" action="{{ route('laporan-admin.update', $data['laporan']->id) ?? '-' }}" enctype="multipart/form-data">
+                      @csrf
+                      @method('PUT') --}}
+                      @if (!$data['laporan']->customer_id)
                         <div class="mt-0">
                           <input type="checkbox" name="transport"> <span>Transport</span>
                         </div>
-                    @endif
-                    <button type="submit" name="status" value="selesai" class="btn badge bg-label-success">Accept</button>
-                    <button type="submit" name="status" value="reject" class="btn badge bg-label-danger">Reject</button>
-                  </form>
+                      @else
+                        <div class="mt-1">
+                          <input type="checkbox" name="mobil"> <span>Mobil</span>
+                        </div>
+                      @endif
+                      
+                      <button type="submit" name="status" value="selesai" class="btn badge bg-label-success">Accept</button>
+                      <button type="submit" name="status" value="reject" class="btn badge bg-label-danger">Reject</button>
+                    {{-- </form> --}}
+                  </div>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
       @endforeach
-
-
-      {{-- @foreach ($laporanBarangView as $data)
-          <div class="col-xl-4 col-lg-6 col-md-6 mb-3">
-            <div class="card">
-              <div class="card-header pb-4">
-                <div class="d-flex align-items-start">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar me-4">
-                      <img src="../../assets/img/icons/brands/social-label.png" alt="Avatar" class="rounded-circle">
-                    </div>
-                    <div class="me-2">
-                      <h5 class="mb-0 text-heading">{{ $data['laporan']->jenis_kegiatan }}</h5>
-                      <div class="client-info text-body"><span class="fw-medium">Staff: </span><span>{{ $data['laporan']->user['name'] }}</span></div>
-                    </div>
-                  </div>
-                  <div class="ms-auto">
-                    <p>{{ $data['laporan']->tanggal_kegiatan }}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="d-flex align-items-center flex-wrap">
-                  <div class="bg-lighter px-3 py-2 rounded me-auto mb-4">
-                    <p class="mb-1"><span class="fw-medium text-heading">$24.8k</span>/ $18.2k</p>
-                    <span class="text-body">Total Budget</span>
-                  </div>
-                  <div class="text-start mb-4">
-                    <p class="mb-1"><span class="text-heading fw-medium">Start : </span>{{ \Carbon\Carbon::parse($data['laporan']->jam_mulai)->format('H:i') }}</p>
-                    <p class="mb-1"><span class="text-heading fw-medium">End : </span>{{ \Carbon\Carbon::parse($data['laporan']->jam_selesai)->format('H:i') }}</p>
-                  </div>
-                </div>
-                <p class="mb-0">{{ $data['laporan']->keterangan_kegiatan }}</p>
-              </div>
-              <div class="card-body border-top">
-                <div class="d-flex align-items-center mb-4">
-                  <p class="mb-0"><span class="text-heading fw-medium">All Hours: </span>380/244</p>
-                  <span class="badge bg-label-success ms-auto">28 Days left</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <small class="text-body">Task: 290/344</small>
-                  <small class="text-body">95% Completed</small>
-                </div>
-                <div class="progress mb-4 rounded" style="height: 8px;">
-                  <div class="progress-bar rounded" role="progressbar" style="width: 95%;" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center">
-                    <ul class="list-unstyled d-flex align-items-center avatar-group mb-0 z-2">
-                      
-                      <li><small class="text-muted">280 Members</small></li>
-                    </ul>
-                  </div>
-                  <div class="ms-auto">
-                    <a href="javascript:void(0);" class="text-muted d-flex align-items-center"><i class="bx bx-chat me-1"></i> 15</a>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body border-top">
-                <div class="d-flex align-items-center mb-4 mt-2">
-                  <p class="mb-0"><span class="text-heading fw-medium">All Hours: </span>380/244</p>
-                  <span class="badge bg-label-success ms-auto">28 Days left</span>
-                </div>
-              </div>
-            </div>
-          </div>
-      @endforeach --}}
     </div>
   </div>
 </div>

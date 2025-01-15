@@ -15,6 +15,7 @@ class Biaya extends Model
         'jam_kerja', 
         'jam_lembur', 
         'kabel', 
-        'transport'
+        'transport',
+        'jarak_tempuh'
     ];
 }

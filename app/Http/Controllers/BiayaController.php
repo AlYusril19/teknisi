@@ -53,7 +53,8 @@ class BiayaController extends Controller
             'jam_kerja' => 'required',
             'jam_lembur' => 'required',
             'kabel' => 'nullable',
-            'transport' => 'nullable'
+            'transport' => 'nullable',
+            'jarak_tempuh' => 'nullable'
         ]);
         try {
             DB::beginTransaction();
@@ -78,7 +79,8 @@ class BiayaController extends Controller
                 'jam_kerja' => $request->jam_kerja,
                 'jam_lembur' => $request->jam_lembur,
                 'kabel' => $request->kabel,
-                'transport' => $request->transport
+                'transport' => $request->transport,
+                'jarak_tempuh' => $request->jarak_tempuh
             ]);
             DB::commit();
             return redirect()->route('biaya-admin.index')->with('success', 'Biaya berhasil disimpan.');
@@ -120,7 +122,8 @@ class BiayaController extends Controller
             'jam_kerja' => 'required',
             'jam_lembur' => 'required',
             'kabel' => 'nullable',
-            'transport' => 'nullable'
+            'transport' => 'nullable',
+            'jarak_tempuh' => 'nullable'
         ]);
         $customerId = $biaya->customer_id;
         // dd($customerId);
@@ -138,7 +141,8 @@ class BiayaController extends Controller
                 'jam_kerja' => $request->jam_kerja,
                 'jam_lembur' => $request->jam_lembur,
                 'kabel' => $request->kabel,
-                'transport' => $request->transport
+                'transport' => $request->transport,
+                'jarak_tempuh' => $request->jarak_tempuh
             ]);
             DB::commit();
             return redirect()->route('biaya-admin.index')->with('success', 'Biaya berhasil disimpan.');

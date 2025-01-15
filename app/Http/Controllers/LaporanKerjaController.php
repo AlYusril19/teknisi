@@ -21,88 +21,38 @@ class LaporanKerjaController extends Controller
         $userId = session('user_id');
         $search = $request->input('search');
 
-        // Ambil laporan berdasarkan status, urutan, dan filter pencarian jika ada
-        $reject = LaporanKerja::with('teknisi')
-            ->whereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
-            })->orWhere('user_id', $userId)
-            ->where('status', 'reject')
+        // Query utama untuk laporan kerja
+        $laporanQuery = LaporanKerja::with('teknisi')
+            ->where(function ($query) use ($userId) {
+                $query->whereHas('teknisi', function ($query) use ($userId) {
+                    $query->where('teknisi_id', $userId);
+                })->orWhere('user_id', $userId);
+            })
             ->when($search, function ($query) use ($search) {
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('jenis_kegiatan', 'like', "%$search%")
                     ->orWhere('keterangan_kegiatan', 'like', "%$search%");
                 });
             })
-            ->orderBy('tanggal_kegiatan', 'asc')
-            ->get();
+            ->orderByRaw("FIELD(status, 'reject', 'draft', 'pending', 'selesai')")
+            ->orderBy('tanggal_kegiatan', 'desc'); // Urutkan berdasarkan tanggal kegiatan
 
-        $drafts = LaporanKerja::with('teknisi')
-            ->whereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
-            })->orWhere('user_id', $userId)
-            ->where('status', 'draft')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('jenis_kegiatan', 'like', "%$search%")
-                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
-                });
-            })
-            ->orderBy('tanggal_kegiatan', 'asc')
-            ->get();
-
-        $pending = LaporanKerja::with('teknisi')
-            ->whereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
-            })->orWhere('user_id', $userId)
-            ->where('status', 'pending')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('jenis_kegiatan', 'like', "%$search%")
-                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
-                });
-            })
-            ->orderBy('tanggal_kegiatan', 'asc')
-            ->get();
-
-        $selesai = LaporanKerja::with('teknisi')
-            ->whereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
-            })->orWhere('user_id', $userId)->where('status', 'selesai')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('jenis_kegiatan', 'like', "%$search%")
-                    ->orWhere('keterangan_kegiatan', 'like', "%$search%");
-                });
-            })
-            ->orderBy('tanggal_kegiatan', 'desc')
-            ->get();
-
-        // Inisialisasi query
-        $laporanQuery = LaporanKerja::query()->with('teknisi')->whereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
-            })->orWhere('user_id', $userId);
-        
         // Cek apakah filter lembur dipilih
         if ($request->filter === 'lembur') {
-            $laporanQuery->where(function($query) {
+            $laporanQuery->where(function ($query) {
                 $query->where('jam_selesai', '>', '17:00:00')
                     ->orWhere('jam_selesai', '<', '05:00:00');
             });
-            $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
-        }else {
-            $laporan = $reject
-                ->merge($drafts)
-                ->merge($pending)
-                ->merge($selesai);
         }
 
-        // Mengambil data user
+        // Ambil data laporan
+        $laporan = $laporanQuery->get();
+
+        // Map data teknisi ke laporan
         foreach ($laporan as $lap) {
-            // dd($lap->teknisi->toArray());
             $lap->support = $lap->teknisi->map(function ($teknisi) {
                 $teknisi = UserApi::getUserById($teknisi->teknisi_id);
                 return [
-                    // 'id' => $teknisi['id'],
                     'name' => $teknisi['name'],
                 ];
             });
@@ -141,18 +91,7 @@ class LaporanKerjaController extends Controller
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
         // Validasi input web baru
-        $request->validate([
-            'tanggal_kegiatan' => 'required|date',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required',
-            'jenis_kegiatan' => 'required|string',
-            'keterangan_kegiatan' => 'required|string',
-            'alamat_kegiatan' => 'required|string',
-            'status' => 'required|in:draft,pending',
-            'customer_id' => 'nullable',
-            'fotos' => 'nullable', // Bisa kosong
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Validasi untuk setiap file dalam array 'fotos'
-        ]);
+        $this->validateRequest($request);
 
         $userId = session('user_id');
         $userName = session('user_name');
@@ -419,20 +358,7 @@ class LaporanKerjaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'tanggal_kegiatan' => 'required|date',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required',
-            'jenis_kegiatan' => 'required|string',
-            'keterangan_kegiatan' => 'required|string',
-            'alamat_kegiatan' => 'required|string',
-            'status' => 'required|in:draft,pending',
-            'customer_id' => 'nullable',
-            'fotos' => 'nullable', // Bisa kosong
-            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Validasi untuk setiap file dalam array 'fotos'
-        ]);
-        
-        $userName = session('user_name');
+        $this->validateRequest($request);
 
         $message = '';
         // Format data barang keluar untuk dikirim ke web lama
@@ -561,4 +487,18 @@ class LaporanKerjaController extends Controller
         return response()->json(['success' => false, 'message' => 'Gambar tidak ditemukan'], 404);
     }
 
+    private function validateRequest($request){
+        $request->validate([
+            'tanggal_kegiatan' => 'required|date',
+            'jam_mulai' => 'required',
+            'jam_selesai' => 'required',
+            'jenis_kegiatan' => 'required|string',
+            'keterangan_kegiatan' => 'required|string',
+            'alamat_kegiatan' => 'required|string',
+            'status' => 'required|in:draft,pending',
+            'customer_id' => 'nullable',
+            'fotos' => 'nullable', // Bisa kosong
+            'fotos.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:5120', // Validasi untuk setiap file dalam array 'fotos'
+        ]);
+    }
 }
