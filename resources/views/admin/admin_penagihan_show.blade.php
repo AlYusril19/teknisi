@@ -72,10 +72,11 @@
         <div class="card-body">
             {{-- Tagihan Before Generate --}}
             @if ($tagihans->count() > 0)
+                {{-- tagihan teknisi dan barang --}}
                 <div class="table-responsive mb-2">
                     <table class="table table-sm table-bordered table-secondary">
                         <caption class="ms-4">
-                            Detail Tagihan
+                            Tagihan Teknisi dan Barang
                         </caption>
                         <thead>
                             <tr align="center">
@@ -98,21 +99,48 @@
                     </table>
                 </div>
 
+                {{-- tagihan barang (pembelian) --}}
+                <div class="table-responsive mb-2">
+                    <table class="table table-sm table-bordered table-secondary">
+                        <caption class="ms-4">
+                            Tagihan Barang
+                        </caption>
+                        <thead>
+                            <tr align="center">
+                                <th>No</th>
+                                <th>Tanggal</th>
+                                <th>Nominal</th>
+                                {{-- <th>Status</th> --}}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($tagihansBarang as $data)
+                                <tr>
+                                    <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
+                                    <td align="center">{{ $data['tanggal_penjualan'] }}</td>
+                                    <td align="right">{{ formatRupiah($data['total_harga']) }}</td>
+                                    {{-- <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td> --}}
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
                 <h5 class="mt-3">Form Generate Tagihan</h5>
-                <form method="POST" action="{{ route('penagihan-admin.store') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('penagihan-admin.store') }}" enctype="multipart/form-data" class="mb-3">
                     @csrf
                     {{-- hidden input --}}
                     <input type="text" name="bulan" value="{{ $bulanDipilih }}" hidden>
                     <input type="text" name="tahun" value="{{ $tahunDipilih }}" hidden>
                     <input type="text" name="customer_id" value="{{ $customer['id'] }}" hidden>
                     {{-- end hidden input --}}
-                    <div class="row mb-3">
+                    <div class="row mb-2">
                         <label class="form-label" for="tanggal_tagihan">Tanggal Tagihan</label>
                         <div>
                             <input type="date" class="form-control" id="tanggal_tagihan" name="tanggal_tagihan" value="{{ date('Y-m-d') }}" required>
                         </div>
                     </div>
-                    <div class="row mb-3">
+                    <div class="row mb-2">
                         <label class="form-label" for="keterangan">Keterangan</label>
                         <div>
                             <input type="text" class="form-control" id="keterangan" name="keterangan" value="Tagihan Periode {{ DateTime::createFromFormat('!m', $bulanDipilih)->format('F') }} {{ $tahunDipilih }}" required>
@@ -146,10 +174,17 @@
                                     <td align="center">
                                         {{ $data->tanggal_tagihan }} <br>
                                         <span class="text-muted">{{ $data->keterangan }}</span>
+                                        @if ($data->diskon)
+                                            <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
+                                        @endif
                                     </td>
                                     {{-- <td></td> --}}
                                     <td align="right">
-                                        {{ formatRupiah($data->laporan_kerja->flatMap->tagihan->sum('total_biaya')) ?? '-' }}
+                                        {{ 
+                                         formatRupiah($data->laporan_kerja->flatMap->tagihan->sum('total_biaya')
+                                         + 
+                                         $data->penjualan->sum('total_biaya')) ?? '-'
+                                        }}
                                     </td>
                                     <td align="center">
                                         @if ($data->status === 'lunas')
@@ -184,13 +219,13 @@
                             {{-- <option value="">--Pilih Tagihan--</option> --}}
                                 @foreach($listPenagihan as $data)
                                     <option value="{{ $data->id }}">
-                                        {{ formatRupiah($data->laporan_kerja->flatMap->tagihan->sum('total_biaya')) }} ||
+                                        {{ formatRupiah($data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') + $data->penjualan->sum('total_biaya')) }} ||
                                         <span class="text-muted">{{ $data->keterangan }}</span>
                                         
                                         @if ($data->pembayaran->sum('jumlah_dibayar') != null)
                                             sisa tagihan ({{ 
                                                 formatRupiah(
-                                                    ($data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') ?? 0) -
+                                                    ($data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') + $data->penjualan->sum('total_biaya') ?? 0) -
                                                     ($data->pembayaran?->sum('jumlah_dibayar') ?? 0)
                                                 ) 
                                             }})
@@ -290,7 +325,11 @@
                                 <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                                 <td align="center">{{ $data->tanggal_tagihan }}</td>
                                 <td align="right">
-                                    {{ formatRupiah($data->laporan_kerja->flatMap->tagihan->sum('total_biaya')) ?? '-' }}
+                                    {{
+                                     formatRupiah($data->laporan_kerja->flatMap->tagihan->sum('total_biaya')
+                                      + 
+                                     $data->penjualan->sum('total_biaya')) ?? '-' 
+                                    }}
                                 </td>
                                 <td align="center">
                                     @if ($data->status === 'lunas')

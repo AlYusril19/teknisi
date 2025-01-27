@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use ApiResponse;
 use App\Models\LaporanKerja;
 use App\Models\UserApi;
+use BarangHelper;
 use Illuminate\Http\Request;
 
 class LaporanKerjaMitraController extends Controller
@@ -16,15 +17,7 @@ class LaporanKerjaMitraController extends Controller
     {
         // Ambil user_id dari session
         $userId = session('user_id');
-
-        // Ambil data customer dari API
-        $customers = ApiResponse::get('/api/get-customer')->json();
-
-        // Filter customer berdasarkan mitra_id yang sesuai dengan user_id yang sedang login
-        $filteredCustomers = collect($customers)->where('mitra_id', $userId);
-
-        // Ambil customer_id dari data customer yang sudah difilter
-        $customerIds = $filteredCustomers->pluck('id'); // Ambil semua customer_id
+        $customerIds = getCustomerId($userId);
 
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()
@@ -58,12 +51,7 @@ class LaporanKerjaMitraController extends Controller
         // Mengambil data user teknisi dan tag teknisi
         foreach ($laporan as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
-            $lap->support = $lap->teknisi->map(function ($teknisi) {
-                $teknisi = UserApi::getUserById($teknisi->teknisi_id);
-                return [
-                    'name' => $teknisi['name'],
-                ];
-            });
+            $lap->support = getTeknisi($lap);
         }
 
         // Tampilkan ke view
@@ -98,23 +86,7 @@ class LaporanKerjaMitraController extends Controller
         $laporan->user = UserApi::getUserById($laporan->user_id);
 
         $penjualan = ApiResponse::get('/api/get-penjualan/' . $id)->json();
-
-        // Inisialisasi array untuk barang yang ditampilkan
-        $barangKeluarView = [];
-        if (isset($penjualan['penjualan_barang'])) {
-            foreach ($penjualan['penjualan_barang'] as $barang) {
-                $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
-                if ($barangDetail) {
-                    $barangKeluarView[] = [
-                        'id' => $barangDetail['id'],
-                        'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang'],
-                        'satuan' => $barangDetail['kategori']['satuan'] ?? '',
-                        'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
-                    ];
-                }
-            }
-        }
+        $barangKeluarView = BarangHelper::getBarangKeluarView($penjualan);  
 
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait

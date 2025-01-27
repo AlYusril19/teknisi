@@ -3,146 +3,146 @@
 @section('content')
 
 <div class="row">
-  <div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="input-group">
-                @if (request('transaksi'))
-                    <button onclick="window.history.back();" class="btn btn-secondary me-2">Back</button>
-                @else
-                    <h5 class="mb-0">Daftar Laporan Kerja</h5>
-                @endif
-            </div>
-            <form action="{{ route('laporan-mitra.index') }}" method="GET">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="kegiatan" value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
-                    <select name="filter" class="form-select" onchange="this.form.submit()">
-                        <option value="">Semua Laporan</option>
-                        <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
-                    </select>
+                    @if (request('transaksi'))
+                        <button onclick="window.history.back();" class="btn btn-secondary me-2">Back</button>
+                    @else
+                        <h5 class="mb-0">Daftar Laporan Kerja</h5>
+                    @endif
                 </div>
-            </form>
-        </div>
-        <div class="table-responsive">
-            <table class="table">
-                <caption class="ms-4">
-                    Data Laporan
-                </caption>
-                <thead>
-                    <tr align="center">
-                        <th width="5%">No</th>
-                        <th>Teknisi</th>
-                        <th>Tanggal</th>
-                        <th>Kegiatan</th>
-                        <th>Jam Kerja</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @foreach($laporan as $data)
-                        <tr class="
-                         {{ $data->jam_selesai < $data->jam_mulai ? 'table-danger' : '' }}
-                         {{ $data->jam_selesai > "17:00" ? 'table-warning' : '' }}
-                         ">
-                            <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                            <td>{{ $data->user['name'] ?? '-' }}</td>
-                            @if ($data->jam_selesai < $data->jam_mulai)
-                                <td align="center">{{ $data->tanggal_kegiatan }} <br> {{ \Carbon\Carbon::parse($data->tanggal_kegiatan)->addDay()->format('Y-m-d') }}</td> {{-- Tanggal ditambah 1 --}}
-                            @else
-                                <td align="center">{{ $data->tanggal_kegiatan }}</td>
-                            @endif
-                            <td>
-                                {{ $data->keterangan_kegiatan }}
-                                @foreach ($data->support as $item)
-                                    <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
-                                @endforeach
-                                @if ($data->diskon != null)
-                                    <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
-                                @endif
-                            </td>
-                            
-                            <td align="center">{{ formatTime($data->jam_mulai) }} - {{  formatTime($data->jam_selesai) }}</td>
-                            <td align="center">
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        {{-- <a class="dropdown-item" href="{{ route('laporan-admin.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
-                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
-                                            <i class="bx bx-show-alt me-2"></i> Show
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
+                <form action="{{ route('laporan-mitra.index') }}" method="GET">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="kegiatan" value="{{ request('search') }}">
+                        <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
+                        <select name="filter" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Laporan</option>
+                            <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <caption class="ms-4">
+                        Data Laporan
+                    </caption>
+                    <thead>
+                        <tr align="center">
+                            <th width="5%">No</th>
+                            <th>Teknisi</th>
+                            <th>Tanggal</th>
+                            <th>Kegiatan</th>
+                            <th>Jam Kerja</th>
+                            <th>Aksi</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="laporanModal" tabindex="-1" aria-labelledby="laporanModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="laporanModalLabel">Detail Laporan Kerja</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Data Laporan -->
-        <p><strong>Teknisi:</strong> <span id="laporanUser"></span></p>
-        <p><strong>Tanggal:</strong> <span id="laporanTanggal"></span></p>
-        <p><strong>Jenis Kegiatan:</strong> <span id="laporanJenis"></span></p>
-        <p><strong>Keterangan Kegiatan:</strong> <span id="laporanKeterangan"></span></p>
-        <p><strong>Jam Mulai:</strong> <span id="laporanJamMulai"></span></p>
-        <p><strong>Jam Selesai:</strong> <span id="laporanJamSelesai"></span></p>
-        <p><strong>Alamat:</strong> <span id="laporanAlamat"></span></p>
-
-        <!-- Daftar Barang -->
-        <div class="col-md-6">
-            <div class="card h-100 mb-0" id="titleBarang" style="display: none;">
-                <h6 class="card-header mb-0">Daftar Barang</h6>
-                <div class="card-body">
-                    <ul id="laporanBarang"></ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mt-1">
-            <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
-                <h6 class="card-header">Jumlah Biaya Kerja & Barang</h6>
-                <div class="card-body">
-                    <table class="table table-bordered table-sm">
-                        <thead>
-                            <tr align="center">
-                                <th width="5%">No</th>
-                                <th>Jenis Biaya</th>
-                                <th>Total</th>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        @foreach($laporan as $data)
+                            <tr class="
+                            {{ $data->jam_selesai < $data->jam_mulai ? 'table-danger' : '' }}
+                            {{ $data->jam_selesai > "17:00" ? 'table-warning' : '' }}
+                            ">
+                                <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
+                                <td>{{ $data->user['name'] ?? '-' }}</td>
+                                @if ($data->jam_selesai < $data->jam_mulai)
+                                    <td align="center">{{ $data->tanggal_kegiatan }} <br> {{ \Carbon\Carbon::parse($data->tanggal_kegiatan)->addDay()->format('Y-m-d') }}</td> {{-- Tanggal ditambah 1 --}}
+                                @else
+                                    <td align="center">{{ $data->tanggal_kegiatan }}</td>
+                                @endif
+                                <td>
+                                    {{ $data->keterangan_kegiatan }}
+                                    @foreach ($data->support as $item)
+                                        <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                                    @endforeach
+                                    @if ($data->diskon != null)
+                                        <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
+                                    @endif
+                                </td>
+                                
+                                <td align="center">{{ formatTime($data->jam_mulai) }} - {{  formatTime($data->jam_selesai) }}</td>
+                                <td align="center">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            {{-- <a class="dropdown-item" href="{{ route('laporan-admin.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
+                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
+                                                <i class="bx bx-show-alt me-2"></i> Show
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody id="laporanTagihan" class="table-border-bottom-0">
-                            {{-- isi tagihan --}}
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <!-- Galeri Foto -->
-        <h6 class="mt-3">Galeri Foto</h6>
-        <ul id="laporanGaleri" class="list-unstyled d-flex align-items-center avatar-group mb-0 z-2"></ul>
-      </div>
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
     </div>
-  </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="laporanModal" tabindex="-1" aria-labelledby="laporanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="laporanModalLabel">Detail Laporan Kerja</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- Data Laporan -->
+            <p><strong>Teknisi:</strong> <span id="laporanUser"></span></p>
+            <p><strong>Tanggal:</strong> <span id="laporanTanggal"></span></p>
+            <p><strong>Jenis Kegiatan:</strong> <span id="laporanJenis"></span></p>
+            <p><strong>Keterangan Kegiatan:</strong> <span id="laporanKeterangan"></span></p>
+            <p><strong>Jam Mulai:</strong> <span id="laporanJamMulai"></span></p>
+            <p><strong>Jam Selesai:</strong> <span id="laporanJamSelesai"></span></p>
+            <p><strong>Alamat:</strong> <span id="laporanAlamat"></span></p>
+
+            <!-- Daftar Barang -->
+            <div class="col-md-6">
+                <div class="card h-100 mb-0" id="titleBarang" style="display: none;">
+                    <h6 class="card-header mb-0">Daftar Barang</h6>
+                    <div class="card-body">
+                        <ul id="laporanBarang"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mt-1">
+                <div class="card h-100 mb-0" id="titleTagihan" style="display: none;">
+                    <h6 class="card-header">Jumlah Biaya Kerja & Barang</h6>
+                    <div class="card-body">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr align="center">
+                                    <th width="5%">No</th>
+                                    <th>Jenis Biaya</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laporanTagihan" class="table-border-bottom-0">
+                                {{-- isi tagihan --}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Galeri Foto -->
+            <h6 class="mt-3">Galeri Foto</h6>
+            <ul id="laporanGaleri" class="list-unstyled d-flex align-items-center avatar-group mb-0 z-2"></ul>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
 </div>
 {{-- end Modal --}}
 

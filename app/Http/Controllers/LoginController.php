@@ -51,8 +51,7 @@ class LoginController extends Controller
                 return redirect()->route('admin.index')->with('success', 'Login successful');
             }
         } else {
-            // Jika login gagal
-            return back()->withErrors(['message' => 'Login failed. Please check your credentials.']);
+            return back()->with('error', 'Login failed. Please check your credentials.');
         }
     }
 

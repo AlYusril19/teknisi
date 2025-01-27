@@ -6,6 +6,7 @@ use ApiResponse;
 use App\Models\LaporanKerja;
 use App\Models\Pembayaran;
 use App\Models\Penagihan;
+use App\Models\Penjualan;
 use App\Models\Tagihan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ class PenagihanController extends Controller
             'diskon' => 'nullable',
             'keterangan' => 'nullable'
         ]);
+        $customerId = $request->customer_id;
 
         $tagihan = LaporanKerja::with('tagihan')
             ->whereMonth('tanggal_kegiatan', $bulanDipilih)
@@ -55,18 +57,44 @@ class PenagihanController extends Controller
             ->where('status', 'selesai')
             ->where('customer_id', $request->customer_id)
             ->whereNull('penagihan_id');
+        $diskon = $tagihan->sum('diskon') / $tagihan->count();
 
-        if ($tagihan->count() > null) {
+        $tagihansBarang = ApiResponse::get('/api/get-penjualan-mitra/'. $customerId . '?bulan='. $bulanDipilih .'&tahun=' . $tahunDipilih)->json();
+
+        if ($tagihan->count() > null || $tagihansBarang > null) {
             $Datapenagihan = [
-                'customer_id' => $request->customer_id,
+                'customer_id' => $customerId,
                 'user_id' => $userId,
                 'tanggal_tagihan' => $request->tanggal_tagihan,
                 'status' => 'baru',
+                'diskon' => $diskon,
                 'keterangan' => $request->keterangan
             ];
-            
             $penagihan = Penagihan::create($Datapenagihan);
-            $tagihan->update(['penagihan_id' => $penagihan->id]);
+
+            if($tagihan->count() > null) {
+                $tagihan->update(['penagihan_id' => $penagihan->id]);
+            }
+            if($tagihansBarang != null) {
+                // Iterasi data dan simpan ke database lokal
+                foreach ($tagihansBarang as $penjualan) {
+                    $penjualanId = $penjualan['id'];
+                    $totalBiaya = $penjualan['total_harga'];
+                    $tanggalPenjualan = $penjualan['tanggal_penjualan'];
+
+                    // Cek apakah penjualan_id sudah ada di database
+                    $existingRecord = Penjualan::where('penjualan_id', $penjualanId)->first();
+                    if (!$existingRecord) {
+                        // Simpan ke database
+                        Penjualan::create([
+                            'penjualan_id' => $penjualanId,
+                            'penagihan_id' => $penagihan->id,
+                            'total_biaya' => $totalBiaya,
+                            'tanggal_penjualan' => $tanggalPenjualan,
+                        ]);
+                    }
+                }
+            }
 
             return redirect()->route('penagihan-admin.show', $request->customer_id)->with('success', 'Tagihan Berhasil di Generate');
         }
@@ -98,10 +126,13 @@ class PenagihanController extends Controller
             ->where('customer_id', $id)
             ->whereNull('penagihan_id')
             ->get();
+        
+        $tagihansBarang = ApiResponse::get('/api/get-penjualan-mitra/'. $id . '?bulan='. $bulanDipilih .'&tahun=' . $tahunDipilih)->json();
 
-        $penagihan = Penagihan::with('laporan_kerja.tagihan', 'pembayaran')
+        $penagihan = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
             ->whereYear('tanggal_tagihan', $tahunDipilih)
             ->where('customer_id', $id);
+        // dd($penagihan->get()->toArray());
 
         $penagihanTahunan = $penagihan->get();
         
@@ -110,7 +141,6 @@ class PenagihanController extends Controller
         $listPenagihan = $penagihan->whereMonth('tanggal_tagihan', $bulanDipilih)
             ->where('status', '!=', 'lunas')
             ->orderBy('tanggal_tagihan', 'desc')->get();
-        // dd($listTagihan->toArray());
 
         $pembayaranTahunan = Pembayaran::whereYear('tanggal_bayar', $tahunDipilih)
             ->where('customer_id', $id)
@@ -123,6 +153,7 @@ class PenagihanController extends Controller
         return view('admin.admin_penagihan_show', compact([
             'customer',
             'tagihans',
+            'tagihansBarang',
             'penagihans',
             'penagihanTahunan',
             'tahunDipilih',
@@ -154,11 +185,12 @@ class PenagihanController extends Controller
      */
     public function destroy(string $id)
     {
-        $penagihans = Penagihan::with('laporan_kerja', 'pembayaran')
+        $penagihans = Penagihan::with('laporan_kerja', 'pembayaran', 'penjualan')
             ->findOrFail($id);
         if ($penagihans->pembayaran->isNotEmpty()) {
             return redirect()->back()->with('error', 'Tagihan sudah dibayar');
         }
+        // ubah status penagihan_id di laporan Kerja
         foreach ($penagihans->laporan_kerja as $laporanKerja) {
             $laporanKerja->penagihan_id = null;
             $laporanKerja->save();

@@ -72,6 +72,13 @@
         <div class="authentication-inner">
           <!-- Register -->
           <div class="card">
+            @if(session('error'))
+              <div class="alert alert-danger alert-dismissible fade-show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                </button>
+              </div>
+            @endif
             {{-- <div class="card-header">{{ __('Login') }}</div> --}}
             <div class="card-body">
               <!-- Logo -->
@@ -231,7 +238,13 @@
     <script src="{{ asset('sneat') }}/assets/js/main.js"></script>
 
     <!-- Page JS -->
-
+    <script>
+      window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function(){
+          $(this).remove(); 
+        });
+      }, 3500);
+    </script>
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
   </body>

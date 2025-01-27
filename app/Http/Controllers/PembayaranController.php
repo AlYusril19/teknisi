@@ -35,15 +35,15 @@ class PembayaranController extends Controller
         $request->validate([
             'bank_id' => 'nullable',
             'penagihan_id' => 'required',
-            // 'customer_id' => 'required',
             'tanggal_bayar' => 'required|date',
             'jumlah_dibayar' => 'required|numeric',
-            // 'status' => 'required',
             'bukti_bayar' => 'nullable'
         ]);
-        $penagihan = Penagihan::with('laporan_kerja.tagihan')->findOrFail($request->penagihan_id);
+        $penagihan = Penagihan::with('laporan_kerja.tagihan', 'penjualan')->findOrFail($request->penagihan_id);
         $pembayaran = Pembayaran::where('penagihan_id', $request->penagihan_id)->get();
-        $totalTagihan = $penagihan->laporan_kerja->flatMap->tagihan->sum('total_biaya');
+        $tagihanBarang = $penagihan->laporan_kerja->flatMap->tagihan->sum('total_biaya');
+        $tagihanTeknisi = $penagihan->penjualan->sum('total_biaya');
+        $totalTagihan = $tagihanBarang + $tagihanTeknisi;
 
         // jika ada angsuran tagihan dikurangi angsuran
         if ($pembayaran->count() > 0) {
@@ -116,24 +116,32 @@ class PembayaranController extends Controller
      */
     public function destroy(string $id)
     {
-        if (session('user_role') != 'superadmin') {
-            return redirect()->back()->with('error', 'Anda tidak diizinkan');
-        }
-        $pembayaran = Pembayaran::with('penagihan')->findOrFail($id);
+        $pembayaran = Pembayaran::with('penagihan.laporan_kerja.tagihan', 'penagihan.penjualan')->findOrFail($id);
         
-        // cek apakah pembayaran lebih dari 1 transaksi
-        $statusPenagihan = Pembayaran::where('penagihan_id', $pembayaran->penagihan_id)
-            ->count();
+        $tagihanBarang = $pembayaran->penagihan->laporan_kerja->flatMap->tagihan->sum('total_biaya');
+        $tagihanTeknisi = $pembayaran->penagihan->penjualan->sum('total_biaya');
+
+        $totalBayar = Pembayaran::where('penagihan_id', $pembayaran->penagihan_id)->sum('jumlah_dibayar');
+        $totalTagihan = $tagihanBarang + $tagihanTeknisi;
+
+        if ($pembayaran->status === 'lunas' || $totalTagihan == $totalBayar) {
+            if (session('user_role') != 'superadmin') {
+                return redirect()->back()->with('error', 'Tagihan lunas dan Anda tidak diizinkan');
+            }
+            $statusBayar = Pembayaran::where('penagihan_id', $pembayaran->penagihan_id)
+                ->update(['status' => 'angsur']);
+        }
 
         // update status dan tanggal_lunas penagihan
-        if ($statusPenagihan > 1) {
-            $status = 'angsur';
-        }else {
+        if ($totalBayar - $pembayaran->jumlah_dibayar === 0) {
             $status = 'baru';
+        }else {
+            $status = 'angsur';
         }
-        $pembayaran->penagihan->updated([
-            'status' => $status,
-            'tanggal_lunas' => null
+
+        $pembayaran->penagihan->update([  
+            'status' => $status,  
+            'tanggal_lunas' => null  
         ]);
 
         $pembayaran->delete();

@@ -36,6 +36,8 @@ Route::middleware(['auth.api', 'role:mitra'])->group(function () {
     Route::resource('/mitra', MitraBerandaController::class);
     Route::resource('/laporan-mitra', LaporanKerjaMitraController::class);
     Route::resource('/penagihan-mitra', PenagihanMitraController::class);
+    Route::get('/coming-soon', [PenagihanMitraController::class, 'indexComingSoon'])->name('coming-soon.index');
+    Route::get('/show-barang', [PenagihanMitraController::class, 'showBarang'])->name('show-barang');
     Route::resource('/pembayaran-mitra', PembayaranMitraController::class);
 });
 

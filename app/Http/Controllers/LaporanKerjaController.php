@@ -7,6 +7,7 @@ use App\Models\Galeri;
 use App\Models\LaporanKerja;
 use App\Models\Teknisi;
 use App\Models\UserApi;
+use BarangHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -50,12 +51,7 @@ class LaporanKerjaController extends Controller
 
         // Map data teknisi ke laporan
         foreach ($laporan as $lap) {
-            $lap->support = $lap->teknisi->map(function ($teknisi) {
-                $teknisi = UserApi::getUserById($teknisi->teknisi_id);
-                return [
-                    'name' => $teknisi['name'],
-                ];
-            });
+            $lap->support = getTeknisi($lap);
         }
 
         return view('teknisi.laporan_kerja_index', [
@@ -212,8 +208,7 @@ class LaporanKerjaController extends Controller
         $barangKembali = json_decode($laporan->barang_kembali, true);
 
         // Ambil data barang dari web lama via API atau sumber lain
-        $response = ApiResponse::get('/api/get-barang');
-        $barangs = $response->json();
+        $barangs = ApiResponse::get('/api/get-barang')->json();
 
         // Inisialisasi array untuk barang yang ditampilkan
         $barangKeluarView = [];
@@ -249,13 +244,7 @@ class LaporanKerjaController extends Controller
         }
 
         // teknisi support (tag)
-        $teknisi = $laporan->teknisi->map(function ($teknisi) {
-            $teknisi = UserApi::getUserById($teknisi->teknisi_id);
-            return [
-                'id' => $teknisi['id'],
-                'name' => $teknisi['name'],
-            ];
-        });
+        $teknisi = getTeknisi($laporan);
 
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait
@@ -298,48 +287,14 @@ class LaporanKerjaController extends Controller
 
         // Inisialisasi array untuk menyimpan data barang yang sudah ditambahkan nama
         $barangKeluarView = [];
-
-        if ($barangKeluar) {
-            foreach ($barangKeluar as $barang) {
-                // Cari data barang berdasarkan ID di array $barangs
-                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
-
-                // Jika barang ditemukan, tambahkan ke array hasil dengan nama
-                if ($barangDetail) {
-                    $barangKeluarView[] = [
-                        'id' => $barang['id'],
-                        'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama'
-                    ];
-                }
-            }
-        }
-
         $barangKembaliView = [];
-        if ($barangKembali) {
-            foreach ($barangKembali as $barang) {
-                // Cari data barang berdasarkan ID di array $barangs
-                $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
-
-                // Jika barang ditemukan, tambahkan ke array hasil dengan nama
-                if ($barangDetail) {
-                    $barangKembaliView[] = [
-                        'id' => $barang['id'],
-                        'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama'
-                    ];
-                }
-            }
-        }
+        
+        // ambil data barang keluar dan kembali (di database teknisi)
+        $barangKeluarView = BarangHelper::processBarang($barangKeluar);
+        $barangKembaliView = BarangHelper::processBarang($barangKembali);
 
         // Data teknisi yang sudah ditambahkan ke laporan
-        $existingTeknisi = $laporan->teknisi->map(function ($teknisi) {
-            $teknisi = UserApi::getUserById($teknisi->teknisi_id);
-            return [
-                'id' => $teknisi['id'],
-                'name' => $teknisi['name'],
-            ];
-        });
+        $existingTeknisi = getTeknisi($laporan);
 
         return view('teknisi.laporan_kerja_edit', compact([
             'barangs', 
@@ -446,7 +401,6 @@ class LaporanKerjaController extends Controller
     {
         $userId = session('user_id');
         $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
-        // dd($laporan->teknisi());
 
         // validasi kepemilikan
         if ($laporan->user_id != $userId) {

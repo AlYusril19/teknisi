@@ -7,6 +7,7 @@ use App\Models\Biaya;
 use App\Models\LaporanKerja;
 use App\Models\Tagihan;
 use App\Models\UserApi;
+use BarangHelper;
 use Illuminate\Http\Request;
 
 class LaporanKerjaAdminController extends Controller
@@ -66,12 +67,7 @@ class LaporanKerjaAdminController extends Controller
         foreach ($laporan as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
             $lap->mitra = collect($customers)->firstWhere('id', $lap->customer_id);
-            $lap->support = $lap->teknisi->map(function ($teknisi) {
-                $teknisi = UserApi::getUserById($teknisi->teknisi_id);
-                return [
-                    'name' => $teknisi['name'],
-                ];
-            });
+            $lap->support = getTeknisi($lap);
         }
 
         // Tampilkan ke view
@@ -87,23 +83,17 @@ class LaporanKerjaAdminController extends Controller
     public function create()
     {
         // Ambil laporan dengan status 'selesai' dan urutkan berdasarkan tanggal terbaru
-        $pending = LaporanKerja::with('teknisi')->where('status', 'pending')
+        $laporans = LaporanKerja::with('teknisi')->where('status', 'pending')
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
-        $laporans = $pending;
+
         // Ambil nama user dari API eksternal dan lampirkan ke laporan
         foreach ($laporans as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
-            $lap->support = $lap->teknisi->map(function ($teknisi) {
-                    $teknisi = UserApi::getUserById($teknisi->teknisi_id);
-                    return [
-                        // 'id' => $teknisi['id'],
-                        'name' => $teknisi['name'],
-                    ];
-                });
+            $lap->support = getTeknisi($lap);
         }
-        // Ambil data barang dari web lama via API
-        $barangs = ApiResponse::get('/api/get-barang')->json();
+
+        // Ambil data customer dari web lama via API
         $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Inisialisasi array untuk menyimpan data laporan beserta barangnya
@@ -121,40 +111,9 @@ class LaporanKerjaAdminController extends Controller
                 $customer = $customerId['nama'];
             }
 
-            // Jika laporan memiliki barang
-            if ($barangKeluar) {
-                foreach ($barangKeluar as $barang) {
-                    // Cari data barang berdasarkan ID di array $barangs
-                    $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
-
-                    // Jika barang ditemukan, tambahkan ke array hasil dengan nama
-                    if ($barangDetail) {
-                        $barangKeluarView[] = [
-                            'id' => $barang['id'],
-                            'jumlah' => $barang['jumlah'],
-                            'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama_barang'
-                            'satuan' => $barangDetail['kategori']['satuan'] ?? '', // Asumsikan kategori barang ada di field 'kategori'
-                        ];
-                    }
-                }
-            }
-            // Jika laporan memiliki barang
-            if ($barangKembali) {
-                foreach ($barangKembali as $barang) {
-                    // Cari data barang berdasarkan ID di array $barangs
-                    $barangDetail = collect($barangs)->firstWhere('id', $barang['id']);
-
-                    // Jika barang ditemukan, tambahkan ke array hasil dengan nama
-                    if ($barangDetail) {
-                        $barangKembaliView[] = [
-                            'id' => $barang['id'],
-                            'jumlah' => $barang['jumlah'],
-                            'nama' => $barangDetail['nama_barang'], // Asumsikan nama barang ada di field 'nama_barang'
-                            'satuan' => $barangDetail['kategori']['satuan'] ?? '', // Asumsikan kategori barang ada di field 'kategori'
-                        ];
-                    }
-                }
-            }
+            // ambil data barang keluar dan kembali (di database teknisi)
+            $barangKeluarView = BarangHelper::processBarang($barangKeluar);
+            $barangKembaliView = BarangHelper::processBarang($barangKembali);
 
             // Tambahkan laporan dan barang ke array hasil
             $laporanBarangView[] = [
@@ -190,37 +149,8 @@ class LaporanKerjaAdminController extends Controller
         $penjualan = ApiResponse::get('/api/get-penjualan/' . $id)->json();
         $pembelian = ApiResponse::get('/api/get-pembelian/' . $id)->json();
 
-        // Inisialisasi array untuk barang yang ditampilkan
-        $barangKeluarView = [];
-        if (isset($penjualan['penjualan_barang'])) {
-            foreach ($penjualan['penjualan_barang'] as $barang) {
-                $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
-                if ($barangDetail) {
-                    $barangKeluarView[] = [
-                        'id' => $barangDetail['id'],
-                        'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang'],
-                        'satuan' => $barangDetail['kategori']['satuan'] ?? '',
-                        'harga_jual' => $barang['harga_jual'] * $barang['jumlah'], // Total harga
-                    ];
-                }
-            }
-        }
-
-        $barangKembaliView = [];
-        if (isset($pembelian['pembelian_barang'])) {
-            foreach ($pembelian['pembelian_barang'] as $barang) {
-                $barangDetail = $barang['barang']; // Detail barang dari API get-penjualan
-                if ($barangDetail) {
-                    $barangKembaliView[] = [
-                        'id' => $barangDetail['id'],
-                        'jumlah' => $barang['jumlah'],
-                        'nama' => $barangDetail['nama_barang'],
-                        'satuan' => $barangDetail['kategori']['satuan'] ?? '',
-                    ];
-                }
-            }
-        }
+        $barangKeluarView = BarangHelper::getBarangKeluarView($penjualan);  
+        $barangKembaliView = BarangHelper::getBarangKembaliView($pembelian);
 
         // Ambil galeri foto
         $galeri = $laporan->galeri; // Ambil galeri terkait
