@@ -119,9 +119,8 @@ class PenagihanMitraController extends Controller
         $tagihanBarang = [];
         foreach ($penjualans as $penjualan) {
             $id = $penjualan->penjualan_id;
-            $tagihanBarang[] = ApiResponse::get('/api/get-penjualan/' . $id)->json();
+            $tagihanBarang[] = ApiResponse::get('/api/get-penjualan-by-id/' . $id)->json();
         }
-        // dd($tagihanBarang);
         return view('mitra.mitra_penagihan_show_barang', compact('tagihanBarang'));
     }
 

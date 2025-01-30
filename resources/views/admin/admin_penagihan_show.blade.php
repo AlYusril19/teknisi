@@ -71,60 +71,64 @@
         </div>
         <div class="card-body">
             {{-- Tagihan Before Generate --}}
-            @if ($tagihans->count() > 0)
+            @if ($tagihans->count() > 0 || $tagihansBarang)
                 {{-- tagihan teknisi dan barang --}}
-                <div class="table-responsive mb-2">
-                    <table class="table table-sm table-bordered table-secondary">
-                        <caption class="ms-4">
-                            Tagihan Teknisi dan Barang
-                        </caption>
-                        <thead>
-                            <tr align="center">
-                                <th>No</th>
-                                <th>Tanggal</th>
-                                <th>Nominal</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($tagihans as $data)
-                                <tr>
-                                    <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                                    <td align="center">{{ $data->tanggal_kegiatan }}</td>
-                                    <td align="right">{{ formatRupiah($data->tagihan->sum('total_biaya')) }}</td>
-                                    <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td>
+                @if ($tagihans->count() > 0)
+                    <div class="table-responsive mb-2">
+                        <table class="table table-sm table-bordered table-secondary">
+                            <caption class="ms-4">
+                                Tagihan Teknisi dan Barang
+                            </caption>
+                            <thead>
+                                <tr align="center">
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Nominal</th>
+                                    <th>Status</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @foreach ($tagihans as $data)
+                                    <tr>
+                                        <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
+                                        <td align="center">{{ $data->tanggal_kegiatan }}</td>
+                                        <td align="right">{{ formatRupiah($data->tagihan->sum('total_biaya')) }}</td>
+                                        <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
 
                 {{-- tagihan barang (pembelian) --}}
-                <div class="table-responsive mb-2">
-                    <table class="table table-sm table-bordered table-secondary">
-                        <caption class="ms-4">
-                            Tagihan Barang
-                        </caption>
-                        <thead>
-                            <tr align="center">
-                                <th>No</th>
-                                <th>Tanggal</th>
-                                <th>Nominal</th>
-                                {{-- <th>Status</th> --}}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($tagihansBarang as $data)
-                                <tr>
-                                    <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                                    <td align="center">{{ $data['tanggal_penjualan'] }}</td>
-                                    <td align="right">{{ formatRupiah($data['total_harga']) }}</td>
-                                    {{-- <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td> --}}
+                @if ($tagihansBarang)
+                    <div class="table-responsive mb-2">
+                        <table class="table table-sm table-bordered table-secondary">
+                            <caption class="ms-4">
+                                Tagihan Barang
+                            </caption>
+                            <thead>
+                                <tr align="center">
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Nominal</th>
+                                    {{-- <th>Status</th> --}}
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @foreach ($tagihansBarang as $data)
+                                    <tr>
+                                        <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
+                                        <td align="center">{{ $data['tanggal_penjualan'] }}</td>
+                                        <td align="right">{{ formatRupiah($data['total_harga']) }}</td>
+                                        {{-- <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td> --}}
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
 
                 <h5 class="mt-3">Form Generate Tagihan</h5>
                 <form method="POST" action="{{ route('penagihan-admin.store') }}" enctype="multipart/form-data" class="mb-3">

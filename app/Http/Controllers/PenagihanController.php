@@ -127,12 +127,19 @@ class PenagihanController extends Controller
             ->whereNull('penagihan_id')
             ->get();
         
-        $tagihansBarang = ApiResponse::get('/api/get-penjualan-mitra/'. $id . '?bulan='. $bulanDipilih .'&tahun=' . $tahunDipilih)->json();
+        $penjualans = ApiResponse::get('/api/get-penjualan-mitra/'. $id . '?bulan='. $bulanDipilih .'&tahun=' . $tahunDipilih)->json();
+        $tagihansBarang = [];
+        foreach ($penjualans as $penjualan) {
+            $penjualanId = $penjualan['id'];
+            $existingRecord = Penjualan::where('penjualan_id', $penjualanId)->first();
+            if (!$existingRecord) {
+                $tagihansBarang[] = ApiResponse::get('/api/get-penjualan-by-id/' . $penjualanId)->json();
+            }
+        }
 
         $penagihan = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
             ->whereYear('tanggal_tagihan', $tahunDipilih)
             ->where('customer_id', $id);
-        // dd($penagihan->get()->toArray());
 
         $penagihanTahunan = $penagihan->get();
         

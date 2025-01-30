@@ -233,17 +233,17 @@
 
               <ul class="navbar-nav flex-row align-items-center ms-auto">
                 <!-- Place this tag where you want the button to render. -->
-                {{-- <li class="nav-item lh-1 me-3">
-                  <a
-                    class="github-button"
-                    href="https://github.com/themeselection/sneat-html-admin-template-free"
-                    data-icon="octicon-star"
-                    data-size="large"
-                    data-show-count="true"
-                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"
-                    >Star</a
-                  >
-                </li> --}}
+                <li class="navbar-item me-3">
+                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="position-relative">
+                      <i class="icon-base bx bx-wallet icon-md"></i>
+                      {{-- cooming soon saldo user --}}
+                      {{-- <span class="badge rounded-pill bg-primary badge-dot badge-notifications border">
+                        {{ formatRupiah(12000) }}
+                      </span> --}}
+                    </span>
+                  </a>
+                </li>
 
                 <!-- User -->
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
