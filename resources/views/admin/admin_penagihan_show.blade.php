@@ -69,6 +69,7 @@
                 </div>
             </form>
         </div>
+        
         <div class="card-body">
             {{-- Tagihan Before Generate --}}
             @if ($tagihans->count() > 0 || $tagihansBarang)
@@ -84,7 +85,7 @@
                                     <th>No</th>
                                     <th>Tanggal</th>
                                     <th>Nominal</th>
-                                    <th>Status</th>
+                                    {{-- <th>Status</th> --}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,7 +94,7 @@
                                         <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                                         <td align="center">{{ $data->tanggal_kegiatan }}</td>
                                         <td align="right">{{ formatRupiah($data->tagihan->sum('total_biaya')) }}</td>
-                                        <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td>
+                                        {{-- <td align="center">{{ $data->penagihan_id ?? 'belum lunas' }}</td> --}}
                                     </tr>
                                 @endforeach
                             </tbody>
