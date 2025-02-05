@@ -1,4 +1,5 @@
 <?php 
+use App\Models\Penagihan;
 use App\Models\UserApi;
 use Carbon\Carbon;
 // Daftarkan helper di composer.json
@@ -141,4 +142,14 @@ function getTeknisi($laporan) {
             'name' => $teknisiData['name'],  
         ];  
     });  
+}
+
+function getInv($id){
+    // invoice = SMU-cust-user-date-id
+    $penagihan = Penagihan::findOrFail($id);
+    $invoice = $penagihan->customer_id;
+    $invoice .= $penagihan->user_id;
+    $invoice .= Carbon::parse($penagihan->tanggal_tagihan)->format('ym');
+    $invoice .= $penagihan->id;
+    return $invoice;
 }

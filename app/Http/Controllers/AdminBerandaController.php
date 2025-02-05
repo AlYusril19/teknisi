@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LaporanKerja;
+use App\Models\Pembayaran;
 use App\Models\UserApi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -74,13 +75,17 @@ class AdminBerandaController extends Controller
             ];
         });
 
+        // informasi pembayaran pending pelanggan
+        $pembayaran = Pembayaran::where('status', 'pending')->count();
+
         return view('admin.dashboard', [
             'userName' => $userName,
             'userRole' => $userRole,
             'laporanPending' => $laporanPending,
             'laporanSekarang' => $jumlahLaporanSekarang,
             'bandingLaporan' => $bandingLaporan,
-            'bandingJamKerjaPerUser' => $bandingJamKerjaPerUser
+            'bandingJamKerjaPerUser' => $bandingJamKerjaPerUser,
+            'pembayaran' => $pembayaran
         ]);
     }
 

@@ -196,13 +196,13 @@
                   </a>
                 </li>
               </ul>
-              {{-- <ul class="menu-sub">
+              <ul class="menu-sub">
                 <li class="menu-item {{ \Route::is('pembayaran-admin.index') ? 'active' : '' }}">
                   <a href="{{ route('pembayaran-admin.index') }}" class="menu-link">
                     <div data-i18n="Account">Pembayaran</div>
                   </a>
                 </li>
-              </ul> --}}
+              </ul>
             </li>
           </ul>
         </aside>

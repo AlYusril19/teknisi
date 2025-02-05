@@ -69,7 +69,7 @@
                 </div>
             </form>
         </div>
-        
+
         <div class="card-body">
             {{-- Tagihan Before Generate --}}
             @if ($tagihans->count() > 0 || $tagihansBarang)
@@ -179,6 +179,7 @@
                                     <td align="center">
                                         {{ $data->tanggal_tagihan }} <br>
                                         <span class="text-muted">{{ $data->keterangan }}</span>
+                                        <span class="text-muted">inv : {{ getInv($data->id) }}</span>
                                         @if ($data->diskon)
                                             <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
                                         @endif
@@ -224,14 +225,14 @@
                             {{-- <option value="">--Pilih Tagihan--</option> --}}
                                 @foreach($listPenagihan as $data)
                                     <option value="{{ $data->id }}">
-                                        {{ formatRupiah($data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') + $data->penjualan->sum('total_biaya')) }} ||
+                                        {{ formatRupiah($data->totalTagihan) }} ||
                                         <span class="text-muted">{{ $data->keterangan }}</span>
                                         
-                                        @if ($data->pembayaran->sum('jumlah_dibayar') != null)
+                                        @if ($data->totalPembayaran != null)
                                             sisa tagihan ({{ 
                                                 formatRupiah(
-                                                    ($data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') + $data->penjualan->sum('total_biaya') ?? 0) -
-                                                    ($data->pembayaran?->sum('jumlah_dibayar') ?? 0)
+                                                    ($data->totalTagihan ?? 0) -
+                                                    ($data->totalPembayaran ?? 0)
                                                 ) 
                                             }})
                                         @endif
@@ -247,7 +248,7 @@
                         <div class="row mb-3">
                             <label class="form-label" for="jumlah_dibayar">Jumlah di Bayar</label>
                             <div>
-                                <input type="number" class="form-control" id="jumlah_dibayar" name="jumlah_dibayar" placeholder="100000" min="1000" required>
+                                <input type="number" class="form-control" id="jumlah_dibayar" name="jumlah_dibayar" placeholder="100000" min="1" required>
                             </div>
                         </div>
                         <button type="submit">Bayar</button>
@@ -277,20 +278,51 @@
                                 <tr>
                                     <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                                     <td align="center">
-                                        {{ $data->tanggal_bayar }} <br>
-                                        {{-- <span class="text-muted">{{ $data->keterangan }}</span> --}}
+                                        <div class="d-flex ">
+                                            {{ $data->tanggal_bayar }} 
+                                            @if ($data->bukti_bayar != null)
+                                                <ul class="list-unstyled m-0 me-2 avatar-group d-flex align-items-center">
+                                                    <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-xs pull-up">
+                                                        <img src="{{ asset('storage/' . $data->bukti_bayar) }}" alt="Gambar" class="rounded-circle" style="cursor: pointer;" onclick="openImageModal('{{ asset('storage/' . $data->bukti_bayar) }}')">
+                                                    </li>
+                                                </ul>
+                                            @endif
+                                        </div>
+                                        <span class="text-muted">inv : {{ getInv($data->penagihan_id) }}</span>
                                     </td>
-                                    {{-- <td></td> --}}
                                     <td align="right">
                                         {{ formatRupiah($data->jumlah_dibayar) }}
                                     </td>
-                                    <td align="center">{{ $data->status }}</td>
                                     <td align="center">
-                                        <form action="{{ route('pembayaran-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i></button>
-                                        </form>
+                                        @if ($data->status === 'pending')
+                                            <span class="badge bg-label-warning">{{ $data->status ?? '-' }}</span>
+                                        @else
+                                            {{ $data->status }}
+                                        @endif
+                                    </td>
+                                    <td align="center">
+                                        @if ($data->status === 'pending' || $data->status === 'transfer')
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                @if ($data->status === 'pending')
+                                                    <form action="{{ route('pembayaran-admin.update', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda menyetujui pembayaran ini?');">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" class="dropdown-item" name="action" value="accept"><i class="bx bx-check-square"></i></button>
+                                                    </form>
+                                                @endif
+                                                <form action="{{ route('pembayaran-admin.update', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda membatalkan pembayaran ini?');">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit" class="dropdown-item" name="action" value="cancel"><i class="bx bx-x-circle"></i></button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <form action="{{ route('pembayaran-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item"><i class="bx bx-trash"></i></button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -328,7 +360,10 @@
                         @foreach ($penagihanTahunan as $data)
                             <tr>
                                 <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                                <td align="center">{{ $data->tanggal_tagihan }}</td>
+                                <td align="center">
+                                    {{ $data->tanggal_tagihan }} <br>
+                                    <span class="text-muted">inv : {{ getInv($data->id) }}</span>
+                                </td>
                                 <td align="right">
                                     {{
                                      formatRupiah($data->laporan_kerja->flatMap->tagihan->sum('total_biaya')
@@ -376,7 +411,19 @@
                         @foreach ($pembayaranTahunan as $data)
                             <tr>
                                 <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                                <td align="center">{{ $data->tanggal_bayar }}</td>
+                                <td align="center">
+                                    <div class="d-flex align-items-center justifiy-content-between">
+                                        {{ $data->tanggal_bayar }} 
+                                        @if ($data->bukti_bayar != null)
+                                            <ul class="list-unstyled m-0 me-2 avatar-group d-flex align-items-center">
+                                                <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-xs pull-up">
+                                                    <img src="{{ asset('storage/' . $data->bukti_bayar) }}" alt="Gambar" class="rounded-circle" style="cursor: pointer;" onclick="openImageModal('{{ asset('storage/' . $data->bukti_bayar) }}')">
+                                                </li>
+                                            </ul>
+                                        @endif
+                                    </div>
+                                    <span class="text-muted">inv : {{ getInv($data->penagihan_id) }}</span>
+                                </td>
                                 <td align="right">
                                     {{ formatRupiah($data->jumlah_dibayar) }}
                                 </td>
@@ -389,7 +436,21 @@
         </div>
     </div>
   </div>
-  
+</div>
+
+<!-- Modal untuk menampilkan gambar -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Bukti Bayar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="bukti bayar" class="img-fluid">
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -403,5 +464,16 @@
         document.getElementById('tahun').addEventListener('change', function() {
             document.getElementById('penagihanForm').submit();
         });
+    </script>
+
+    {{-- gambar bukti bayar --}}
+    <script>
+        function openImageModal(imageSrc) {
+            // Set the src of the image inside the modal to the clicked image
+            document.getElementById('modalImage').src = imageSrc;
+            // Show the modal
+            var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+            imageModal.show();
+        }
     </script>
 @endsection

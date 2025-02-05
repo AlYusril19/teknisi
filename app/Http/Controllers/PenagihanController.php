@@ -9,6 +9,7 @@ use App\Models\Penagihan;
 use App\Models\Penjualan;
 use App\Models\Tagihan;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class PenagihanController extends Controller
@@ -135,26 +136,37 @@ class PenagihanController extends Controller
             if (!$existingRecord) {
                 $tagihansBarang[] = ApiResponse::get('/api/get-penjualan-by-id/' . $penjualanId)->json();
             }
-        }
+        };
 
-        $penagihan = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
+        $penagihanTahunan = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
             ->whereYear('tanggal_tagihan', $tahunDipilih)
-            ->where('customer_id', $id);
+            ->where('customer_id', $id)->get();
 
-        $penagihanTahunan = $penagihan->get();
-        
-        $penagihans = $penagihan->whereMonth('tanggal_tagihan', $bulanDipilih)->get();
+        $penagihans = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
+            ->whereYear('tanggal_tagihan', $tahunDipilih)
+            ->where('customer_id', $id)->whereMonth('tanggal_tagihan', $bulanDipilih)->get();
 
-        $listPenagihan = $penagihan->whereMonth('tanggal_tagihan', $bulanDipilih)
-            ->where('status', '!=', 'lunas')
-            ->orderBy('tanggal_tagihan', 'desc')->get();
+        $listPenagihan = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
+            ->whereYear('tanggal_tagihan', $tahunDipilih)
+            ->where('customer_id', $id)->where('status', '!=', 'lunas')
+            ->orderBy('tanggal_tagihan', 'desc')
+            ->get();
+        foreach ($listPenagihan as $data) {
+            $data->totalTagihan = $data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') + $data->penjualan->sum('total_biaya');
+            $data->totalPembayaran = $data->pembayaran?->filter(function ($pembayaran) {
+                return $pembayaran->status !== 'cancel'; // Ganti 'cancel' dengan nilai status yang sesuai
+            })->sum('jumlah_dibayar');
+        }
 
         $pembayaranTahunan = Pembayaran::whereYear('tanggal_bayar', $tahunDipilih)
             ->where('customer_id', $id)
+            ->where('status', '<>', 'cancel')
             ->get();
+            
         $pembayaran = Pembayaran::whereYear('tanggal_bayar', $tahunDipilih)
             ->whereMonth('tanggal_bayar', $bulanDipilih)
             ->where('customer_id', $id)
+            ->where('status', '<>', 'cancel')
             ->get();
 
         return view('admin.admin_penagihan_show', compact([

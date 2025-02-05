@@ -8,10 +8,14 @@
                 <div class="d-flex align-items-start row">
                     <div class="col-sm-7">
                         <div class="card-body">
-                            {{-- {{ __('You are logged in!') }} --}}
-                            <p>Welcome {{ $userRole }} {{ $userName }}</p>
                             <h5 class="card-title text-primary mb-3">Welcome {{ $userRole }} {{ $userName }} 🎉</h5>
-                            {{-- <p class="mb-6">You have 0 item data with low stock.<br>Check in bottom.</p> --}}
+                            @if ($penagihan->isNotEmpty())
+                                <p class="mb-6">
+                                    Hai {{ $userName }} Ada tagihan baru nih, cek di link berikut ya! 
+                                    <a href="{{ route('penagihan-mitra.index') }}" class="btn btn-sm btn-outline-primary">tagihan</a>
+                                </p>
+                                
+                            @endif
                             {{-- <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary">Buat Laporan</a> --}}
                             {{-- @if ($barangMenipis)
                                 <a href="{{ route('laporan-admin.create') }}" class="btn btn-sm btn-outline-primary">View Pendings</a>

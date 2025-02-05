@@ -1,94 +1,86 @@
 @extends('layouts.app_sneat')
 
 @section('content')
-    {{-- <h5 class="pb-1 mb-6">Data Peserta</h5> --}}
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            {{-- <h5 class="mb-0">Daftar Laporan Kerja</h5> --}}
-            <a href="{{ route('laporan.create') }}" class="btn btn-primary mb-0">Buat Laporan</a>
-            <form action="{{ route('laporan.index') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
-                    <select name="filter" class="form-select" onchange="this.form.submit()">
-                        <option value="">Semua Laporan</option>
-                        <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
-                        {{-- <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option> --}}
-                    </select>
-                </div>
-            </form>
-        </div>
-        <div class="table-responsive">
-            <table class="table">
-                <caption class="ms-4">
-                    Data Laporan
-                </caption>
-                <thead>
-                    <tr align="center">
-                        <th width="5%">No</th>
-                        <th>Tanggal</th>
-                        <th>Jenis</th>
-                        <th>Kegiatan</th>
-                        <th>status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @foreach($laporan as $data)
-                        <tr>
-                            <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                            <td>{{ $data->tanggal_kegiatan }}</td>
-                            <td>{{ $data->jenis_kegiatan }}</td>
-                            <td>
-                                {{ $data->keterangan_kegiatan }}
-                                @foreach ($data->support as $item)
-                                    <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
-                                @endforeach
-                            </td>
-                            <td align="center">
-                                <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : 
-                                                            ($data->status === 'pending' ? 'warning' : 
-                                                            ($data->status === 'reject' ? 'danger' : 'success')) }}">
-                                                            {{ $data->status ?? 'null' }}
-                                </span>
-                            </td>
-                            <td align="center">
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        {{-- <a class="dropdown-item" href="{{ route('laporan.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
-                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
-                                            <i class="bx bx-show-alt me-2"></i> Show
-                                        </button>
-                                        @if ($data->status != 'selesai' && $data->status != 'pending')
-                                            <a class="dropdown-item" href="{{ route('laporan.edit', $data->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a>
-                                        @endif
-                                        @if ($data->status != 'selesai' && $data->status != 'pending')
-                                            <form action="{{ route('laporan.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {{-- <div class="row">
-        <div class="col-sm-12">
-            <div class="card">
-                {{ $laporan->links() }}
+{{-- <h5 class="pb-1 mb-6">Data Peserta</h5> --}}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        {{-- <h5 class="mb-0">Daftar Laporan Kerja</h5> --}}
+        <a href="{{ route('laporan.create') }}" class="btn btn-primary mb-0">Buat Laporan</a>
+        <form action="{{ route('laporan.index') }}" method="GET">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
+                <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
+                <select name="filter" class="form-select" onchange="this.form.submit()">
+                    <option value="">Semua Laporan</option>
+                    <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
+                    {{-- <option value="transport" {{ request('filter') == 'transport' ? 'selected' : '' }}>Kegiatan Keluar</option> --}}
+                </select>
             </div>
-        </div>
-    </div> --}}
-    {{-- <hr class="my-12"> --}}
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <caption class="ms-4">
+                Data Laporan
+            </caption>
+            <thead>
+                <tr align="center">
+                    <th width="5%">No</th>
+                    <th>Tanggal</th>
+                    <th>Jenis</th>
+                    <th>Kegiatan</th>
+                    <th>status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @foreach($laporan as $data)
+                    <tr>
+                        <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
+                        <td>{{ $data->tanggal_kegiatan }}</td>
+                        <td>{{ $data->jenis_kegiatan }}</td>
+                        <td>
+                            {{ $data->keterangan_kegiatan }}
+                            @foreach ($data->support as $item)
+                                <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                            @endforeach
+                        </td>
+                        <td align="center">
+                            <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : 
+                                                        ($data->status === 'pending' ? 'warning' : 
+                                                        ($data->status === 'reject' ? 'danger' : 'success')) }}">
+                                                        {{ $data->status ?? 'null' }}
+                            </span>
+                        </td>
+                        <td align="center">
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    {{-- <a class="dropdown-item" href="{{ route('laporan.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
+                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#laporanModal" data-id="{{ $data->id }}">
+                                        <i class="bx bx-show-alt me-2"></i> Show
+                                    </button>
+                                    @if ($data->status != 'selesai' && $data->status != 'pending')
+                                        <a class="dropdown-item" href="{{ route('laporan.edit', $data->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a>
+                                    @endif
+                                    @if ($data->status != 'selesai' && $data->status != 'pending')
+                                        <form action="{{ route('laporan.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="laporanModal" tabindex="-1" aria-labelledby="laporanModalLabel" aria-hidden="true">

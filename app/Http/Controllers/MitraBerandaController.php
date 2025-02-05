@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Penagihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -14,9 +15,19 @@ class MitraBerandaController extends Controller
     {
         $userName = session('user_name'); // Ambil nama user dari session
         $userRole = session('user_role'); // Ambil role user dari session
+        $userId = session('user_id'); // Ambil role user dari session
+
+        $customerId = getCustomerId($userId)->first();
+
+        $penagihan = Penagihan::where('customer_id', $customerId)
+            ->where('status', 'baru')
+            ->orWhere('status', 'angsur')
+            ->get();
+        
         return view('mitra.dashboard',[
             'userName' => $userName, 
-            'userRole' => $userRole
+            'userRole' => $userRole,
+            'penagihan' => $penagihan,
         ]);
     }
 

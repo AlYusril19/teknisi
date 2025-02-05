@@ -53,6 +53,7 @@ Route::middleware(['auth.api', 'role:admin,superadmin'])->group(function () {
     Route::resource('/biaya-admin', BiayaController::class);
     Route::resource('/penagihan-admin', PenagihanController::class);
     Route::resource('/pembayaran-admin', PembayaranController::class);
+    Route::get('/tagihan-show/{id}', [PembayaranController::class, 'indexShow'])->name('penagihan-show.index');
 });
 
 // Default route

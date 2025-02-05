@@ -8,13 +8,17 @@
                     <div class="col-sm-7">
                         <div class="card-body">
                             <h5 class="card-title text-primary mb-3">Welcome {{ $userRole }} {{ $userName }} 🎉</h5>
-                            <p class="mb-6">You have {{ $laporanPending ?? '0' }} report pending today.<br>Check in bottom.</p>
-                            
                             @if ($laporanPending)
-                                <a href="{{ route('laporan-admin.create') }}" class="btn btn-sm btn-outline-primary">View Pendings</a>
+                                <p class="mb-1">You have {{ $laporanPending ?? '0' }} report pending today.<br>Check in bottom.</p>
+                                <a href="{{ route('laporan-admin.create') }}" class="btn btn-sm btn-outline-primary mb-2">View Pendings</a>
                             @endif
 
-                            <h6 class="mt-5 mb-1">Cek data pada bulan yang dipilih</h6>
+                            @if ($pembayaran)
+                                <p class="mb-1">You have {{ $pembayaran ?? '0' }} new Payment.<br>Check in bottom.</p>
+                                <a href="{{ route('pembayaran-admin.index') }}" class="btn btn-sm btn-outline-primary mb-2">View Payments</a>
+                            @endif
+
+                            <h6 class="mt-3 mb-1">Cek data pada bulan yang dipilih</h6>
                             <!-- Dropdown Pemilihan Bulan dan Tahun -->
                             <form action="{{ route('admin.index') }}" method="GET">
                                 <div class="row g-2">

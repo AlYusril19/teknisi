@@ -40,7 +40,10 @@
                             @foreach($penagihans as $data)
                                 <tr>
                                     <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                                    <td align="center">{{ $data->tanggal_tagihan }}</td>
+                                    <td align="center">
+                                        {{ $data->tanggal_tagihan }} <br>
+                                        <span class="text-muted">inv : {{ getInv($data->id) }}</span>
+                                    </td>
                                     <td align="right">
                                         {{ 
                                             formatRupiah(
@@ -52,7 +55,7 @@
                                     </td>
                                     <td>
                                         {{ $data->keterangan }}
-                                        @if ($data->diskon != null)
+                                        @if ($data->diskon != 0)
                                             <br>
                                             <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
                                         @endif
@@ -73,7 +76,7 @@
                                             </button>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item" href="{{ route('penagihan-mitra.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a>
-                                                {{-- <a class="dropdown-item" href="{{ route('penagihan-mitra.show', $data->id) }}"><i class="bx bx-credit-card me-2"></i> Pay</a> --}}
+                                                <a class="dropdown-item" href="{{ route('pembayaran-mitra.show', $data->id) }}"><i class="bx bx-credit-card me-2"></i> Pay</a>
                                             </div>
                                         </div>
                                     </td>

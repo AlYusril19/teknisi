@@ -101,14 +101,6 @@
             </table>
         </div>
     </div>
-    {{-- <div class="row">
-        <div class="col-sm-12">
-            <div class="card">
-                {{ $laporan->links() }}
-            </div>
-        </div>
-    </div> --}}
-    {{-- <hr class="my-12"> --}}
   </div>
 </div>
 
