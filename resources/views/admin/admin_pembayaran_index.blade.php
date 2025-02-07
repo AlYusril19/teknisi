@@ -38,7 +38,15 @@
                         <tr>
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                             <td align="center">{{ $data->customerName['nama'] }}</td>
-                            <td align="center">{{ $data->status }} {{ $data->tanggal_konfirmasi ?? '' }}</td>
+                            <td align="center">
+                                @if ($data->status === 'pending')
+                                    <span class="badge bg-warning rounded-pill">Pending</span>
+                                @elseif($data->status === 'cancel')
+                                    <span class="badge bg-danger rounded-pill">Cancel</span>
+                                @else
+                                    ✅ {{ $data->status }} {{ $data->tanggal_konfirmasi }}
+                                @endif
+                            </td>
                             <td align="right">{{ formatRupiah($data->jumlah_dibayar) }}</td>
                             <td align="center">
                                 <div class="dropdown">
@@ -50,13 +58,7 @@
                                         <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalTagihan" onclick="loadTagihan({{ $data->penagihan->id }})">
                                             <i class="bx bx-show-alt me-2"></i> Show
                                         </button>
-                                        {{-- <a class="dropdown-item" href="{{ route('penagihan-show.index', $data->penagihan_id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
-                                        {{-- <a class="dropdown-item" href="{{ route('biaya-admin.edit', $data['biaya']->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a> --}}
-                                        {{-- <form action="{{ route('biaya-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                        </form> --}}
+                                        <a class="dropdown-item" href="{{ route('penagihan-admin.show', $data->customer_id.'#pembayaran') }}"><i class="bx bx-show-alt me-2"></i> Detail</a>
                                     </div>
                                 </div>
                             </td>
@@ -78,6 +80,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <span class="text-muted">inv : {{ getInv($data->penagihan_id) }}</span>
                 <div id="tagihanContent" class="table-responsive">
                     <p>Memuat data...</p>
                 </div>
@@ -102,28 +105,55 @@
                 if (response.penagihan.laporan_kerja.length > 0) {
                     content += '<h5>Tagihan Teknisi dan Barang ' + response.tanggalTagihan + '</h5>';
                     content += '<table class="table"><thead><tr><th>No</th><th>Tanggal</th><th>Jenis Tagihan</th><th>Nominal</th></tr></thead><tbody>';
+
+                    let totalSemuaTagihan = 0; // Inisialisasi total semua tagihan
+
                     response.penagihan.laporan_kerja.forEach((data, index) => {
+                        let totalTagihan = data.tagihan.reduce((sum, item) => sum + Number(item.total_biaya), 0);
+                        totalSemuaTagihan += totalTagihan; // Tambahkan ke total semua tagihan
+
                         content += `<tr>
                             <td>${index + 1}</td>
                             <td>${data.tanggal_kegiatan}</td>
                             <td>${data.jenis_kegiatan === 'mitra' ? 'Teknisi' : ''} ${data.barang ? 'dan Barang' : ''}</td>
-                            <td>${data.tagihan.reduce((sum, item) => sum + item.total_biaya, 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                            <td align="right">${formatRupiahJS(totalTagihan)}</td>
                         </tr>`;
                     });
+
+                    // Tambahkan total biaya di bawah tabel
+                    content += `<tr>
+                        <td colspan="3" align="right"><strong>Total Biaya:</strong></td>
+                        <td align="right"><strong>${formatRupiahJS(totalSemuaTagihan)}</strong></td>
+                    </tr>`;
+
                     content += '</tbody></table>';
                 }
+
                 
                 if (response.penagihan.penjualan.length > 0) {
                     content += '<h5>Tagihan Barang ' + response.tanggalTagihan + '</h5>';
                     content += '<table class="table"><thead><tr><th>No</th><th>Tanggal</th><th>Jenis Tagihan</th><th>Nominal</th></tr></thead><tbody>';
+
+                    let totalSemuaTagihanPenjualan = 0; // Total semua tagihan penjualan
+
                     response.penagihan.penjualan.forEach((data, index) => {
+                        let totalTagihan = Number(data.total_biaya);
+                        totalSemuaTagihanPenjualan += totalTagihan; // Tambahkan ke total semua tagihan penjualan
+
                         content += `<tr>
                             <td>${index + 1}</td>
                             <td>${data.tanggal_penjualan}</td>
                             <td>Barang</td>
-                            <td>${parseFloat(data.total_biaya).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                            <td align="right">${formatRupiahJS(totalTagihan)}</td>
                         </tr>`;
                     });
+
+                    // Tambahkan total biaya penjualan barang
+                    content += `<tr>
+                        <td colspan="3" align="right"><strong>Total Biaya Barang:</strong></td>
+                        <td align="right"><strong>${formatRupiahJS(totalSemuaTagihanPenjualan)}</strong></td>
+                    </tr>`;
+
                     content += '</tbody></table>';
                 }
                 

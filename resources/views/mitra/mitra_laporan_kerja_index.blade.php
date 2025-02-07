@@ -1,4 +1,4 @@
-@extends('layouts.app_sneat_mitra')
+@extends('layouts.app_sneat_blank')
 
 @section('content')
 
@@ -7,11 +7,12 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="input-group">
-                    @if (request('transaksi'))
+                    {{-- @if (request('transaksi'))
                         <button onclick="window.history.back();" class="btn btn-secondary me-2">Back</button>
                     @else
                         <h5 class="mb-0">Daftar Laporan Kerja</h5>
-                    @endif
+                    @endif --}}
+                    <button onclick="window.history.back();" class="btn btn-secondary me-2">Back</button>
                 </div>
                 <form action="{{ route('laporan-mitra.index') }}" method="GET">
                     <div class="input-group">

@@ -38,6 +38,7 @@ class PenagihanMitraController extends Controller
             ->whereYear('tanggal_tagihan', $tahunDipilih)
             ->where('customer_id', $customerIds)
             ->orderByRaw("FIELD(status, 'baru', 'angsur', 'lunas')")
+            ->orderBy('tanggal_tagihan', 'desc')
             ->get();
         return view('mitra.mitra_penagihan_index', compact('penagihans', 'tahunDipilih'));
     }

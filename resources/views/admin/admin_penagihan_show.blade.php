@@ -258,7 +258,7 @@
 
             {{-- tabel pembayaran periode bulan --}}
             @if ($pembayaran->count() > 0)
-                <div class="table-responsive mt-3">
+                <div class="table-responsive mt-3" id="pembayaran">
                     <h5 class="mb-1">Tabel Data Pembayaran</h5>
                     <table class="table table-sm table-bordered table-success">
                         <caption class="ms-4">

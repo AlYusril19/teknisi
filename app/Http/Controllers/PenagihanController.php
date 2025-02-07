@@ -58,7 +58,13 @@ class PenagihanController extends Controller
             ->where('status', 'selesai')
             ->where('customer_id', $request->customer_id)
             ->whereNull('penagihan_id');
-        $diskon = $tagihan->sum('diskon') / $tagihan->count();
+        
+        $tagihanCount = $tagihan->count();
+        if ($tagihanCount > 0) {
+            $diskon = $tagihan->sum('diskon') / $tagihanCount;
+        } else {
+            $diskon = 0;
+        }
 
         $tagihansBarang = ApiResponse::get('/api/get-penjualan-mitra/'. $customerId . '?bulan='. $bulanDipilih .'&tahun=' . $tahunDipilih)->json();
 
@@ -167,6 +173,8 @@ class PenagihanController extends Controller
             ->whereMonth('tanggal_bayar', $bulanDipilih)
             ->where('customer_id', $id)
             ->where('status', '<>', 'cancel')
+            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('tanggal_bayar', 'desc')
             ->get();
 
         return view('admin.admin_penagihan_show', compact([
@@ -206,7 +214,11 @@ class PenagihanController extends Controller
     {
         $penagihans = Penagihan::with('laporan_kerja', 'pembayaran', 'penjualan')
             ->findOrFail($id);
-        if ($penagihans->pembayaran->isNotEmpty()) {
+        $validate = $penagihans->pembayaran?->filter(function ($pembayaran) {
+            return $pembayaran->status !== 'cancel'; // Ganti 'cancel' dengan nilai status yang sesuai
+        });
+        
+        if ($validate->isNotEmpty()) {
             return redirect()->back()->with('error', 'Tagihan sudah dibayar');
         }
         // ubah status penagihan_id di laporan Kerja

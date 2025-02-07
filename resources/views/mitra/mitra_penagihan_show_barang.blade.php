@@ -1,5 +1,7 @@
-@extends('layouts.app_sneat_mitra')
-
+@extends('layouts.app_sneat_blank')
+{{-- @section('navbar')
+    @include('mitra.mitra_navbar_bsh')
+@endsection --}}
 @section('content')
 
 <div class="row">

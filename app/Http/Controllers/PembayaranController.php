@@ -16,7 +16,10 @@ class PembayaranController extends Controller
      */
     public function index()
     {
-        $pembayarans = Pembayaran::orderBy('tanggal_bayar', 'desc')->get();
+        $pembayarans = Pembayaran::orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('tanggal_bayar', 'desc')
+            ->get();
+
         $customers = ApiResponse::get('/api/get-customer')->json();
         
         foreach ($pembayarans as $data) {

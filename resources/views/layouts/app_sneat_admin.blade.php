@@ -6,6 +6,7 @@
 
 * Product Page: https://themeselection.com/products/sneat-bootstrap-html-admin-template/
 * Created by: ThemeSelection
+* Edited by: SkyTaMa
 * License: You must have a valid license purchased in order to legally use the theme for your project.
 * Copyright ThemeSelection (https://themeselection.com)
 
@@ -190,7 +191,7 @@
                 <div data-i18n="Account Settings">Administrasi</div>
               </a>
               <ul class="menu-sub">
-                <li class="menu-item {{ \Route::is('penagihan-admin.index') ? 'active' : '' }}">
+                <li class="menu-item {{ \Route::is('penagihan-admin.*') ? 'active' : '' }}">
                   <a href="{{ route('penagihan-admin.index') }}" class="menu-link">
                     <div data-i18n="Account">Penagihan</div>
                   </a>

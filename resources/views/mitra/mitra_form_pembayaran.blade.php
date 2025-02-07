@@ -83,139 +83,141 @@
 @section('content')
 
 <div class="row">
-  <div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <button onclick="window.history.back();" class="btn btn-secondary me-2">Back</button>
-            <h5 class="mb-0">Form Pembayaran</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('pembayaran-mitra.store') }}" enctype="multipart/form-data">
-                @csrf
-                {{-- @method('PUT') --}}
-                <input type="hidden" id="penagihan_id" name="penagihan_id" value="{{ $id }}" readonly>
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label" for="totalTagihan">Total Tagihan</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan) }}" readonly>
-                    </div>
-                </div>
-                @if ($pembayaran->isNotEmpty())
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="totalTagihan">Sudah di Bayar</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalBayar) }}" readonly>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="totalTagihan">Sisa Tagihan</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan - $totalBayar) }}" readonly>
-                        </div>
-                    </div>
-                @endif
-                @if ($totalTagihan - $totalBayar != 0)
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="name">Jumlah Dibayar</label>
-                        <div class="col-sm-10">
-                            <input type="number" class="form-control" id="jumlah_dibayar" name="jumlah_dibayar" value="{{ $totalTagihan - $totalBayar }}" min="1" max="{{ $totalTagihan - $totalBayar }}" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="name">Tanggal Pembayaran</label>
-                        <div class="col-sm-10">
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="foto">Upload Bukti <br><span class="text-muted">(Max: 5MB)</span></label>
-                        <div class="col-sm-10">
-                            <input type="file" name="foto" id="foto" accept="image/*" onchange="previewAndCompressImages()" required>
-                        </div>
-                    </div>
-                    <!-- Tempat untuk menampilkan jajaran pratinjau gambar -->
-                    <div id="imagePreview" class="image-preview"></div>
-
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary me-2">Simpan</button>
-                        <button type="reset" class="btn btn-outline-secondary" onclick="resetImagePreview()">Batal</button>
-                    </div>
-                @endif
-            </form>
-        </div>
-    </div>
-
-    {{-- tabel pembayaran --}}
-    @if ($listPembayaran->isNotEmpty())
-        <div class="card mt-3">
+    <div class="col-md-12">
+        <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Tabel History Pembayaran</h5>
+                <a href="{{ route('penagihan-mitra.index') }}">
+                    <button class="btn btn-secondary me-2">Back</button>
+                </a>
+                <h5 class="mb-0">Form Pembayaran</h5>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <caption class="ms-4">
-                            Data Pembayaran
-                        </caption>
-                        <thead>
-                            <tr align="center">
-                                <th width="5%">No</th>
-                                <th>Tanggal</th>
-                                <th>Nominal</th>
-                                <th>status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            @foreach($listPembayaran as $data)
-                                <tr>
-                                    <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                                    <td>{{ $data->tanggal_bayar }}</td>
-                                    <td align="right">{{ formatRupiah($data->jumlah_dibayar) }}</td>
-                                    <td align="center">
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            @if ($data->bukti_bayar != null)
-                                                <ul class="list-unstyled m-0 me-2 avatar-group d-flex align-items-center">
-                                                    <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-xs pull-up">
-                                                        <img src="{{ asset('storage/' . $data->bukti_bayar) }}" alt="Gambar" class="rounded-circle" style="cursor: pointer;" onclick="openImageModal('{{ asset('storage/' . $data->bukti_bayar) }}')">
-                                                    </li>
-                                                </ul>
-                                            @endif
-                                            @if ($data->status === 'pending')
-                                                <span class="badge bg-warning rounded-pill">Pending</span>
-                                            @elseif($data->status === 'cancel')
-                                                <span class="badge bg-danger rounded-pill">Cancel</span>
-                                            @else
-                                                ✅ {{ $data->tanggal_konfirmasi }}
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td align="center">
-                                        <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                {{-- <a class="dropdown-item" href="{{ route('laporan-admin.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
-                                                @if ($data->tanggal_konfirmasi === null)
-                                                    <form action="{{ route('pembayaran-mitra.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                <form method="POST" action="{{ route('pembayaran-mitra.store') }}" enctype="multipart/form-data">
+                    @csrf
+                    {{-- @method('PUT') --}}
+                    <input type="hidden" id="penagihan_id" name="penagihan_id" value="{{ $id }}" readonly>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="totalTagihan">Total Tagihan</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan) }}" readonly>
+                        </div>
+                    </div>
+                    @if ($pembayaran->isNotEmpty())
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="totalTagihan">Sudah di Bayar</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalBayar) }}" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="totalTagihan">Sisa Tagihan</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan - $totalBayar) }}" readonly>
+                            </div>
+                        </div>
+                    @endif
+                    @if ($totalTagihan - $totalBayar != 0)
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="name">Jumlah Dibayar</label>
+                            <div class="col-sm-10">
+                                <input type="number" class="form-control" id="jumlah_dibayar" name="jumlah_dibayar" value="{{ $totalTagihan - $totalBayar }}" min="1" max="{{ $totalTagihan - $totalBayar }}" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="name">Tanggal Pembayaran</label>
+                            <div class="col-sm-10">
+                                <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="foto">Upload Bukti <br><span class="text-muted">(Max: 5MB)</span></label>
+                            <div class="col-sm-10">
+                                <input type="file" name="foto" id="foto" accept="image/*" onchange="previewAndCompressImages()" required>
+                            </div>
+                        </div>
+                        <!-- Tempat untuk menampilkan jajaran pratinjau gambar -->
+                        <div id="imagePreview" class="image-preview"></div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary me-2">Simpan</button>
+                            <button type="reset" class="btn btn-outline-secondary" onclick="resetImagePreview()">Batal</button>
+                        </div>
+                    @endif
+                </form>
             </div>
         </div>
-    @endif
-  </div>
+
+        {{-- tabel pembayaran --}}
+        @if ($listPembayaran->isNotEmpty())
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Tabel History Pembayaran</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <caption class="ms-4">
+                                Data Pembayaran
+                            </caption>
+                            <thead>
+                                <tr align="center">
+                                    <th width="5%">No</th>
+                                    <th>Tanggal</th>
+                                    <th>Nominal</th>
+                                    <th>status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-border-bottom-0">
+                                @foreach($listPembayaran as $data)
+                                    <tr>
+                                        <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
+                                        <td>{{ $data->tanggal_bayar }}</td>
+                                        <td align="right">{{ formatRupiah($data->jumlah_dibayar) }}</td>
+                                        <td align="center">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                @if ($data->bukti_bayar != null)
+                                                    <ul class="list-unstyled m-0 me-2 avatar-group d-flex align-items-center">
+                                                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-xs pull-up">
+                                                            <img src="{{ asset('storage/' . $data->bukti_bayar) }}" alt="Gambar" class="rounded-circle" style="cursor: pointer;" onclick="openImageModal('{{ asset('storage/' . $data->bukti_bayar) }}')">
+                                                        </li>
+                                                    </ul>
+                                                @endif
+                                                @if ($data->status === 'pending')
+                                                    <span class="badge bg-warning rounded-pill">Pending</span>
+                                                @elseif($data->status === 'cancel')
+                                                    <span class="badge bg-danger rounded-pill">Cancel</span>
+                                                @else
+                                                    ✅ {{ $data->tanggal_konfirmasi }}
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td align="center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    {{-- <a class="dropdown-item" href="{{ route('laporan-admin.show', $data->id) }}"><i class="bx bx-show-alt me-2"></i> Show</a> --}}
+                                                    @if ($data->tanggal_konfirmasi === null)
+                                                        <form action="{{ route('pembayaran-mitra.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
 </div>
 
 <!-- Modal untuk menampilkan gambar -->
