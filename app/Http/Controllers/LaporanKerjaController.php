@@ -268,9 +268,9 @@ class LaporanKerjaController extends Controller
         $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
 
         // validasi kepemilikan
-        if ($laporan->user_id != $userId) {
-            return redirect()->back()->with('error', 'Anda tidak diizinkan.');
-        }
+        // if ($laporan->user_id != $userId) {
+        //     return redirect()->back()->with('error', 'Anda tidak diizinkan.');
+        // }
 
         // validasi status laporan
         if ($laporan->status === 'selesai' || $laporan->status === 'pending') {
@@ -313,7 +313,18 @@ class LaporanKerjaController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $laporan = LaporanKerja::findOrFail($id);
+
         $this->validateRequest($request);
+
+        $userId = session('user_id');
+
+        // validasi kepemilikan
+        if ($laporan->user_id != $userId) {
+            if ($request->status !== 'draft') {
+                return redirect()->back()->with('error', 'Anda tidak diizinkan post laporan ini.');
+            }
+        }
 
         $message = '';
         // Format data barang keluar untuk dikirim ke web lama
@@ -344,7 +355,6 @@ class LaporanKerjaController extends Controller
             $barangKembali = null;
         }
         
-        $laporan = LaporanKerja::findOrFail($id);
         if ($request->hasFile('fotos')) {
             foreach ($request->file('fotos') as $foto) {
                 $path = $foto->store('dokumentasi_foto', 'public');

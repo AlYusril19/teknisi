@@ -201,7 +201,9 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" name="status" value="pending" class="btn btn-primary me-2">Post</button>
+                        @if ($laporan->user_id === session('user_id'))
+                            <button type="submit" name="status" value="pending" class="btn btn-primary me-2">Post</button>
+                        @endif
                         <button type="submit" name="status" value="draft" class="btn btn-secondary me-2">Draft</button>
                         {{-- <button type="reset" class="btn btn-outline-secondary">Batal</button> --}}
                     </div>
