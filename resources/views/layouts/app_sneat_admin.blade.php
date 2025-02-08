@@ -47,7 +47,8 @@
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/fonts/boxicons.css" />
 
     <!-- Core CSS -->
-    <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/css/core.css') }}?v={{ filemtime(public_path('sneat/assets/vendor/css/core.css')) }}" class="template-customizer-core-css" />
+    {{-- <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/css/core.css" class="template-customizer-core-css" /> --}}
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/css/demo.css" />
 
