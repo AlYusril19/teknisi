@@ -488,6 +488,11 @@ progress {
     font-size: 4rem;
   }
 }
+@media (max-width: 768px) {
+  .display-1 {
+    font-size: calc(1.2rem + 2.5vw);
+  }
+}
 
 .display-2 {
   font-size: calc(1.475rem + 2.7vw);
@@ -497,6 +502,11 @@ progress {
 @media (min-width: 1200px) {
   .display-2 {
     font-size: 3.5rem;
+  }
+}
+@media (max-width: 768px) {
+  .display-2 {
+    font-size: calc(1.1rem + 2.2vw);
   }
 }
 
@@ -510,6 +520,11 @@ progress {
     font-size: 3rem;
   }
 }
+@media (max-width: 768px) {
+  .display-3 {
+    font-size: calc(1rem + 2vw);
+  }
+}
 
 .display-4 {
   font-size: calc(1.375rem + 1.5vw);
@@ -519,6 +534,11 @@ progress {
 @media (min-width: 1200px) {
   .display-4 {
     font-size: 2.5rem;
+  }
+}
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: calc(0.9rem + 1.5vw);
   }
 }
 
@@ -532,6 +552,11 @@ progress {
     font-size: 2rem;
   }
 }
+@media (max-width: 768px) {
+  .display-5 {
+    font-size: calc(0.8rem + 1.2vw);
+  }
+}
 
 .display-6 {
   font-size: calc(1.275rem + 0.3vw);
@@ -543,6 +568,12 @@ progress {
     font-size: 1.5rem;
   }
 }
+@media (max-width: 768px) {
+  .display-6 {
+    font-size: calc(0.75rem + 1vw);
+  }
+}
+
 
 .list-unstyled {
   padding-left: 0;
