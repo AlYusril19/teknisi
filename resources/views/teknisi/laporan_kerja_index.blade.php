@@ -66,11 +66,13 @@
                                         <a class="dropdown-item" href="{{ route('laporan.edit', $data->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a>
                                     @endif
                                     @if ($data->status != 'selesai' && $data->status != 'pending')
-                                        <form action="{{ route('laporan.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                        </form>
+                                        @if ($data->user_id === session('user_id'))
+                                            <form action="{{ route('laporan.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
