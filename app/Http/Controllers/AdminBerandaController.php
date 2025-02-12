@@ -7,6 +7,7 @@ use App\Models\Pembayaran;
 use App\Models\UserApi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class AdminBerandaController extends Controller
 {
@@ -126,7 +127,9 @@ class AdminBerandaController extends Controller
      */
     public function create()
     {
-        //
+        // Tampilkan form edit profile dengan data nama user dari session
+        $userName = session('user_name');
+        return view('admin.edit_profile', ['userName' => $userName]);
     }
 
     /**
@@ -134,7 +137,40 @@ class AdminBerandaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validasi input form
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        // Ambil token dari session
+        $token = session('api_token');
+
+        // Siapkan data untuk dikirim ke API
+        $data = [
+            'name' => $request->name,
+        ];
+
+        // Jika password diisi, tambahkan ke data yang dikirim
+        if ($request->filled('password')) {
+            $data['password'] = $request->password;
+            $data['password_confirmation'] = $request->password_confirmation;
+        }
+
+        // Kirim request ke API untuk update profile
+        $urlApi = env('APP_URL_API');
+        $response = Http::withToken($token)->put($urlApi . '/api/user/update', $data);
+
+        // Jika request berhasil
+        if ($response->successful()) {
+            // Update nama di session
+            session(['user_name' => $request->name]);
+
+            return redirect()->back()->with('success', 'Profile updated successfully!');
+        }
+
+        // Jika gagal, kembalikan dengan error
+        return back()->withErrors(['message' => 'Failed to update profile.']);
     }
 
     /**

@@ -10,8 +10,8 @@
             <h5 class="mb-0">Daftar Laporan Kerja</h5>
             <form action="{{ route('laporan-admin.index') }}" method="GET">
                 <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
+                    <input type="hidden" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
+                    {{-- <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button> --}}
                     <select name="filter" class="form-select me-2" onchange="this.form.submit()">
                         <option value="">Semua Laporan</option>
                         <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
@@ -104,7 +104,7 @@
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal Laporan -->
 <div class="modal fade" id="laporanModal" tabindex="-1" aria-labelledby="laporanModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -346,7 +346,7 @@
                     // Kosongkan list barang
                     tagihanList.innerHTML = '';
 
-                    if (data.tagihan.length > 0) {
+                    if (data.tagihan.length > 0 && data.laporan.customer_id !== null) {
                         // Jika ada data barang kembali, tampilkan judul dan list barang
                         titleTagihan.style.display = 'block';
 

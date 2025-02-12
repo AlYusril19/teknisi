@@ -206,6 +206,23 @@
                 </li>
               </ul>
             </li>
+
+            <li class="menu-header small text-uppercase">
+              <span class="menu-header-text">Pages</span>
+            </li>
+            <li class="menu-item {{ \Route::is('admin.create') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-dock-top"></i>
+                <div data-i18n="Account Settings">Account Settings</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ \Route::is('admin.create') ? 'active' : '' }}">
+                  <a href="{{ route('admin.create') }}" class="menu-link">
+                    <div data-i18n="Account">Account</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
           </ul>
         </aside>
         <!-- / Menu -->
@@ -226,17 +243,21 @@
 
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
               <!-- Search -->
-              <div class="navbar-nav align-items-center">
-                <div class="nav-item d-flex align-items-center">
-                  <i class="bx bx-search fs-4 lh-0"></i>
-                  <input
-                    type="text"
-                    class="form-control border-0 shadow-none"
-                    placeholder="Search..."
-                    aria-label="Search..."
-                  />
+              <form action="{{ $search ?? route('laporan-admin.index') }}" method="GET">
+                <div class="navbar-nav align-items-center">
+                  <div class="nav-item d-flex align-items-center">
+                    <i class="bx bx-search fs-4 lh-0"></i>
+                    <input
+                      type="text"
+                      class="form-control border-0 shadow-none"
+                      placeholder="{{ $searchTitle ?? "Search Laporan" }}"
+                      aria-label="{{ $searchTitle ?? "Search Laporan" }}"
+                      name="search"
+                      value="{{ request('search') }}"
+                    />
+                  </div>
                 </div>
-              </div>
+              </form>
               <!-- /Search -->
 
               <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -279,27 +300,27 @@
                     <li>
                       <div class="dropdown-divider"></div>
                     </li>
-                    {{-- <li>
-                      <a class="dropdown-item" href="#">
+                    <li>
+                      <a class="dropdown-item" href="{{ route('admin.create') }}">
                         <i class="bx bx-user me-2"></i>
                         <span class="align-middle">My Profile</span>
                       </a>
                     </li>
-                    <li>
+                    {{-- <li>
                       <a class="dropdown-item" href="#">
                         <i class="bx bx-cog me-2"></i>
                         <span class="align-middle">Settings</span>
                       </a>
-                    </li>
+                    </li> --}}
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="{{ route('pembayaran-admin.index') }}">
                         <span class="d-flex align-items-center align-middle">
                           <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
                           <span class="flex-grow-1 align-middle">Billing</span>
-                          <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
+                          <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">{{ $pembayaranCount }}</span>
                         </span>
                       </a>
-                    </li> --}}
+                    </li>
                     <li>
                       <div class="dropdown-divider"></div>
                     </li>
