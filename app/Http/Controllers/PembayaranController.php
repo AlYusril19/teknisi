@@ -131,6 +131,8 @@ class PembayaranController extends Controller
     public function update(Request $request, string $id)
     {
         $pembayaran = Pembayaran::findOrFail($id);
+        $mitraId = getMitraId($pembayaran->customer_id)->first();
+        $chatIdMitra = UserApi::getUserById($mitraId)['id_telegram'];
         $penagihan = Penagihan::with('laporan_kerja.tagihan', 'penjualan')->findOrFail($pembayaran->penagihan_id);
         $tagihanBarang = $penagihan->laporan_kerja->flatMap->tagihan->sum('total_biaya');
         $tagihanTeknisi = $penagihan->penjualan->sum('total_biaya');
@@ -177,6 +179,8 @@ class PembayaranController extends Controller
                 $penagihan->update(['tanggal_lunas' => now()]);
             }
             $penagihan->update(['status' => $status]);
+            $message = "Tagihan anda telah disetujui oleh Admin " . session('user_name') . "\nTerimakasih";
+            sendMessage($message, $chatIdMitra);
             return redirect()->back()->with('success', 'Tagihan di setujui');
         }
         return redirect()->back()->with('error', 'request failure');

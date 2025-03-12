@@ -44,6 +44,7 @@ Route::middleware(['auth.api', 'role:mitra'])->group(function () {
 Route::middleware(['auth.api', 'role:staff'])->group(function () {
     Route::resource('/teknisi', TeknisiBerandaController::class);
     Route::resource('/laporan', LaporanKerjaController::class);
+    Route::get('/laporan-all', [LaporanKerjaController::class, 'indexAll'])->name('laporan-all.index');
     Route::delete('/delete-image/{id}', [LaporanKerjaController::class, 'deleteImage'])->name('delete-image');
 });
 

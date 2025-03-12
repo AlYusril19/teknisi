@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use ApiResponse;
 use App\Models\Penagihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -36,12 +37,18 @@ class MitraBerandaController extends Controller
      */
     public function create()
     {
-        // Tampilkan form edit profile dengan data nama user dari session
-        $userName = session('user_name');
-        $userEmail = session('user_email');
+        $userId = session('user_id');
+        $user = ApiResponse::get('/api/get-user/'.$userId)->json();
+
+        $userName = $user['name'];
+        $userEmail = $user['email'];
+        $idTelegram = $user['id_telegram'];
+        $nohp = $user['nohp'];
         return view('mitra.edit_profile', [
             'userName' => $userName,
-            'userEmail' => $userEmail
+            'userEmail' => $userEmail,
+            'idTelegram' => $idTelegram,
+            'nohp' => $nohp
         ]);
     }
 
@@ -53,6 +60,8 @@ class MitraBerandaController extends Controller
         // Validasi input form
         $request->validate([
             'name' => 'required|in:' . $request->name,
+            'nohp' => 'required|string|max:13',
+            'id_telegram' => 'required|string|max:15',
             'email' => 'required',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
@@ -63,7 +72,9 @@ class MitraBerandaController extends Controller
         // Siapkan data untuk dikirim ke API
         $data = [
             'name' => $request->name,
-            'email' => $request->email
+            'email' => $request->email,
+            'nohp' => $request->nohp,
+            'id_telegram' => $request->id_telegram,
         ];
 
         // Jika password diisi, tambahkan ke data yang dikirim

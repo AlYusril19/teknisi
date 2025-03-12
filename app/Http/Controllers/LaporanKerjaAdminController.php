@@ -187,6 +187,7 @@ class LaporanKerjaAdminController extends Controller
         $barangKeluar = json_decode($laporan->barang, true);
         $barangKembali = json_decode($laporan->barang_kembali, true);
         $userName = UserApi::getUserById($laporan->user_id);
+        $chatIdTeknisi = $userName['id_telegram'];
 
         $jamMulaiKerja = strtotime($laporan->jam_mulai);
         $jamSelesaiKerja = strtotime($laporan->jam_selesai);
@@ -399,6 +400,9 @@ class LaporanKerjaAdminController extends Controller
         }else {
             $laporan->update($data);
         }
+        
+        $messageTeknisi = "Laporan Anda telah di reject oleh Admin " . session('user_name') . ", harap dicek kembali";
+        sendMessage($messageTeknisi, $chatIdTeknisi);
         return redirect()->back()->with('error', 'Laporan dibatalkan.'. $message);
     }
 

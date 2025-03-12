@@ -38,6 +38,8 @@ class LoginController extends Controller
                 'user_name' => $user['name'],
                 'user_role' => $user['role'],
                 'user_email' => $user['email'],
+                'id_telegram' => $user['id_telegram'],
+                'nohp' => $user['nohp'],
             ]);
 
             // Redirect ke dashboard atau halaman lain

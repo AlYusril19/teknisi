@@ -31,6 +31,7 @@ class PembayaranMitraController extends Controller
      */
     public function store(Request $request)
     {
+        $userName = session('user_name');
         $request->validate([
             'bank_id' => 'nullable',
             'penagihan_id' => 'required',
@@ -70,7 +71,10 @@ class PembayaranMitraController extends Controller
             'bukti_bayar' => $path
         ];
         Pembayaran::create($pembayaran);
-        // return redirect()->route('penagihan-mitra.index')->with('pembayaran berhasil, menunggu konfirmasi dari admin');
+        $message = "Mitra " . $userName . " Telah melakukan pembayaran dengan nominal: " . formatRupiah($request->jumlah_dibayar);
+        sendMessageAdmin($message);
+        $photoUrl = storage_path("app/public/{$path}");
+        sendPhotoAdmin($photoUrl, "bukti bayar");
         return redirect()->back()->with('success', 'pembayaran berhasil, menunggu konfirmasi dari admin');
     }
 
@@ -122,6 +126,7 @@ class PembayaranMitraController extends Controller
     public function destroy(string $id)
     {
         $userId = session('user_id');
+        $userName = session('user_name');
         $customerId = getCustomerId($userId)->first();
         $pembayaran = Pembayaran::findOrFail($id);
 
@@ -133,6 +138,8 @@ class PembayaranMitraController extends Controller
         }
         Storage::disk('public')->delete($pembayaran->bukti_bayar);
         $pembayaran->delete();
+        $message = "Mitra " . $userName . " Membatalkan pembayaran";
+        sendMessageAdmin($message);
         return redirect()->back()->with('success', 'pembayaran berhasil dihapus');
     }
 }

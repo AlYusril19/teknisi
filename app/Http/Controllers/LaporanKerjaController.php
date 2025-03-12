@@ -59,6 +59,51 @@ class LaporanKerjaController extends Controller
         ]);
     }
 
+    public function indexALl(Request $request) 
+    {
+        // Ambil user_id dari session
+        $userId = session('user_id');
+
+        // Inisialisasi query
+        $laporanQuery = LaporanKerja::query()
+            ->where('status', 'selesai');
+        // Cek apakah filter lembur dipilih
+        if ($request->filter === 'lembur') {
+            $laporanQuery->where(function($query) {
+                $query->where('jam_selesai', '>', '17:00:00')
+                    ->orWhere('jam_selesai', '<', '03:00:00');
+            });
+        }
+
+        // Cek apakah ada pencarian berdasarkan nama barang atau laporan
+        if ($request->search) {
+            $laporanQuery->where(function ($query) use ($request) {
+                $query->Where('keterangan_kegiatan', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Cek apakah ada pencarian berdasarkan nama barang atau laporan
+        if ($request->transaksi) {
+            $laporanQuery->where(function ($query) use ($request) {
+                $query->Where('penagihan_id', $request->transaksi);
+            });
+        }
+
+        // Ambil data laporan yang sudah difilter
+        $laporan = $laporanQuery->orderBy('tanggal_kegiatan', 'desc')->get();
+
+        // Mengambil data user teknisi dan tag teknisi
+        foreach ($laporan as $lap) {
+            $lap->user = UserApi::getUserById($lap->user_id);
+            $lap->support = getTeknisi($lap);
+        }
+
+        // Tampilkan ke view
+        return view('teknisi.laporan_kerja_index_all', [
+            'laporan' => $laporan
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -91,6 +136,7 @@ class LaporanKerjaController extends Controller
 
         $userId = session('user_id');
         $userName = session('user_name');
+        $idTelegram = session('id_telegram');
 
         // Format pesan WhatsApp
         $pesanWhatsApp = "Laporan *" . $userName . "* :\n" .
@@ -189,6 +235,9 @@ class LaporanKerjaController extends Controller
             }
             $message .= 'dan tag teknisi ';
         }
+
+        // $messageTelegram = $userName . " Telah mengirim laporan, harap segera dicek";
+        // sendMessageAdmin($messageTelegram);
 
         return redirect()->route('laporan.index')
                         ->with('success', 'Laporan ' .$message. 'berhasil disimpan.');

@@ -1,4 +1,5 @@
 <?php 
+use App\Jobs\SendTelegramNotification;
 use App\Models\Penagihan;
 use App\Models\UserApi;
 use Carbon\Carbon;
@@ -134,6 +135,17 @@ function getCustomerId($userId) {
     return $filteredCustomers->pluck('id'); // Ambil semua customer_id 
 }
 
+function getMitraId($custId) {
+    // Ambil data customer dari API  
+    $customers = ApiResponse::get('/api/get-customer')->json();  
+  
+    // Filter customer berdasarkan mitra_id yang sesuai dengan user_id yang sedang login  
+    $filteredCustomers = collect($customers)->where('id', $custId);  
+  
+    // Ambil customer_id dari data customer yang sudah difilter  
+    return $filteredCustomers->pluck('mitra_id'); // Ambil semua customer_id 
+}
+
 function getTeknisi($laporan) {
     return $laporan->teknisi->map(function ($teknisi) {  
         $teknisiData = UserApi::getUserById($teknisi->teknisi_id);  
@@ -152,4 +164,40 @@ function getInv($id){
     $invoice .= Carbon::parse($penagihan->tanggal_tagihan)->format('ym');
     $invoice .= $penagihan->id;
     return $invoice;
+}
+
+function sendMessageAdmin($message){
+    $chatId = ApiResponse::get('/api/get-user-admin')->json();
+    foreach ($chatId as $chat) {
+        SendTelegramNotification::dispatch('message', [
+            'message' => $message,
+            'chat_id' => $chat['id_telegram'],
+        ]);
+    }
+}
+
+function sendMessage($message, $chatId){
+    SendTelegramNotification::dispatch('message', [
+        'message' => $message,
+        'chat_id' => $chatId,
+    ]);
+}
+
+function sendPhoto($photoUrl, $chatId, $caption = null){
+    SendTelegramNotification::dispatch('photo', [
+        'file_path' => $photoUrl,
+        'chat_id' => $chatId,
+        'caption' => $caption,
+    ]);
+}
+
+function sendPhotoAdmin($photoUrl, $caption = null){
+    $chatId = ApiResponse::get('/api/get-user-admin')->json();
+    foreach ($chatId as $chat) {
+        SendTelegramNotification::dispatch('photo', [
+            'file_path' => $photoUrl,
+            'chat_id' => $chat['id_telegram'],
+            'caption' => $caption,
+        ]);
+    }
 }

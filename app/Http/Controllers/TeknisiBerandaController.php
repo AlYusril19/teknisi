@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use ApiResponse;
 use App\Models\LaporanKerja;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
@@ -166,9 +167,17 @@ class TeknisiBerandaController extends Controller
      */
     public function create()
     {
-        // Tampilkan form edit profile dengan data nama user dari session
-        $userName = session('user_name');
-        return view('teknisi.edit_profile', ['userName' => $userName]);
+        $userId = session('user_id');
+        $user = ApiResponse::get('/api/get-user/'.$userId)->json();
+
+        $userName = $user['name'];
+        $idTelegram = $user['id_telegram'];
+        $nohp = $user['nohp'];
+        return view('teknisi.edit_profile', [
+            'userName' => $userName,
+            'idTelegram' => $idTelegram,
+            'nohp' => $nohp
+        ]);
     }
 
     /**
@@ -179,6 +188,8 @@ class TeknisiBerandaController extends Controller
         // Validasi input form
         $request->validate([
             'name' => 'required|string|max:255',
+            'nohp' => 'required|string|max:13',
+            'id_telegram' => 'required|string|max:15',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
@@ -188,6 +199,8 @@ class TeknisiBerandaController extends Controller
         // Siapkan data untuk dikirim ke API
         $data = [
             'name' => $request->name,
+            'nohp' => $request->nohp,
+            'id_telegram' => $request->id_telegram,
         ];
 
         // Jika password diisi, tambahkan ke data yang dikirim

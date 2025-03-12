@@ -36,6 +36,18 @@
                                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;">
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="nohp">No HP</label>
+                            <div class="col-sm-10">
+                                <input type="numeric" class="form-control" id="nohp" name="nohp" placeholder="085712345678" value="{{ old('nohp', $nohp ?? "") }}" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="id_telegram">ID Telegram</label>
+                            <div class="col-sm-10">
+                                <input type="numeric" class="form-control" id="id_telegram" name="id_telegram" placeholder="1234567890" value="{{ old('name', $idTelegram ?? "") }}" required>
+                            </div>
+                        </div>
                         <div class="mt-4">
                             <button type="submit" class="btn btn-primary me-2">Simpan</button>
                             <button type="reset" class="btn btn-outline-secondary">Batal</button>
