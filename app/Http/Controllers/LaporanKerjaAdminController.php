@@ -401,7 +401,7 @@ class LaporanKerjaAdminController extends Controller
             $laporan->update($data);
         }
         
-        $messageTeknisi = "Laporan Anda telah di reject oleh Admin " . session('user_name') . ", harap dicek kembali";
+        $messageTeknisi = "Laporan Anda telah di reject oleh Admin <b>" . session('user_name') . "</b>, harap dicek kembali";
         sendMessage($messageTeknisi, $chatIdTeknisi);
         return redirect()->back()->with('error', 'Laporan dibatalkan.'. $message);
     }
