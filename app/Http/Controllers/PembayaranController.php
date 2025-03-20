@@ -54,6 +54,7 @@ class PembayaranController extends Controller
      */
     public function store(Request $request)
     {
+        $userName = session('user_name');
         $request->validate([
             'bank_id' => 'nullable',
             'penagihan_id' => 'required',
@@ -65,6 +66,10 @@ class PembayaranController extends Controller
         $pembayaran = Pembayaran::where('penagihan_id', $request->penagihan_id)
             ->where('status', '<>', 'cancel')
             ->get();
+        
+        $mitraId = getMitraId($penagihan->customer_id)->first();
+        $custName = ApiResponse::get('/api/get-user/'.$mitraId)->json()['name'];
+
         $tagihanBarang = $penagihan->laporan_kerja->flatMap->tagihan->sum('total_biaya');
         $tagihanTeknisi = $penagihan->penjualan->sum('total_biaya');
         $totalTagihan = $tagihanBarang + $tagihanTeknisi;
@@ -97,7 +102,9 @@ class PembayaranController extends Controller
             $penagihan->update(['tanggal_lunas' => now()]);
         }
         $penagihan->update(['status' => $status]);
-
+        
+        $message = "Admin <b>" . $userName . "</b> Telah melakukan pembayaran manual pelanggan <b>".$custName."</b>\nDengan nominal: " . formatRupiah($request->jumlah_dibayar);
+        sendMessageAdmin($message);
         return redirect()->back()->with('success', 'tagihan sukses dibayar');
     }
 

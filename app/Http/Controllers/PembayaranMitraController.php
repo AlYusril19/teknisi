@@ -71,7 +71,7 @@ class PembayaranMitraController extends Controller
             'bukti_bayar' => $path
         ];
         Pembayaran::create($pembayaran);
-        $message = "Mitra " . $userName . " Telah melakukan pembayaran dengan nominal: " . formatRupiah($request->jumlah_dibayar);
+        $message = "Mitra <b>" . $userName . "</b> Telah melakukan pembayaran dengan nominal: " . formatRupiah($request->jumlah_dibayar);
         sendMessageAdmin($message);
         $photoUrl = storage_path("app/public/{$path}");
         sendPhotoAdmin($photoUrl, "bukti bayar");
