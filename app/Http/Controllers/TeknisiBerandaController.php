@@ -39,20 +39,31 @@ class TeknisiBerandaController extends Controller
             ->count();
 
         // Laporan untuk periode sekarang
-        $laporanSekarang = LaporanKerja::with('teknisi')->whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
-            ->where('user_id', $userId)
-            ->where('status', 'selesai')
-            ->orWhereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
+        $laporanSekarang = LaporanKerja::with('teknisi')
+            ->where(function ($query) use ($tanggalAwal, $tanggalAkhir, $userId) {
+                $query->whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
+                    ->where('status', 'selesai')
+                    ->where(function ($q) use ($userId) {
+                        $q->where('user_id', $userId)
+                            ->orWhereHas('teknisi', function ($subQuery) use ($userId) {
+                                $subQuery->where('teknisi_id', $userId);
+                            });
+                    });
             })
             ->get();
 
+
         // Laporan untuk periode bulan sebelumnya
-        $laporanKemarin = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
-            ->where('user_id', $userId)
-            ->where('status', 'selesai')
-            ->orWhereHas('teknisi', function ($query) use ($userId) {
-                $query->where('teknisi_id', $userId);
+        $laporanKemarin = LaporanKerja::with('teknisi')
+            ->where(function ($query) use ($tanggalAwalBulanLalu, $tanggalAkhirBulanLalu, $userId) {
+                $query->whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
+                    ->where('status', 'selesai')
+                    ->where(function ($q) use ($userId) {
+                        $q->where('user_id', $userId)
+                            ->orWhereHas('teknisi', function ($subQuery) use ($userId) {
+                                $subQuery->where('teknisi_id', $userId);
+                            });
+                    });
             })
             ->get();
 

@@ -20,6 +20,7 @@ class LaporanKerjaAdminController extends Controller
         $customers = ApiResponse::get('/api/get-customer')->json();
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()->where('status', 'selesai');
+
         // Cek apakah filter lembur dipilih
         if ($request->filter === 'lembur') {
             $laporanQuery->where(function($query) {
@@ -50,12 +51,16 @@ class LaporanKerjaAdminController extends Controller
             });
         }
 
-        // Cek apakah mitra dipilih
+        // Cek apakah teknisi dipilih
         if ($request->teknisi) {
             $laporanQuery->where(function($query) use ($request) {
-                $query->where('user_id', $request->teknisi);
+                $query->where('user_id', $request->teknisi)
+                    ->orWhereHas('teknisi', function ($q) use ($request) {
+                        $q->where('teknisi_id', $request->teknisi);
+                    });
             });
         }
+
 
         // Ambil data laporan yang sudah difilter
         $laporan = $laporanQuery
