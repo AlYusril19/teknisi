@@ -37,15 +37,16 @@ class AdminBerandaController extends Controller
         $laporanPending = LaporanKerja::where('status', 'pending')->count();
 
         // Laporan untuk periode sekarang
-        $laporanSekarang = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
-            // ->orWhereHas('teknisi')
+        $laporanSekarang = LaporanKerja::with('teknisi')
+            ->whereBetween('tanggal_kegiatan', [$tanggalAwal, $tanggalAkhir])
             ->where('status', 'selesai')
             ->get();
-        // dd($laporanSekarang);
+
+        // dd($laporanSekarang->toArray());
 
         // Laporan untuk periode bulan sebelumnya
-        $laporanKemarin = LaporanKerja::whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
-            // ->orWhereHas('teknisi')
+        $laporanKemarin = LaporanKerja::with('teknisi')
+            ->whereBetween('tanggal_kegiatan', [$tanggalAwalBulanLalu, $tanggalAkhirBulanLalu])
             ->where('status', 'selesai')
             ->get();
 
@@ -100,27 +101,42 @@ class AdminBerandaController extends Controller
         });
     }
 
-    private function hitungJamKerja($laporanKerja)
+    private function hitungJamKerja($laporanKerja): mixed
     {
-        return $laporanKerja->groupBy('user_id')->map(function ($laporanPerUser) {
-            $user = $laporanPerUser->first()->user;
-            $namaUser = $user['name'] ?? 'Unknown User';
-            $totalJam = $laporanPerUser->reduce(function ($carry, $laporan) {
-                $jamMulai = Carbon::parse($laporan->jam_mulai);
-                $jamSelesai = Carbon::parse($laporan->jam_selesai);
-                // Jika jam selesai lebih kecil, tambahkan 1 hari
-                if ($jamSelesai->lessThan($jamMulai)) {
-                    $jamSelesai->addDay();
-                }
+        $jamKerja = [];
 
-                return $carry + $jamMulai->diffInSeconds($jamSelesai);
-            }, 0); // Konversi detik ke jam
-            return [
-                'user_id' => $user['id'],
-                'name' => $namaUser,
-                'total_jam' => $totalJam,
-            ];
-        });
+        foreach ($laporanKerja as $laporan) {
+            // Hitung durasi jam kerja
+            $jamMulai = Carbon::parse($laporan->jam_mulai);
+            $jamSelesai = Carbon::parse($laporan->jam_selesai);
+            if ($jamSelesai->lessThan($jamMulai)) {
+                $jamSelesai->addDay();
+            }
+            $durasi = $jamMulai->diffInSeconds($jamSelesai);
+
+            // Ambil semua user yang terlibat: user_id utama + semua teknisi_id
+            $userIds = [$laporan->user_id];
+            if (!empty($laporan->teknisi)) {
+                foreach ($laporan->teknisi as $teknisi) {
+                    $userIds[] = $teknisi->teknisi_id;
+                }
+            }
+
+            // Hitung jam kerja per user
+            foreach ($userIds as $userId) {
+                if (!isset($jamKerja[$userId])) {
+                    $user = UserApi::getUserById($userId);
+                    $jamKerja[$userId] = [
+                        'user_id' => $userId,
+                        'name' => $user['name'] ?? 'Unknown User',
+                        'total_jam' => 0,
+                    ];
+                }
+                $jamKerja[$userId]['total_jam'] += $durasi;
+            }
+        }
+
+        return collect($jamKerja);
     }
 
 
