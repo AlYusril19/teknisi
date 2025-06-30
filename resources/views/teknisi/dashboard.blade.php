@@ -7,7 +7,7 @@
                 <div class="d-flex align-items-start row">
                     <div class="col-sm-7">
                         <div class="card-body">
-                            <h5 class="card-title text-primary mb-3">Welcome {{ $userRole }} {{ $userName }} 🎉</h5>
+                            <h5 class="card-title text-primary mb-3">Welcome {{ $userRole!=='magang' ? $userRole : '' }} {{ $userName }} 🎉</h5>
                             <p>Keterangan Laporan per periode kerja</p>
 
                             <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary mb-3">Buat Laporan</a>

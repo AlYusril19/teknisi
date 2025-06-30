@@ -110,6 +110,9 @@
                           <input type="checkbox" name="mobil"> <span>Mobil</span>
                         </div>
                       @endif
+                      <div class="mt-1">
+                        <input type="checkbox" name="shift" value="2"> <span>Shift 2</span>
+                      </div>
                       
                       <button type="submit" name="status" value="selesai" class="btn badge bg-label-success">Accept</button>
                       <button type="submit" name="status" value="reject" class="btn badge bg-label-danger">Reject</button>

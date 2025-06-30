@@ -42,15 +42,20 @@ class LoginController extends Controller
                 'nohp' => $user['nohp'],
             ]);
 
-            // Redirect ke dashboard atau halaman lain
-            if ($user['role'] === 'mitra') {
-                return redirect()->route('mitra.index')->with('success', 'Login successful');
-            }
-            if ($user['role'] === 'staff') {
-                return redirect()->route('teknisi.index')->with('success', 'Login successful');
-            }
-            if ($user['role'] === 'admin' || $user['role'] === 'superadmin') {
-                return redirect()->route('admin.index')->with('success', 'Login successful');
+            // status aktif
+            if ($user['status'] === 'aktif') {
+                // Redirect ke dashboard atau halaman lain
+                if ($user['role'] === 'mitra') {
+                    return redirect()->route('mitra.index')->with('success', 'Login successful');
+                }
+                if ($user['role'] === 'staff' || $user['role'] === 'magang') {
+                    return redirect()->route('teknisi.index')->with('success', 'Login successful');
+                }
+                if ($user['role'] === 'admin' || $user['role'] === 'superadmin') {
+                    return redirect()->route('admin.index')->with('success', 'Login successful');
+                }
+            } else {
+                return view('layouts.app_sneat_error');
             }
         } else {
             return back()->with('error', 'Login failed. Please check your credentials.');

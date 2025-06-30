@@ -41,7 +41,7 @@ Route::middleware(['auth.api', 'role:mitra'])->group(function () {
     Route::resource('/pembayaran-mitra', PembayaranMitraController::class);
 });
 
-Route::middleware(['auth.api', 'role:staff'])->group(function () {
+Route::middleware(['auth.api', 'role:staff,magang'])->group(function () {
     Route::resource('/teknisi', TeknisiBerandaController::class);
     Route::resource('/laporan', LaporanKerjaController::class);
     Route::get('/laporan-all', [LaporanKerjaController::class, 'indexAll'])->name('laporan-all.index');

@@ -72,16 +72,28 @@ class TeknisiBerandaController extends Controller
             $jamSelesai = Carbon::parse($laporan->jam_selesai);
             $jamMulai = Carbon::parse($laporan->jam_mulai);
 
-            // Kondisi: jam selesai lebih dari 17:00 atau di antara 00:00 dan 06:00
-            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            // shifting
+            if ($laporan->shift === '1') {
+                // Kondisi: jam selesai lebih dari 16:00 atau di antara 00:00 dan 06:00
+                return $jamSelesai->format('H:i:s') > '16:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            } else {
+                // Kondisi: jam selesai lebih dari 16:00 atau di antara 00:00 dan 06:00
+                return $jamSelesai->format('H:i:s') > '21:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            }
         });
 
         $jamLemburKemarin = $laporanKemarin->filter(function ($laporan) {
             $jamSelesai = Carbon::parse($laporan->jam_selesai);
             $jamMulai = Carbon::parse($laporan->jam_mulai);
 
-            // Kondisi: jam selesai lebih dari 17:00 atau di antara 00:00 dan 06:00
-            return $jamSelesai->format('H:i:s') > '17:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            // shifting
+            if ($laporan->shift === '1') {
+                // Kondisi: jam selesai lebih dari 16:00 atau di antara 00:00 dan 06:00
+                return $jamSelesai->format('H:i:s') > '16:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            } else {
+                // Kondisi: jam selesai lebih dari 16:00 atau di antara 00:00 dan 06:00
+                return $jamSelesai->format('H:i:s') > '21:00:00' || $jamSelesai->format('H:i:s') < $jamMulai->format('H:i:s');
+            }
         });
 
         // Hitung jumlah laporan bulan berjalan dan kemarin
@@ -128,7 +140,11 @@ class TeknisiBerandaController extends Controller
         foreach ($jamLemburSekarang as $laporan) {
             $jamMulai = Carbon::parse($laporan->jam_mulai);
             $jamSelesai = Carbon::parse($laporan->jam_selesai);
-            $jamLembur = Carbon::parse('17:00');
+            if ($laporan->shift === '1') {
+                $jamLembur = Carbon::parse('16:00');
+            } else {
+                $jamLembur = Carbon::parse('21:00');
+            }
 
             // Tambahkan 1 hari jika jam selesai lebih kecil dari jam mulai
             if ($jamSelesai < $jamMulai) {
@@ -145,7 +161,11 @@ class TeknisiBerandaController extends Controller
         foreach ($jamLemburKemarin as $laporan) {
             $jamMulai = Carbon::parse($laporan->jam_mulai);
             $jamSelesai = Carbon::parse($laporan->jam_selesai);
-            $jamLembur = Carbon::parse('17:00');
+            if ($laporan->shift === '1') {
+                $jamLembur = Carbon::parse('16:00');
+            } else {
+                $jamLembur = Carbon::parse('21:00');
+            }
 
             // Tambahkan 1 hari jika jam selesai lebih kecil dari jam mulai
             if ($jamSelesai < $jamMulai) {

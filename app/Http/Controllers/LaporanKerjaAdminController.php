@@ -154,7 +154,7 @@ class LaporanKerjaAdminController extends Controller
         $penjualan = ApiResponse::get('/api/get-penjualan/' . $id)->json();
         $pembelian = ApiResponse::get('/api/get-pembelian/' . $id)->json();
 
-        $barangKeluarView = BarangHelper::getBarangKeluarView($penjualan);  
+        $barangKeluarView = BarangHelper::getBarangKeluarView($penjualan);
         $barangKembaliView = BarangHelper::getBarangKembaliView($pembelian);
 
         // Ambil galeri foto
@@ -197,7 +197,12 @@ class LaporanKerjaAdminController extends Controller
         $jamMulaiKerja = strtotime($laporan->jam_mulai);
         $jamSelesaiKerja = strtotime($laporan->jam_selesai);
         $jamMulai = strtotime("06:00:00");
-        $jamSelesai = strtotime("17:00:00");
+        // $jamSelesai = strtotime("17:00:00");
+        if ($request->shift) {
+            $jamSelesai = strtotime("21:00:00");
+        } else {
+            $jamSelesai = strtotime("16:00:00");
+        }
         if ($jamSelesaiKerja <= $jamMulaiKerja) {
             $jamSelesaiKerja += 86400; //Tambah 1 hari
         }
