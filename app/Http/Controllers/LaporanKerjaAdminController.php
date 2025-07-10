@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use ApiResponse;
 use App\Models\Biaya;
+use App\Models\ChatLaporan;
 use App\Models\LaporanKerja;
 use App\Models\Tagihan;
 use App\Models\UserApi;
@@ -92,10 +93,18 @@ class LaporanKerjaAdminController extends Controller
             ->orderBy('tanggal_kegiatan', 'asc')
             ->get();
 
+        $komentarCount = ChatLaporan::where('is_read', false)
+            ->where('user_id', '!=', session('user_id'))
+            ->count();
+
         // Ambil nama user dari API eksternal dan lampirkan ke laporan
         foreach ($laporans as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
             $lap->support = getTeknisi($lap);
+            $lap->chatCount = ChatLaporan::where('is_read', false)
+            ->where('user_id', '!=', session('user_id'))
+            ->where('laporan_id', '=', $lap->id)
+            ->count();
         }
 
         // Ambil data customer dari web lama via API
@@ -125,7 +134,8 @@ class LaporanKerjaAdminController extends Controller
                 'laporan' => $laporan,
                 'customer' => $customer,
                 'barangKeluarView' => $barangKeluarView,
-                'barangKembaliView' => $barangKembaliView
+                'barangKembaliView' => $barangKembaliView,
+                // 'komentarCount' => $komentarCount
             ];
         }
         return view('admin.admin_laporan_kerja_update', [
@@ -187,7 +197,7 @@ class LaporanKerjaAdminController extends Controller
         $this->validateRequest($request);
         $response = ApiResponse::get('/api/get-barang');
         $barangs = $response->json();
-        $laporan = LaporanKerja::with('penagihan', 'teknisi')->findOrFail($id);
+        $laporan = LaporanKerja::with('penagihan', 'teknisi', 'komentar')->findOrFail($id);
         $data = $request->all();
         $barangKeluar = json_decode($laporan->barang, true);
         $barangKembali = json_decode($laporan->barang_kembali, true);
@@ -360,13 +370,16 @@ class LaporanKerjaAdminController extends Controller
                 $laporan->update($data);
                 if ($barangKembali) {
                     if ($responseKembali->failed()) {
+                        $laporan->komentar()->delete();
                         return redirect()->back()->with('error', 'Laporan berhasil di post. (ada error di barang kembali)')
                             ->with('whatsappLink', $linkWhatsApp);
                     }
                 }
+                $laporan->komentar()->delete();
                 return redirect()->back()->with('success', 'Laporan ' .$message. 'berhasil di post.')
                     ->with('whatsappLink', $linkWhatsApp);
-            }
+            }            
+            $laporan->komentar()->delete();
             $laporan->update($data);
             return redirect()->back()->with('success', 'Laporan berhasil di post.')
                 ->with('whatsappLink', $linkWhatsApp);
@@ -409,10 +422,10 @@ class LaporanKerjaAdminController extends Controller
             $laporan->update(['status' => 'pending']);
         }else {
             $laporan->update($data);
+            $messageTeknisi = "Laporan Anda telah di reject oleh Admin <b>" . session('user_name') . "</b>, harap dicek kembali";
+            sendMessage($messageTeknisi, $chatIdTeknisi);
         }
         
-        $messageTeknisi = "Laporan Anda telah di reject oleh Admin <b>" . session('user_name') . "</b>, harap dicek kembali";
-        sendMessage($messageTeknisi, $chatIdTeknisi);
         return redirect()->back()->with('error', 'Laporan dibatalkan.'. $message);
     }
 
@@ -444,5 +457,4 @@ class LaporanKerjaAdminController extends Controller
             'kendaraan.max' => 'Kendaraan tidak boleh lebih dari 10.',  
         ]); 
     }
-
 }

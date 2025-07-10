@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminBerandaController;
 use App\Http\Controllers\BiayaController;
+use App\Http\Controllers\ChatLaporanController;
 use App\Http\Controllers\LaporanKerjaAdminController;
 use App\Http\Controllers\LaporanKerjaController;
 use App\Http\Controllers\LaporanKerjaMitraController;
@@ -54,10 +55,10 @@ Route::middleware(['auth.api', 'role:admin,superadmin'])->group(function () {
     Route::resource('/biaya-admin', BiayaController::class);
     Route::resource('/penagihan-admin', PenagihanController::class);
     Route::resource('/pembayaran-admin', PembayaranController::class);
+    // Route::resource('/chat-laporan',ChatLaporanController::class);
+    // Route::get('/chat-laporan/{laporan}/fetch', [ChatLaporanController::class, 'fetch']);
     Route::get('/tagihan-show/{id}', [PembayaranController::class, 'indexShow'])->name('penagihan-show.index');
 });
 
-// Default route
-// Route::get('/', function () {
-//     return redirect()->route('login');
-// })->name('home');
+Route::resource('/chat-laporan',ChatLaporanController::class);
+Route::get('/chat-laporan/{laporan}/fetch', [ChatLaporanController::class, 'fetch']);

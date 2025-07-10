@@ -51,6 +51,25 @@
                                                         ($data->status === 'reject' ? 'danger' : 'success')) }}">
                                                         {{ $data->status ?? 'null' }}
                             </span>
+                            @if ($data->status === 'reject' || $data->status === 'pending')
+                                {{-- <button type="button" class="btn badge bg-label-primary" data-bs-toggle="modal" data-bs-target="#commentModal-{{ $data->id }}">
+                                    <span class="d-flex align-items-center align-middle">
+                                        <i class="bx bx-comment-detail me-1"></i>
+                                        <span class="flex-grow-1 align-middle">Comment</span>
+                                        <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20 ms-1">{{ $data->chatCount }}</span>
+                                    </span>
+                                </button> --}}
+                                <button type="button" class="btn badge bg-label-primary" data-bs-toggle="modal" data-bs-target="#commentModal-{{ $data->id }}">
+                                    <span class="d-flex align-items-center align-middle" data-laporan-id="{{ $data->id }}">
+                                        <i class="bx bx-comment-detail me-1"></i>
+                                        <span class="flex-grow-1 align-middle">Comment</span>
+                                        <span class="notif-chat flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20 ms-1" 
+                                            style="min-width: 20px; height: 20px; font-size: 11px; border-radius: 50%;">
+                                            {{ $data->chatCount }}
+                                        </span>
+                                    </span>
+                                </button>
+                            @endif
                         </td>
                         <td align="center">
                             <div class="dropdown">
@@ -78,6 +97,24 @@
                             </div>
                         </td>
                     </tr>
+                    <!-- Modal untuk menampilkan komentar -->
+                    <div class="modal fade" id="commentModal-{{ $data->id }}" tabindex="-1" aria-labelledby="commentModalLabel-{{ $data->id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Komentar</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="list-komentar-{{ $data->id }}" class="mb-3" style="max-height: 200px; overflow-y: auto; background: #f9f9f9; padding:10px; border-radius:5px; border:1px solid #ccc"></div>
+                                <textarea class="form-control" id="inputKomentar-{{ $data->id }}" rows="3" placeholder="Tulis komentar..."></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="kirimKomentar({{ $data->id }})">Kirim</button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
             </tbody>
         </table>
@@ -163,6 +200,7 @@
 @endif
 
 @section('js')
+{{-- menampilkan show button --}}
 <script>
     function timeFormat(timeString) {
         // Asumsikan timeString dalam format "HH:MM:SS"
@@ -285,5 +323,103 @@
                 });
         });
     });
+</script>
+
+{{-- menampilkan modal komentar --}}
+<script>
+  @foreach($laporan as $data)
+    let interval{{ $data->id }};
+
+    function fetchKomentar{{ $data->id }}() {
+      fetch(`/chat-laporan/{{ $data->id }}/fetch`)
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('list-komentar-{{ $data->id }}');
+          list.innerHTML = '';
+
+          if (!data.length) {
+            list.innerHTML = '<div class="text-muted">Belum ada komentar.</div>';
+            return;
+          }
+
+          data.forEach(komentar => {
+            const div = document.createElement('div');
+            const isiKomentar = komentar.komentar.replace(/\n/g, '<br>');
+            div.className = komentar.is_me ? 'text-end mb-2' : 'text-start mb-2';
+            div.innerHTML = `
+              <div class="p-2 rounded bg-light ${komentar.is_me ? 'bg-primary text-white' : ''}">
+                <strong>${komentar.name}</strong><br/>
+                <div>${isiKomentar}</div>
+                <small>${komentar.created_at}</small><br/>
+              </div>
+            `;
+            list.appendChild(div);
+          });
+
+          list.scrollTop = list.scrollHeight;
+        });
+    }
+
+    // Modal shown: fetch + polling
+    document.getElementById('commentModal-{{ $data->id }}')
+      .addEventListener('shown.bs.modal', () => {
+        fetchKomentar{{ $data->id }}();
+        interval{{ $data->id }} = setInterval(fetchKomentar{{ $data->id }}, 5000);
+      });
+
+    // Modal hidden: stop polling
+    document.getElementById('commentModal-{{ $data->id }}')
+      .addEventListener('hidden.bs.modal', () => {
+        clearInterval(interval{{ $data->id }});
+      });
+
+    // Kirim komentar
+    function kirimKomentar(id) {
+      const input = document.getElementById('inputKomentar-' + id);
+      const komentar = input.value.trim();
+      if (!komentar) return;
+
+      fetch('/chat-laporan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+          laporan_id: id,
+          komentar: komentar
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        input.value = '';
+        fetchKomentar{{ $data->id }}();
+      });
+    }
+  @endforeach
+</script>
+
+{{-- script count komentar --}}
+<script>
+function updateChatBadges() {
+  fetch('/chat-laporan/show')
+    .then(res => res.json())
+    .then(data => {
+      document.querySelectorAll('[data-laporan-id]').forEach(el => {
+        const laporanId = el.getAttribute('data-laporan-id');
+        const badge = el.querySelector('.notif-chat');
+
+        const count = data[laporanId] ?? 0;
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+      });
+    });
+}
+
+// Update setiap 5 detik
+setInterval(updateChatBadges, 5000);
+
+// Jalankan pertama kali
+updateChatBadges();
 </script>
 @endsection

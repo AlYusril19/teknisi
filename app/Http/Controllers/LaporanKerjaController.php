@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use ApiResponse;
+use App\Models\ChatLaporan;
 use App\Models\Galeri;
 use App\Models\LaporanKerja;
 use App\Models\Teknisi;
@@ -52,6 +53,10 @@ class LaporanKerjaController extends Controller
         // Map data teknisi ke laporan
         foreach ($laporan as $lap) {
             $lap->support = getTeknisi($lap);
+            $lap->chatCount = ChatLaporan::where('is_read', false)
+                ->where('user_id', '!=', session('user_id'))
+                ->where('laporan_id', '=', $lap->id)
+                ->count();
         }
 
         return view('teknisi.laporan_kerja_index', [
@@ -115,12 +120,14 @@ class LaporanKerjaController extends Controller
         $barangsKembali = ApiResponse::get('/api/get-barang-kembali')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
         $teknisi = ApiResponse::get('/api/get-teknisi/'.$userId)->json();
+        $helper = ApiResponse::get('/api/get-helper/'.$userId)->json();
 
         return view('teknisi.laporan_kerja_create', compact([
             'barangs', 
             'customers', 
             'barangsKembali',
-            'teknisi'
+            'teknisi',
+            'helper'
         ]));
     }
 

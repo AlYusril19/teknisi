@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('chat_laporan', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('laporan_id')->constrained('laporan_kerja')->onDelete('cascade');
-            $table->unsignedBigInteger('user_id');
-            $table->text('isi');
-            $table->timestamps();
+        Schema::table('chat_laporan', function (Blueprint $table) {
+            $table->boolean('is_read')->default(false)->after('isi');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('chat_laporan');
+        Schema::table('chat_laporan', function (Blueprint $table) {
+            $table->dropColumn('is_read');
+        });
     }
 };
