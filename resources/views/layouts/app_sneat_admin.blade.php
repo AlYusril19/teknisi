@@ -207,6 +207,29 @@
               </ul>
             </li>
 
+            @if (session('user_role') === 'superadmin')
+                <li class="menu-item {{ \Route::is('item-gaji.*') || \Route::is('gaji-default.*') || \Route::is('gaji-staff.*') ? 'active open' : '' }}">
+                  <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-dock-top"></i>
+                    <div data-i18n="Account Settings">Gaji</div>
+                  </a>
+                  <ul class="menu-sub">
+                    <li class="menu-item {{ \Route::is('gaji-default.*') ? 'active' : '' }}">
+                      <a href="{{ route('gaji-default.index') }}" class="menu-link">
+                        <div data-i18n="Account">Gaji Staff</div>
+                      </a>
+                    </li>
+                  </ul>
+                  <ul class="menu-sub">
+                    <li class="menu-item {{ \Route::is('item-gaji.*') ? 'active' : '' }}">
+                      <a href="{{ route('item-gaji.index') }}" class="menu-link">
+                        <div data-i18n="Account">Item Gaji</div>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+            @endif
+
             <li class="menu-header small text-uppercase">
               <span class="menu-header-text">Pages</span>
             </li>

@@ -83,7 +83,8 @@
 @section('content')
 
 <div class="row">
-    <div class="col-md-12">
+    {{-- form input pembayaran --}}
+    <div class="col-xl">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <a href="{{ route('penagihan-mitra.index') }}">
@@ -96,44 +97,37 @@
                     @csrf
                     {{-- @method('PUT') --}}
                     <input type="hidden" id="penagihan_id" name="penagihan_id" value="{{ $id }}" readonly>
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="totalTagihan">Total Tagihan</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan) }}" readonly>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="totalTagihan">Total Tagihan</label>
+                        <div class="input-group input-group-merge"></div>
+                        <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan) }}" readonly>
                     </div>
                     @if ($pembayaran->isNotEmpty())
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="totalTagihan">Sudah di Bayar</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalBayar) }}" readonly>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="totalTagihan">Sudah di Bayar</label>
+                            <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalBayar) }}" readonly>
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="totalTagihan">Sisa Tagihan</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan - $totalBayar) }}" readonly>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="totalTagihan">Sisa Tagihan</label>
+                            <input type="text" class="form-control" id="totalTagihan" name="totalTagihan" value="{{ formatRupiah($totalTagihan - $totalBayar) }}" readonly>
                         </div>
                     @endif
                     @if ($totalTagihan - $totalBayar != 0)
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="name">Jumlah Dibayar</label>
-                            <div class="col-sm-10">
-                                <input type="number" class="form-control" id="jumlah_dibayar" name="jumlah_dibayar" value="{{ $totalTagihan - $totalBayar }}" min="1" max="{{ $totalTagihan - $totalBayar }}" required>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="name">Jumlah Dibayar</label>
+                            <input type="number" class="form-control" id="jumlah_dibayar" name="jumlah_dibayar" value="{{ $totalTagihan - $totalBayar }}" min="1" max="{{ $totalTagihan - $totalBayar }}" required>
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="name">Tanggal Pembayaran</label>
-                            <div class="col-sm-10">
-                                <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="name">Tanggal Pembayaran</label>
+                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
                         </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="foto">Upload Bukti <br><span class="text-muted">(Max: 5MB)</span></label>
-                            <div class="col-sm-10">
-                                <input type="file" name="foto" id="foto" accept="image/*" onchange="previewAndCompressImages()" required>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="catatan">Catatan</label>
+                            <textarea class="form-control" id="catatan" name="catatan" placeholder="Catatan (opsional)"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="foto">Upload Bukti <br><span class="text-muted">(Max: 5MB)</span></label>
+                            <input type="file" class="form-control" name="foto" id="foto" accept="image/*" onchange="previewAndCompressImages()" required>
                         </div>
                         <!-- Tempat untuk menampilkan jajaran pratinjau gambar -->
                         <div id="imagePreview" class="image-preview"></div>
@@ -146,10 +140,13 @@
                 </form>
             </div>
         </div>
+    </div>
 
+    {{-- tabel pembayaran --}}
+    <div class="col-xl">
         {{-- tabel pembayaran --}}
         @if ($listPembayaran->isNotEmpty())
-            <div class="card mt-3">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Tabel History Pembayaran</h5>
                 </div>

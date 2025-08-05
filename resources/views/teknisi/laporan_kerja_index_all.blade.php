@@ -54,7 +54,7 @@
                                     <td align="center">{{ $data->tanggal_kegiatan }}</td>
                                 @endif
                                 <td>
-                                    {{ $data->keterangan_kegiatan }}
+                                    {!! nl2br(e($data->keterangan_kegiatan)) !!}
                                     @foreach ($data->support as $item)
                                         <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
                                     @endforeach

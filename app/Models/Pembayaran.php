@@ -17,7 +17,8 @@ class Pembayaran extends Model
         'tanggal_konfirmasi',
         'jumlah_dibayar',
         'status',
-        'bukti_bayar'
+        'bukti_bayar',
+        'catatan'
     ];
 
     public function penagihan() {

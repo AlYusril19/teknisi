@@ -12,6 +12,7 @@ class Teknisi extends Model
 
     protected $fillable = [
         'laporan_id',
-        'teknisi_id'
+        'teknisi_id',
+        'helper'
     ];
 }

@@ -16,10 +16,6 @@
                                 </p>
                                 
                             @endif
-                            {{-- <a href="{{ route('laporan.index') }}" class="btn btn-sm btn-outline-primary">Buat Laporan</a> --}}
-                            {{-- @if ($barangMenipis)
-                                <a href="{{ route('laporan-admin.create') }}" class="btn btn-sm btn-outline-primary">View Pendings</a>
-                            @endif --}}
                         </div>
                     </div>
                     <div class="col-sm-5 text-center text-sm-left">

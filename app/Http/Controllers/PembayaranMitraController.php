@@ -36,6 +36,7 @@ class PembayaranMitraController extends Controller
             'bank_id' => 'nullable',
             'penagihan_id' => 'required',
             'jumlah_dibayar' => 'required|numeric',
+            'catatan'
         ]);
 
         if ($request->jumlah_dibayar <= 0) {
@@ -68,7 +69,8 @@ class PembayaranMitraController extends Controller
             'tanggal_bayar' => $request->tanggal_bayar,
             'jumlah_dibayar' => $request->jumlah_dibayar,
             'status' => 'pending',
-            'bukti_bayar' => $path
+            'bukti_bayar' => $path,
+            'catatan' => $request->catatan
         ];
         Pembayaran::create($pembayaran);
         $message = "Mitra <b>" . $userName . "</b> Telah melakukan pembayaran dengan nominal: " . formatRupiah($request->jumlah_dibayar);

@@ -19,7 +19,7 @@
 
                             <h6 class="mb-1">Cek data pada bulan yang dipilih</h6>
                             <!-- Dropdown Pemilihan Bulan dan Tahun -->
-                            <form action="{{ route('teknisi.index') }}" method="GET">
+                            <form action="{{ route('teknisi.index') }}" id="formDateLaporan" method="GET">
                                 <div class="row g-2">
                                     <div class="col-md-6">
                                         <label for="bulan" class="form-label">Pilih Bulan</label>
@@ -42,7 +42,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-3">Terapkan</button>
                             </form>
                         </div>
                     </div>
@@ -168,4 +167,17 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('js')
+{{-- listener bulan dan tahun --}}
+    <script>
+        document.getElementById('bulan').addEventListener('change', function() {
+            document.getElementById('formDateLaporan').submit();
+        });
+
+        document.getElementById('tahun').addEventListener('change', function() {
+            document.getElementById('formDateLaporan').submit();
+        });
+    </script>
 @endsection

@@ -184,6 +184,17 @@
                     </div>
 
                     <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="helper">Tag Helper</label>
+                        <div class="col-sm-10">
+                            <!-- Tombol untuk memunculkan modal -->
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#helperModal">
+                                <i class="menu-icon tf-icons bx bx-user"></i>
+                                <span class="badge badge-center rounded-pill bg-primary w-px-20 h-px-20" id="total-helper">0</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="fotos">Upload Gambar <br><span class="text-muted">(Max: 5MB)</span></label>
                         <div class="col-sm-10">
                             <input type="file" name="fotos[]" id="fotos" multiple accept="image/*" onchange="previewAndCompressImages()">
@@ -685,6 +696,68 @@
 
         // Update daftar teknisi pada halaman load
         updateDaftarTeknisi();
+    });
+</script>
+
+{{-- get tag helper teknisi --}}
+<script>
+    $(document).ready(function () {
+        // Update daftar helper yang sudah di-tag saat halaman dimuat
+        function updateDaftarHelper() {
+            var totalHelper = 0;
+            $('#daftar-helper tbody tr').each(function () {
+                totalHelper++;
+            });
+            $('#total-helper').text(totalHelper);
+        }
+
+        // Tambahkan helper ke daftar
+        $('#btn-tambah-helper').on('click', function () {
+            var helperId = $('#helper_id').val();
+            var helperNama = $('#helper_id option:selected').text();
+
+            if (helperId) {
+                // Periksa apakah helper sudah ada di daftar
+                var exists = false;
+                $('#daftar-helper tbody tr').each(function () {
+                    if ($(this).data('helper-id') == helperId) {
+                        exists = true;
+                        return false;
+                    }
+                });
+
+                // Jika belum ada, tambahkan ke tabel
+                if (!exists) {
+                    var row = `<tr data-helper-id="${helperId}">
+                        <td>${helperNama}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-hapus-helper">Hapus</button>
+                            <input type="hidden" name="helper_ids[]" value="${helperId}">
+                        </td>
+                    </tr>`;
+                    $('#daftar-helper tbody').append(row);
+                    updateDaftarHelper()
+                } else {
+                    alert('Helper sudah ditambahkan!');
+                }
+            } else {
+                alert('Pilih helper terlebih dahulu!');
+            }
+        });
+
+        // Hapus helper dari daftar
+        $(document).on('click', '.btn-hapus-helper', function () {
+            $(this).closest('tr').remove();
+            updateDaftarHelper()
+        });
+
+        // Simpan helper yang ditambahkan
+        $('#btn-simpan-helper').on('click', function () {
+            $('#helperModal').modal('hide'); // Tutup modal
+        });
+
+        // Update daftar helper pada halaman load
+        updateDaftarHelper();
     });
 </script>
 

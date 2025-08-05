@@ -52,6 +52,7 @@ class LaporanKerjaMitraController extends Controller
         foreach ($laporan as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
             $lap->support = getTeknisi($lap);
+            $lap->supportHelper = getHelper($lap);
         }
 
         // Tampilkan ke view

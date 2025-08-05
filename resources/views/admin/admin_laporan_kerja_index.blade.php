@@ -62,9 +62,12 @@
                                 {{ $data->mitra['nama'] ?? '' }}
                             </td>
                             <td>
-                                {{ $data->keterangan_kegiatan }}
+                                {!! nl2br(e($data->keterangan_kegiatan)) !!}
                                 @foreach ($data->support as $item)
                                     <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                                @endforeach
+                                @foreach ($data->supportHelper as $helper)
+                                    <p class="mb-0 text-primary">&commat;{{ $helper['name'] }} ~ <small>Helper</small></p>
                                 @endforeach
                                 @if ($data->diskon != null)
                                     <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
@@ -264,11 +267,10 @@
                     document.getElementById('laporanTanggal').textContent = rentangTanggal;
                     document.getElementById('laporanUser').textContent = data.laporan.user.name;
                     document.getElementById('laporanJenis').textContent = data.laporan.jenis_kegiatan;
-                    document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
+                    document.getElementById('laporanKeterangan').innerHTML = data.laporan.keterangan_kegiatan.replace(/\n/g, '<br/>');
                     document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
                     document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);
                     document.getElementById('laporanAlamat').textContent = data.laporan.alamat_kegiatan;
-
 
 
                     // Isi daftar barang keluar

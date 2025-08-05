@@ -58,6 +58,9 @@
                                     @foreach ($data->support as $item)
                                         <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
                                     @endforeach
+                                    @foreach ($data->supportHelper as $helper)
+                                        <p class="mb-0 text-primary">&commat;{{ $helper['name'] }} ~ <small>Helper</small></p>
+                                    @endforeach
                                     @if ($data->diskon != null)
                                         <div class="badge bg-danger rounded-pill ms-auto">{{ $data->diskon }}% Off</div>
                                     @endif

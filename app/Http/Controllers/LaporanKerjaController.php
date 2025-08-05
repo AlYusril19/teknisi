@@ -53,6 +53,7 @@ class LaporanKerjaController extends Controller
         // Map data teknisi ke laporan
         foreach ($laporan as $lap) {
             $lap->support = getTeknisi($lap);
+            $lap->supportHelper = getHelper($lap);
             $lap->chatCount = ChatLaporan::where('is_read', false)
                 ->where('user_id', '!=', session('user_id'))
                 ->where('laporan_id', '=', $lap->id)
@@ -243,6 +244,19 @@ class LaporanKerjaController extends Controller
             $message .= 'dan tag teknisi ';
         }
 
+        // Tag helper di database teknisi
+        $helper_ids = $request->input('helper_ids');
+        if ($request->helper_ids != null) {
+            foreach ($helper_ids as $helper_id) {
+                Teknisi::create([
+                    'teknisi_id' => $helper_id,
+                    'laporan_id' => $laporan->id,
+                    'helper' => true,
+                ]);
+            }
+            $message .= 'dan tag helper ';
+        }
+
         // $messageTelegram = $userName . " Telah mengirim laporan, harap segera dicek";
         // sendMessageAdmin($messageTelegram);
 
@@ -323,11 +337,6 @@ class LaporanKerjaController extends Controller
         $userId = session('user_id');
         $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
 
-        // validasi kepemilikan
-        // if ($laporan->user_id != $userId) {
-        //     return redirect()->back()->with('error', 'Anda tidak diizinkan.');
-        // }
-
         // validasi status laporan
         if ($laporan->status === 'selesai' || $laporan->status === 'pending') {
             return redirect()->back()->with('error', 'Laporan sudah di post tidak dapat diedit.');
@@ -340,6 +349,7 @@ class LaporanKerjaController extends Controller
         $barangsKembali = ApiResponse::get('/api/get-barang-kembali')->json();
         $customers = ApiResponse::get('/api/get-customer')->json();
         $teknisi = ApiResponse::get('/api/get-teknisi/'.$userId)->json();
+        $helper = ApiResponse::get('/api/get-helper/'.$userId)->json();
 
         // Inisialisasi array untuk menyimpan data barang yang sudah ditambahkan nama
         $barangKeluarView = [];
@@ -351,6 +361,7 @@ class LaporanKerjaController extends Controller
 
         // Data teknisi yang sudah ditambahkan ke laporan
         $existingTeknisi = getTeknisi($laporan);
+        $existingHelper = getHelper($laporan);
 
         return view('teknisi.laporan_kerja_edit', compact([
             'barangs', 
@@ -360,7 +371,9 @@ class LaporanKerjaController extends Controller
             'barangKembaliView', 
             'customers',
             'teknisi',
-            'existingTeknisi'
+            'existingTeknisi',
+            'helper',
+            'existingHelper'
         ]));
     }
 
@@ -450,6 +463,19 @@ class LaporanKerjaController extends Controller
                 ]);
             }
             $message .= 'dan tag teknisi ';
+        }
+
+        // Tag helper di database teknisi
+        $helper_ids = $request->input('helper_ids');
+        if ($request->helper_ids != null) {
+            foreach ($helper_ids as $helper_id) {
+                Teknisi::create([
+                    'teknisi_id' => $helper_id,
+                    'laporan_id' => $laporan->id,
+                    'helper' => true,
+                ]);
+            }
+            $message .= 'dan tag helper ';
         }
 
         if ($request->status === 'draft') {

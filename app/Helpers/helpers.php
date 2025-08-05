@@ -147,14 +147,29 @@ function getMitraId($custId) {
 }
 
 function getTeknisi($laporan) {
-    return $laporan->teknisi->map(function ($teknisi) {  
-        $teknisiData = UserApi::getUserById($teknisi->teknisi_id);  
-        return [  
-            'id' => $teknisiData['id'],  
-            'name' => $teknisiData['name'],  
-        ];  
-    });  
+    return $laporan->teknisi
+        ->where('helper', false) // ambil hanya yang bukan helper
+        ->map(function ($teknisi) {
+            $teknisiData = UserApi::getUserById($teknisi->teknisi_id);
+            return [
+                'id' => $teknisiData['id'],
+                'name' => $teknisiData['name'],
+            ];
+        });
 }
+
+function getHelper($laporan) {
+    return $laporan->teknisi
+        ->where('helper', true) // ambil hanya yang bukan helper
+        ->map(function ($teknisi) {
+            $teknisiData = UserApi::getUserById($teknisi->teknisi_id);
+            return [
+                'id' => $teknisiData['id'],
+                'name' => $teknisiData['name'],
+            ];
+        });
+}
+
 
 function getInv($id){
     // invoice = SMU-cust-user-date-id

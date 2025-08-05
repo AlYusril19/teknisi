@@ -144,3 +144,43 @@
     </div>
 </div>
 {{-- End Modal Tag Teknisi --}}
+
+{{-- Modal Tag Helper Teknisi --}}
+<div class="modal fade" id="helperModal" tabindex="-1" aria-labelledby="helperModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="helperModalLabel">Tag Helper</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="helper_id" class="form-label">Pilih Helper</label>
+                    <select id="helper_id" class="form-select">
+                        <option value="" disabled selected>Pilih Helper</option>
+                        @foreach ($helper as $staff)
+                            <option value="{{ $staff['id'] }}">{{ $staff['name'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="button" id="btn-tambah-helper" class="btn btn-primary">Tambah Helper</button>
+                <table class="table mt-3" id="daftar-helper">
+                    <thead>
+                        <tr>
+                            <th>Nama Helper</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Baris helper yang dipilih akan ditambahkan di sini -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" id="btn-simpan-helper" class="btn btn-primary">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End Modal Tag Helper Teknisi --}}

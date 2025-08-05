@@ -25,7 +25,7 @@
             </caption>
             <thead>
                 <tr align="center">
-                    <th width="5%">No</th>
+                    {{-- <th width="5%">No</th> --}}
                     <th>Tanggal</th>
                     <th>Jenis</th>
                     <th>Kegiatan</th>
@@ -36,41 +36,41 @@
             <tbody class="table-border-bottom-0">
                 @foreach($laporan as $data)
                     <tr>
-                        <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                        <td>{{ $data->tanggal_kegiatan }}</td>
+                        {{-- <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td> --}}
+                        <td align="center">{{ $data->tanggal_kegiatan }}</td>
                         <td>{{ $data->jenis_kegiatan }}</td>
                         <td>
-                            {{ $data->keterangan_kegiatan }}
+                            {!! nl2br(e($data->keterangan_kegiatan)) !!}
                             @foreach ($data->support as $item)
-                                <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                              <p class="mb-0 text-primary">&commat;{{ $item['name'] }}</p>
+                            @endforeach
+                            @foreach ($data->supportHelper as $helper)
+                              <p class="mb-0 text-primary">&commat;{{ $helper['name'] }} ~ <small>Helper</small></p>
                             @endforeach
                         </td>
                         <td align="center">
+                          <div class="d-flex flex-column align-items-center">
                             <span class="badge bg-label-{{ $data->status === 'draft' ? 'primary' : 
-                                                        ($data->status === 'pending' ? 'warning' : 
-                                                        ($data->status === 'reject' ? 'danger' : 'success')) }}">
-                                                        {{ $data->status ?? 'null' }}
+                                                          ($data->status === 'pending' ? 'warning' : 
+                                                          ($data->status === 'reject' ? 'danger' : 'success')) }} mb-1">
+                              {{ $data->status ?? 'null' }}
                             </span>
+
                             @if ($data->status === 'reject' || $data->status === 'pending')
-                                {{-- <button type="button" class="btn badge bg-label-primary" data-bs-toggle="modal" data-bs-target="#commentModal-{{ $data->id }}">
-                                    <span class="d-flex align-items-center align-middle">
-                                        <i class="bx bx-comment-detail me-1"></i>
-                                        <span class="flex-grow-1 align-middle">Comment</span>
-                                        <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20 ms-1">{{ $data->chatCount }}</span>
-                                    </span>
-                                </button> --}}
-                                <button type="button" class="btn badge bg-label-primary" data-bs-toggle="modal" data-bs-target="#commentModal-{{ $data->id }}">
-                                    <span class="d-flex align-items-center align-middle" data-laporan-id="{{ $data->id }}">
-                                        <i class="bx bx-comment-detail me-1"></i>
-                                        <span class="flex-grow-1 align-middle">Comment</span>
-                                        <span class="notif-chat flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20 ms-1" 
-                                            style="min-width: 20px; height: 20px; font-size: 11px; border-radius: 50%;">
-                                            {{ $data->chatCount }}
-                                        </span>
-                                    </span>
-                                </button>
+                              <button type="button" class="btn badge bg-label-primary px-2 py-1" data-bs-toggle="modal" data-bs-target="#commentModal-{{ $data->id }}">
+                                <span class="d-flex align-items-center" data-laporan-id="{{ $data->id }}">
+                                  <i class="bx bx-comment-detail me-1"></i>
+                                  <span>Comment</span>
+                                  <span class="notif-chat badge rounded-pill bg-danger ms-1" 
+                                        style="min-width: 20px; height: 20px; font-size: 11px;">
+                                    {{ $data->chatCount }}
+                                  </span>
+                                </span>
+                              </button>
                             @endif
+                          </div>
                         </td>
+
                         <td align="center">
                             <div class="dropdown">
                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">

@@ -290,8 +290,11 @@
                                         </div>
                                         <span class="text-muted">inv : {{ getInv($data->penagihan_id) }}</span>
                                     </td>
-                                    <td align="right">
-                                        {{ formatRupiah($data->jumlah_dibayar) }}
+                                    <td>
+                                        <div align="right">{{ formatRupiah($data->jumlah_dibayar) }}</div>
+                                        @if ($data->catatan)
+                                            <span class="text-muted">NB: {{ $data->catatan }}</span>
+                                        @endif
                                     </td>
                                     <td align="center">
                                         @if ($data->status === 'pending')
@@ -455,6 +458,7 @@
 @endsection
 
 @section('js')
+    {{-- Menambahkan event listener untuk mengirim form saat bulan atau tahun diubah --}}
     <script>
         // Menambahkan event listener untuk mengirim form saat bulan atau tahun diubah
         document.getElementById('bulan').addEventListener('change', function() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use ApiResponse;
 use App\Models\Biaya;
 use App\Models\ChatLaporan;
+use App\Models\GajiDetailDefault;
 use App\Models\LaporanKerja;
 use App\Models\Tagihan;
 use App\Models\UserApi;
@@ -74,6 +75,7 @@ class LaporanKerjaAdminController extends Controller
             $lap->user = UserApi::getUserById($lap->user_id);
             $lap->mitra = collect($customers)->firstWhere('id', $lap->customer_id);
             $lap->support = getTeknisi($lap);
+            $lap->supportHelper = getHelper($lap);
         }
 
         // Tampilkan ke view
@@ -101,6 +103,7 @@ class LaporanKerjaAdminController extends Controller
         foreach ($laporans as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
             $lap->support = getTeknisi($lap);
+            $lap->supportHelper = getHelper($lap);
             $lap->chatCount = ChatLaporan::where('is_read', false)
             ->where('user_id', '!=', session('user_id'))
             ->where('laporan_id', '=', $lap->id)
@@ -241,19 +244,49 @@ class LaporanKerjaAdminController extends Controller
             $biayaJarakTempuh *= $request->kendaraan;
         }
 
-        $biayaKerja = $biaya->jam_kerja / 3600;
-        $biayaLembur = $biaya->jam_lembur / 3600;
+        $biayaStaff = GajiDetailDefault::where('teknisi_id', $laporan->user_id)->where('aktif', 1)->get();
+        $biayaRole = GajiDetailDefault::where('role', $userName['role'])->where('aktif', 1)->get();
+        $itemBiaya = $biayaStaff->isNotEmpty() ? $biayaStaff : $biayaRole;
+        // Jika ada biaya di staff atau role
+        if ($itemBiaya->isNotEmpty()) {
+            $biayaDetails = $this->rumusGaji($itemBiaya);
+            $biayaKerja = $biayaDetails['biayaKerja'];
+            $biayaLembur = $biayaDetails['biayaLembur'];
+        }else {
+            return redirect()->back()->with('error', 'terjadi kesalahan update, harap hubungi SPV perihal input gaji');
+            // $biayaKerja = $biaya->jam_kerja / 3600;
+            // $biayaLembur = $biaya->jam_lembur / 3600;
+        }
         $biayaTransport = $biaya->transport;
 
         $comment = '';
         // jika tag teknisi lain
-        if ($laporan->teknisi()->count() != null) {
+        if ($laporan->teknisi()->count() > 0) {
             $jumlahTeknisi = $laporan->teknisi()->count() + 1;
             $comment .= ' '.$jumlahTeknisi.'x';
-            $biayaKerja *= $jumlahTeknisi;
-            $biayaLembur *= $jumlahTeknisi;
             $biayaTransport *= $jumlahTeknisi;
+            foreach ($laporan->teknisi as $teknisi) {
+                $userTag = UserApi::getUserById($teknisi->teknisi_id);
+                $biayaStaff = GajiDetailDefault::where('teknisi_id', $userTag['id'])->where('aktif', 1)->get();
+                $biayaRole = GajiDetailDefault::where('role', $userTag['role'])->where('aktif', 1)->get();
+                $itemBiaya = $biayaStaff->isNotEmpty() ? $biayaStaff : $biayaRole;
+
+                if ($itemBiaya->isNotEmpty()) {
+                    $biayaDetails = $this->rumusGaji($itemBiaya);
+                    $biayaKerja += $biayaDetails['biayaKerja'];
+                    $biayaLembur += $biayaDetails['biayaLembur'];
+                }else {
+                    return redirect()->back()->with('error', 'terjadi kesalahan update, harap hubungi SPV perihal input gaji');
+                }
+            }
         }
+        // if ($laporan->teknisi()->count() != null) {
+        //     $jumlahTeknisi = $laporan->teknisi()->count() + 1;
+        //     $comment .= ' '.$jumlahTeknisi.'x';
+        //     $biayaKerja *= $jumlahTeknisi;
+        //     $biayaLembur *= $jumlahTeknisi;
+        //     $biayaTransport *= $jumlahTeknisi;
+        // }
 
         // jika ada diskon
         if ($request->diskon > 0) {
@@ -281,18 +314,18 @@ class LaporanKerjaAdminController extends Controller
             // rumus hitung jam kerja
             if ($jamMulaiKerja >= $jamMulai && $jamMulaiKerja <= $jamSelesai) {
                 if ($jamSelesaiKerja <= $jamSelesai && $jamSelesaiKerja >= $jamMulai) { // Tidak ada lembur
-                    $totalBiayaKerja = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaKerja;
+                    $totalBiayaKerja = ceil(($jamSelesaiKerja - $jamMulaiKerja)/3600) * $biayaKerja;
                     $this->createTagihan($laporan->id, 'Biaya Kerja' . $commentTagihan, $totalBiayaKerja);
                 } else { // Ada Lembur
-                    $totalBiayaKerja = ($jamSelesai - $jamMulaiKerja) * $biayaKerja;
-                    $totalBiayaLembur = ($jamSelesaiKerja - $jamSelesai) * $biayaLembur;
+                    $totalBiayaKerja = ceil(($jamSelesai - $jamMulaiKerja)/3600) * $biayaKerja;
+                    $totalBiayaLembur = ceil(($jamSelesaiKerja - $jamSelesai)/3600) * $biayaLembur;
                     $this->createTagihan($laporan->id, 'Biaya Kerja' . $commentTagihan, $totalBiayaKerja);
                     $this->createTagihan($laporan->id, 'Biaya Lembur' . $commentTagihan, $totalBiayaLembur);
                     
                 }
             } else {
                 // Semua jam lembur
-                $totalBiayaLembur = ($jamSelesaiKerja - $jamMulaiKerja) * $biayaLembur;
+                $totalBiayaLembur = ceil(($jamSelesaiKerja - $jamMulaiKerja)/3600) * $biayaLembur;
                 $this->createTagihan($laporan->id, 'Biaya Lembur' . $commentTagihan, $totalBiayaLembur);
             }
 
@@ -456,5 +489,19 @@ class LaporanKerjaAdminController extends Controller
             'kendaraan.min' => 'Kendaraan tidak boleh kurang dari 0.',  
             'kendaraan.max' => 'Kendaraan tidak boleh lebih dari 10.',  
         ]); 
+    }
+
+    // Rumus Gaji Role atau Staff /Jam
+    private function rumusGaji($gaji) {
+        $gajiPlus = $gaji->where('jenis', 'tambah')->sum('jumlah');
+        $gajiMinus = $gaji->where('jenis', 'potong')->sum('jumlah');
+        $totalGaji = $gajiPlus - $gajiMinus;
+        $biayaKerja = ($totalGaji / 26 / 8);
+        $biayaLembur = $biayaKerja * 2;
+
+        return [
+            'biayaKerja' => $biayaKerja,
+            'biayaLembur' => $biayaLembur,
+        ];
     }
 }
