@@ -192,7 +192,7 @@ function sendMessageAdmin($message){
 }
 
 function sendMessage($message, $chatId){
-    SendTelegramNotification::dispatch('message', [
+    $response = SendTelegramNotification::dispatch('message', [
         'message' => $message,
         'chat_id' => $chatId,
     ]);
@@ -216,3 +216,15 @@ function sendPhotoAdmin($photoUrl, $caption = null){
         ]);
     }
 }
+
+function testTelegramId($chatId, $message = 'Testing message Skytama')
+{
+    $data = [
+        'message' => $message,
+        'chat_id' => $chatId,
+    ];
+    $response = ApiResponse::post('/api/send-message', $data);
+
+    return $response;
+}
+

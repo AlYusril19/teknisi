@@ -1,12 +1,11 @@
-@extends('layouts.app_sneat_admin')
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
+@extends($layout)
 
 @section('content')
 <div class="row justify-content-center">
         <div class="col-xl-12">
+            @include('navbar_profile_user')
             <div class="card">
-                <h5 class="card-header">Profile Details</h5>
+                {{-- <h5 class="card-header">Profile Details</h5> --}}
                 <!-- Account -->
                 <div class="card-body">
                     <form id="formUploadPhoto" enctype="multipart/form-data">
@@ -42,7 +41,7 @@
                     </form>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.store') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route($routePrefix.'.store') }}" enctype="multipart/form-data">
                         @csrf
                         {{-- @method('PUT') --}}
                         <div class="row g-3">
@@ -51,20 +50,20 @@
                                 <input type="text" class="form-control" id="name" name="name" placeholder="Budiono Siregar" value="{{ old('name', $user['name']) }}" required>
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label for="password" class="form-label">Password (biarkan kosong jika tidak diganti)</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;">
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;">
+                                <label class="form-label" for="email">Email</label>
+                                <input type="text" class="form-control" id="email" name="email" placeholder="budiono@skytama.com" value="{{ old('email', $user['email']) }}" required>
                             </div>
                             <div class="mb-3 col-md-6">
                                 <label class="form-label" for="nohp">No HP</label>
                                 <input type="numeric" class="form-control" id="nohp" name="nohp" placeholder="085712345678" value="{{ old('nohp', $user['nohp'] ?? "") }}" required>
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label class="form-label" for="id_telegram">ID Telegram</label>
-                                <input type="numeric" class="form-control" id="id_telegram" name="id_telegram" placeholder="1234567890" value="{{ old('name', $user['id_telegram'] ?? "") }}" required>
+                                <label class="form-label" for="alamat">Alamat</label>
+                                <input type="numeric" class="form-control" id="alamat" name="alamat" placeholder="RT.05 RW.02 Ds. Kalikatir Kec. Gondang Mojokerto" value="{{ old('alamat', $user['alamat'] ?? "") }}" required>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label class="form-label" for="tanggal_lahir">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir', $user['tanggal_lahir'] ?? "") }}" required>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -81,7 +80,6 @@
                 <button id="cropSaveBtn">Simpan Crop & Upload</button>
                 <button id="cropCancelBtn">Batal</button>
             </div>
-
         </div>
     </div>
 
@@ -96,8 +94,4 @@
             @endforeach
         </ul>
     @endif
-@endsection
-
-@section('js')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 @endsection

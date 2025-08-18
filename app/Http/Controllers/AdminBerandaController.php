@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Http;
 
 class AdminBerandaController extends Controller
 {
+    private $routePrefix = 'admin';
+    private $layout = 'layouts.app_sneat_admin';
     /**
      * Display a listing of the resource.
      */
@@ -143,18 +145,33 @@ class AdminBerandaController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $menu = $request->query('menu');
         $userId = session('user_id');
         $user = ApiResponse::get('/api/get-user/'.$userId)->json();
-
-        $userName = $user['name'];
-        $idTelegram = $user['id_telegram'];
-        $nohp = $user['nohp'];
-        return view('admin.edit_profile', [
-            'userName' => $userName,
-            'idTelegram' => $idTelegram,
-            'nohp' => $nohp
+        switch ($menu) {
+            case 'account':
+                $view = "edit_profile";
+                break;
+            
+            case 'notification':
+                $view = "edit_profile_notification";
+                break;
+            
+            case 'security':
+                $view = "edit_profile_security";
+                break;
+            
+            default:
+                $view = "edit_profile";
+                break;
+        }
+        return view($view, [
+            'user' => $user,
+            'routePrefix'   => $this->routePrefix,
+            'layout'        => $this->layout,
+            'menu'          => $menu,
         ]);
     }
 
@@ -164,11 +181,14 @@ class AdminBerandaController extends Controller
     // store user
     public function store(Request $request)
     {
+        $userId = session('user_id');
+        $user = ApiResponse::get('/api/get-user/'.$userId)->json();
         // Validasi input form
         $request->validate([
-            'name' => 'required|string|max:255',
-            'nohp' => 'required|string|max:13',
-            'id_telegram' => 'required|string|max:15',
+            'name' => 'nullable|string|max:64',
+            'nohp' => 'nullable|string|max:13',
+            'email' => 'nullable|string|max:64',
+            'id_telegram' => 'nullable|string|max:15',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
@@ -177,10 +197,21 @@ class AdminBerandaController extends Controller
 
         // Siapkan data untuk dikirim ke API
         $data = [
-            'name' => $request->name,
-            'nohp' => $request->nohp,
-            'id_telegram' => $request->id_telegram,
+            'name' => $request->name ?? $user['name'],
+            'nohp' => $request->nohp ?? $user['nohp'],
+            'email' => $request->email ?? $user['email'],
+            'id_telegram' => $request->id_telegram ?? $user['id_telegram'],
+            'alamat' => $request->alamat ?? $user['alamat'],
+            'tanggal_lahir' => $request->tanggal_lahir ?? $user['tanggal_lahir'],
         ];
+
+        if ($request->filled('id_telegram')) {
+            $idTelegram = $request->id_telegram;
+            $rensponseTelegram = testTelegramId($idTelegram);
+            if (!$rensponseTelegram->successful()) {
+                return redirect()->back()->with('error', 'Id Telegram salah atau tidak terdaftar!');
+            }
+        }
 
         // Jika password diisi, tambahkan ke data yang dikirim
         if ($request->filled('password')) {
@@ -195,7 +226,12 @@ class AdminBerandaController extends Controller
         // Jika request berhasil
         if ($response->successful()) {
             // Update nama di session
-            session(['user_name' => $request->name]);
+            session([
+                'user_name'   => $data['name'],
+                'user_email' => $data['email'],
+                'nohp' => $data['nohp'], 
+                'id_telegram' => $data['id_telegram'],
+            ]);
 
             return redirect()->back()->with('success', 'Profile updated successfully!');
         }

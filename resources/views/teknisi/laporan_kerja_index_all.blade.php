@@ -98,7 +98,7 @@
         <p><strong>Teknisi:</strong> <span id="laporanUser"></span></p>
         <p id="titleTeknisi" style="display: none;" class="mb-0"><strong>Team Support:</strong> <ul id="laporanTeknisi"></ul></p>
         <p><strong>Tanggal:</strong> <span id="laporanTanggal"></span></p>
-        <p><strong>Jenis Kegiatan:</strong> <span id="laporanJenis"></span></p>
+        <p><strong>Jenis Kegiatan:</strong> <span id="laporanJenis"></span> <span id="laporanMitra"></span></p>
         <p><strong>Keterangan Kegiatan:</strong> <span id="laporanKeterangan"></span></p>
         <p><strong>Jam Mulai:</strong> <span id="laporanJamMulai"></span></p>
         <p><strong>Jam Selesai:</strong> <span id="laporanJamSelesai"></span></p>
@@ -190,6 +190,7 @@
                     document.getElementById('laporanUser').textContent = data.laporan.user.name;
                     document.getElementById('laporanTanggal').textContent = data.laporan.tanggal_kegiatan;
                     document.getElementById('laporanJenis').textContent = data.laporan.jenis_kegiatan;
+                    document.getElementById('laporanMitra').textContent = data.laporan.mitra;
                     document.getElementById('laporanKeterangan').textContent = data.laporan.keterangan_kegiatan;
                     document.getElementById('laporanJamMulai').textContent = timeFormat(data.laporan.jam_mulai);
                     document.getElementById('laporanJamSelesai').textContent = timeFormat(data.laporan.jam_selesai);

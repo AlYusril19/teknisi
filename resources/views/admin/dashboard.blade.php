@@ -3,6 +3,7 @@
 @section('content')
     <div class="row">
         <div class="col-xxl-6 mb-3 order-0">
+            @extends('modal_himbauan')
             <div class="card">
                 <div class="d-flex align-items-start row">
                     <div class="col-sm-7">

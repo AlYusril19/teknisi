@@ -22,6 +22,7 @@ class LaporanKerjaController extends Controller
     {
         $userId = session('user_id');
         $search = $request->input('search');
+        $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Query utama untuk laporan kerja
         $laporanQuery = LaporanKerja::with('teknisi')
@@ -54,6 +55,7 @@ class LaporanKerjaController extends Controller
         foreach ($laporan as $lap) {
             $lap->support = getTeknisi($lap);
             $lap->supportHelper = getHelper($lap);
+            $lap->mitra = collect($customers)->firstWhere('id', $lap->customer_id);
             $lap->chatCount = ChatLaporan::where('is_read', false)
                 ->where('user_id', '!=', session('user_id'))
                 ->where('laporan_id', '=', $lap->id)
@@ -69,6 +71,7 @@ class LaporanKerjaController extends Controller
     {
         // Ambil user_id dari session
         $userId = session('user_id');
+        $customers = ApiResponse::get('/api/get-customer')->json();
 
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()
@@ -102,6 +105,7 @@ class LaporanKerjaController extends Controller
         foreach ($laporan as $lap) {
             $lap->user = UserApi::getUserById($lap->user_id);
             $lap->support = getTeknisi($lap);
+            $lap->mitra = collect($customers)->firstWhere('id', $lap->customer_id);
         }
 
         // Tampilkan ke view
@@ -272,6 +276,9 @@ class LaporanKerjaController extends Controller
         // Ambil laporan berdasarkan ID
         $laporan = LaporanKerja::with('teknisi')->findOrFail($id);
         $laporan->user = UserApi::getUserById($laporan->user_id);
+        $customers = ApiResponse::get('/api/get-customer')->json();
+        $mitra = collect($customers)->firstWhere('id', $laporan->customer_id);
+        $laporan->mitra = $mitra['nama'] ?? null;
 
         // Ambil barang keluar dari laporan
         $barangKeluar = json_decode($laporan->barang, true);

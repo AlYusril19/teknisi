@@ -26,7 +26,13 @@
                     @foreach($listStaff as $data)
                         <tr>
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
-                            <td align="left">{{ $data['name'] }}</td>
+                            <td align="left">
+                                @if ($data['role'] === 'magang')
+                                    {{ $data['name'] }}<small class="text-primary"> &commat;Helper</small>
+                                @else
+                                    {{ $data['name'] }}
+                                @endif
+                            </td>
                             <td align="center"><span class="{{ $data['class'] ?? '' }}">{{ $data['status'] }}</span></td>
                             <td align="right">{{ formatRupiah($data['gaji']) }}</td>
                             <td align="center">

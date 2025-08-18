@@ -128,7 +128,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="row mb-3">
+                    <div class="row mb-3" id="barang_kembali">
                         <label class="col-sm-2 col-form-label" for="barang">Barang Kembali</label>
                         <div class="col-sm-10">
                             <!-- Tombol untuk memunculkan modal -->
@@ -171,16 +171,18 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="teknisi">Tag Teknisi</label>
-                        <div class="col-sm-10">
-                            <!-- Tombol untuk memunculkan modal -->
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#teknisiModal">
-                                <i class="menu-icon tf-icons bx bx-user"></i>
-                                <span class="badge badge-center rounded-pill bg-primary w-px-20 h-px-20" id="total-teknisi">0</span>
-                            </button>
+                    @if (session('user_role') !== 'magang')
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="teknisi">Tag Teknisi</label>
+                            <div class="col-sm-10">
+                                <!-- Tombol untuk memunculkan modal -->
+                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#teknisiModal">
+                                    <i class="menu-icon tf-icons bx bx-user"></i>
+                                    <span class="badge badge-center rounded-pill bg-primary w-px-20 h-px-20" id="total-teknisi">0</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="helper">Tag Helper</label>
@@ -460,122 +462,103 @@
 </script>
 
 {{-- foto dokumentasi --}}
-    <script>
-        // Inisialisasi DataTransfer untuk menyimpan file yang dipilih
-        let selectedFiles = new DataTransfer();
-
-        // Fungsi untuk mempratinjau dan kompres gambar
-        function previewAndCompressImages() {
-            var preview = document.getElementById('imagePreview');
-            var input = document.getElementById('fotos');
-            var files = input.files;
-
-            // Loop melalui file yang baru dipilih
-            for (let i = 0; i < files.length; i++) {
-                let file = files[i];
-
-                // Jika ukuran file di bawah 350KB, tambahkan langsung tanpa kompresi
-                if (file.size <= 350 * 1024) {
-                    addFileToPreviewAndSelected(file);
-                } else {
-                    // Buat FileReader untuk membaca file
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        var img = new Image();
-                        img.src = e.target.result;
-
-                        img.onload = function() {
-                            var canvas = document.createElement('canvas');
-                            var ctx = canvas.getContext('2d');
-
-                            var width = img.width;
-                            var height = img.height;
-                            var maxDimension = 1024;
-
-                            // Resize gambar jika lebih besar dari maxDimension
-                            if (width > height) {
-                                if (width > maxDimension) {
-                                    height = Math.round((height *= maxDimension / width));
-                                    width = maxDimension;
-                                }
-                            } else {
-                                if (height > maxDimension) {
-                                    width = Math.round((width *= maxDimension / height));
-                                    height = maxDimension;
-                                }
+<script>
+    // Inisialisasi DataTransfer untuk menyimpan file yang dipilih
+    let selectedFiles = new DataTransfer();
+    // Fungsi untuk mempratinjau dan kompres gambar
+    function previewAndCompressImages() {
+        var preview = document.getElementById('imagePreview');
+        var input = document.getElementById('fotos');
+        var files = input.files;
+        // Loop melalui file yang baru dipilih
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            // Jika ukuran file di bawah 350KB, tambahkan langsung tanpa kompresi
+            if (file.size <= 350 * 1024) {
+                addFileToPreviewAndSelected(file);
+            } else {
+                // Buat FileReader untuk membaca file
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        var ctx = canvas.getContext('2d');
+                        var width = img.width;
+                        var height = img.height;
+                        var maxDimension = 1024;
+                        // Resize gambar jika lebih besar dari maxDimension
+                        if (width > height) {
+                            if (width > maxDimension) {
+                                height = Math.round((height *= maxDimension / width));
+                                width = maxDimension;
                             }
-
-                            // Atur ukuran canvas
-                            canvas.width = width;
-                            canvas.height = height;
-                            ctx.drawImage(img, 0, 0, width, height);
-
-                            // Fungsi untuk kompresi bertahap hingga ukuran di bawah 350kB
-                            function compressImage(quality, callback) {
-                                canvas.toBlob(function(blob) {
-                                    if (blob.size <= 350 * 1024 || quality <= 0.1) {
-                                        var compressedFile = new File([blob], file.name, { type: file.type });
-                                        callback(compressedFile);
-                                    } else {
-                                        compressImage(quality - 0.05, callback);
-                                    }
-                                }, file.type, quality);
+                        } else {
+                            if (height > maxDimension) {
+                                width = Math.round((width *= maxDimension / height));
+                                height = maxDimension;
                             }
-
-                            // Kompres gambar dengan kualitas awal 0.9
-                            compressImage(0.9, function(compressedFile) {
-                                addFileToPreviewAndSelected(compressedFile);
-                            });
-                        };
+                        }
+                        // Atur ukuran canvas
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // Fungsi untuk kompresi bertahap hingga ukuran di bawah 350kB
+                        function compressImage(quality, callback) {
+                            canvas.toBlob(function(blob) {
+                                if (blob.size <= 350 * 1024 || quality <= 0.1) {
+                                    var compressedFile = new File([blob], file.name, { type: file.type });
+                                    callback(compressedFile);
+                                } else {
+                                    compressImage(quality - 0.05, callback);
+                                }
+                            }, file.type, quality);
+                        }
+                        // Kompres gambar dengan kualitas awal 0.9
+                        compressImage(0.9, function(compressedFile) {
+                            addFileToPreviewAndSelected(compressedFile);
+                        });
                     };
-
-                    reader.readAsDataURL(file);
-                }
+                };
+                reader.readAsDataURL(file);
             }
         }
-
-        // Fungsi untuk menambahkan file ke pratinjau dan DataTransfer
-        function addFileToPreviewAndSelected(file) {
-            // Tambahkan file ke DataTransfer
-            selectedFiles.items.add(file);
-
-            // Update input files dengan gambar yang terkompres
-            document.getElementById('fotos').files = selectedFiles.files;
-
-            // Buat pratinjau gambar
-            var preview = document.getElementById('imagePreview');
-            var container = document.createElement('div');
-            container.classList.add('image-container');
-
-            var img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            container.appendChild(img);
-
-            var deleteButton = document.createElement('button');
-            deleteButton.textContent = '×';
-            deleteButton.classList.add('delete-image-btn');
-
-            // Event untuk menghapus gambar
-            deleteButton.onclick = function() {
-                // Hapus file dari DataTransfer
-                for (let j = 0; j < selectedFiles.items.length; j++) {
-                    if (file.name === selectedFiles.items[j].getAsFile().name) {
-                        selectedFiles.items.remove(j);
-                        break;
-                    }
+    }
+    // Fungsi untuk menambahkan file ke pratinjau dan DataTransfer
+    function addFileToPreviewAndSelected(file) {
+        // Tambahkan file ke DataTransfer
+        selectedFiles.items.add(file);
+        // Update input files dengan gambar yang terkompres
+        document.getElementById('fotos').files = selectedFiles.files;
+        // Buat pratinjau gambar
+        var preview = document.getElementById('imagePreview');
+        var container = document.createElement('div');
+        container.classList.add('image-container');
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        container.appendChild(img);
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = '×';
+        deleteButton.classList.add('delete-image-btn');
+        // Event untuk menghapus gambar
+        deleteButton.onclick = function() {
+            // Hapus file dari DataTransfer
+            for (let j = 0; j < selectedFiles.items.length; j++) {
+                if (file.name === selectedFiles.items[j].getAsFile().name) {
+                    selectedFiles.items.remove(j);
+                    break;
                 }
-
-                // Update input files
-                document.getElementById('fotos').files = selectedFiles.files;
-
-                // Hapus pratinjau gambar
-                container.remove();
-            };
-
-            container.appendChild(deleteButton);
-            preview.appendChild(container);
-        }
-    </script>
+            }
+            // Update input files
+            document.getElementById('fotos').files = selectedFiles.files;
+            // Hapus pratinjau gambar
+            container.remove();
+        };
+        container.appendChild(deleteButton);
+        preview.appendChild(container);
+    }
+</script>
 
 {{-- get mitra (customer) --}}
 <script>
@@ -585,9 +568,23 @@
         
         // Tampilkan input customer jika kegiatan adalah mitra
         if (kegiatan === 'mitra') {
-            customerInput.style.display = 'block';
+            customerInput.style.display = '';
         } else {
             customerInput.style.display = 'none';
+        }
+    });
+</script>
+
+{{-- hide barang kembali --}}
+<script>
+    document.getElementById('jenis_kegiatan').addEventListener('change', function() {
+        var kegiatan = this.value;
+        
+        // Tampilkan input customer jika kegiatan adalah mitra
+        if (kegiatan === 'mitra') {
+            $('#barang_kembali').hide(); // Sembunyikan
+        } else {
+            $('#barang_kembali').show(); // Tampilkan
         }
     });
 </script>

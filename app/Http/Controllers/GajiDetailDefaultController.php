@@ -41,6 +41,18 @@ class GajiDetailDefaultController extends Controller
             }
         }
 
+        // Urutkan listStaff dengan custom di atas untuk setiap ID
+        usort($listStaff, function ($a, $b) {
+            // Prioritaskan 'custom' di atas
+            if ($a['status'] == 'custom' && $b['status'] != 'custom') {
+                return -1;
+            } elseif ($a['status'] != 'custom' && $b['status'] == 'custom') {
+                return 1;
+            }
+            // Urutkan berdasarkan ID jika status sama
+            return $a['id'] <=> $b['id'];
+        });
+
         // Gaji By Role
         $userRoles = [
             'staff' => ['gaji' => 0],

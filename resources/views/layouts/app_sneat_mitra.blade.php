@@ -58,6 +58,7 @@
     <link rel="stylesheet" href="{{ asset('sneat') }}/assets/vendor/libs/apex-charts/apex-charts.css" />
 
     <!-- Page CSS -->
+    @include('assets.css.main_css')
 
     <!-- Helpers -->
     <script src="{{ asset('sneat') }}/assets/vendor/js/helpers.js"></script>
@@ -250,16 +251,16 @@
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                   <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                      <img src="{{ asset('sneat') }}/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                      <img src="{{ $userProfil ? config('api.base_url').'/storage/'.$userProfil : asset('sneat/assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
                     </div>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="{{ route('mitra.create') }}">
                         <div class="d-flex">
                           <div class="flex-shrink-0 me-3">
                             <div class="avatar avatar-online">
-                              <img src="{{ asset('sneat') }}/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                              <img src="{{ $userProfil ? config('api.base_url').'/storage/'.$userProfil : asset('sneat/assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
                             </div>
                           </div>
                           <div class="flex-grow-1">
@@ -431,31 +432,9 @@
     <script src="{{ asset('sneat') }}/assets/js/main.js"></script>
 
     <!-- Page JS -->
-    <script src="{{ asset('sneat') }}/assets/js/dashboards-analytics.js"></script>
-    <script>
-      window.setTimeout(function() {
-        $(".alert").fadeTo(500, 0).slideUp(500, function(){
-          $(this).remove(); 
-        });
-      }, 3500);
-    </script>
-
-    <script>
-      function formatRupiahJS(angka) {
-          var reverse = angka.toString().split('').reverse().join('');
-          var ribuan = reverse.match(/\d{1,3}/g);
-          ribuan = ribuan.join('.').split('').reverse().join('');
-          return 'Rp ' + ribuan;
-      }
-    </script>
+    @include('assets.js.main_js')
 
     @yield('js')
-
-    <script>
-      $(document).ready(function() {
-        $('.select2').select2();
-      });
-    </script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

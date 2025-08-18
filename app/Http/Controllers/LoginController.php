@@ -38,6 +38,7 @@ class LoginController extends Controller
                 'user_name' => $user['name'],
                 'user_role' => $user['role'],
                 'user_email' => $user['email'],
+                'user_photo' => $user['photo'],
                 'id_telegram' => $user['id_telegram'],
                 'nohp' => $user['nohp'],
             ]);
