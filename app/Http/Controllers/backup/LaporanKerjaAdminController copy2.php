@@ -20,7 +20,6 @@ class LaporanKerjaAdminController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = 15;
         $customers = ApiResponse::get('/api/get-customer')->json();
         // Inisialisasi query
         $laporanQuery = LaporanKerja::query()->where('status', 'selesai');
@@ -70,7 +69,7 @@ class LaporanKerjaAdminController extends Controller
         $laporan = $laporanQuery
             ->orderBy('tanggal_kegiatan', 'desc')
             ->orderBy('jam_mulai', 'desc') // Menambahkan urutan berdasarkan jam_mulai secara ascending
-            ->paginate($perPage);
+            ->get();
 
         // Mengambil data user
         foreach ($laporan as $lap) {
@@ -92,52 +91,60 @@ class LaporanKerjaAdminController extends Controller
      */
     public function create()
     {
-        // pagination size
-        $perPage = 6;
-
-        // ambil laporan (SUDAH pagination)
-        $laporans = LaporanKerja::with(['teknisi', 'galeri'])
-            ->where('status', 'pending')
+        // Ambil laporan dengan status 'selesai' dan urutkan berdasarkan tanggal terbaru
+        $laporans = LaporanKerja::with('teknisi')->where('status', 'pending')
             ->orderBy('tanggal_kegiatan', 'asc')
-            ->withCount([
-                'chatLaporans as chatCount' => function ($q) {
-                    $q->where('is_read', false)
-                    ->where('user_id', '!=', session('user_id'));
-                }
-            ])
-            ->paginate($perPage);
+            ->get();
 
-        // ambil customer 1x saja
-        $customers = collect(
-            ApiResponse::get('/api/get-customer')->json()
-        );
+        $komentarCount = ChatLaporan::where('is_read', false)
+            ->where('user_id', '!=', session('user_id'))
+            ->count();
 
-        // mapping data tambahan (AMAN untuk paginator)
-        foreach ($laporans as $laporan) {
-
-            // user dari API
-            $laporan->user = UserApi::getUserById($laporan->user_id);
-
-            // teknisi & helper
-            $laporan->support = getTeknisi($laporan);
-            $laporan->supportHelper = getHelper($laporan);
-
-            // customer
-            $customer = $customers->firstWhere('id', $laporan->customer_id);
-            $laporan->customer_name = $customer['nama'] ?? null;
-
-            // barang keluar & kembali
-            $laporan->barangKeluarView = BarangHelper::processBarang(
-                json_decode($laporan->barang, true)
-            );
-
-            $laporan->barangKembaliView = BarangHelper::processBarang(
-                json_decode($laporan->barang_kembali, true)
-            );
+        // Ambil nama user dari API eksternal dan lampirkan ke laporan
+        foreach ($laporans as $lap) {
+            $lap->user = UserApi::getUserById($lap->user_id);
+            $lap->support = getTeknisi($lap);
+            $lap->supportHelper = getHelper($lap);
+            $lap->chatCount = ChatLaporan::where('is_read', false)
+            ->where('user_id', '!=', session('user_id'))
+            ->where('laporan_id', '=', $lap->id)
+            ->count();
         }
 
+        // Ambil data customer dari web lama via API
+        $customers = ApiResponse::get('/api/get-customer')->json();
+
+        // Inisialisasi array untuk menyimpan data laporan beserta barangnya
+        $laporanBarangView = [];
+
+        foreach ($laporans as $laporan) {
+            // Decode JSON barang ke dalam array
+            $barangKeluar = json_decode($laporan->barang, true);
+            $barangKembali = json_decode($laporan->barang_kembali, true);
+            $barangKeluarView = [];
+            $barangKembaliView = [];
+            $customer = '';
+            $customerId = collect($customers)->firstWhere('id', $laporan->customer_id);
+            if ($customerId) {
+                $customer = $customerId['nama'];
+            }
+
+            // ambil data barang keluar dan kembali (di database teknisi)
+            $barangKeluarView = BarangHelper::processBarang($barangKeluar);
+            $barangKembaliView = BarangHelper::processBarang($barangKembali);
+
+            // Tambahkan laporan dan barang ke array hasil
+            $laporanBarangView[] = [
+                'laporan' => $laporan,
+                'customer' => $customer,
+                'barangKeluarView' => $barangKeluarView,
+                'barangKembaliView' => $barangKembaliView,
+                // 'komentarCount' => $komentarCount
+            ];
+        }
         return view('admin.admin_laporan_kerja_update', [
-            'laporans' => $laporans
+            // 'laporan' => $laporan,
+            'laporanBarangView' => $laporanBarangView
         ]);
     }
 

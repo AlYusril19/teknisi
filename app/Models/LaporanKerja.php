@@ -51,6 +51,10 @@ class LaporanKerja extends Model
     {
         return $this->hasMany(ChatLaporan::class, 'laporan_id');
     }
+    public function chatLaporans()
+    {
+        return $this->hasMany(ChatLaporan::class, 'laporan_id');
+    }
     protected static function boot()
     {
         parent::boot();

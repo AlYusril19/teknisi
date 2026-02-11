@@ -27,7 +27,7 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    {{-- <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="jam_kerja">Biaya Jam Kerja</label>
                         <div class="col-sm-10">
                             <input type="number" class="form-control" id="jam_kerja" name="jam_kerja" placeholder="biaya jam kerja" value="{{ $biaya->jam_kerja }}" required>
@@ -39,7 +39,7 @@
                         <div class="col-sm-10">
                             <input type="number" class="form-control" id="jam_lembur" name="jam_lembur" placeholder="biaya jam lembur" value="{{ $biaya->jam_lembur }}" required>
                         </div>
-                    </div>
+                    </div> --}}
 
                     {{-- <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="kabel">Biaya Penarikan Fiber</label>

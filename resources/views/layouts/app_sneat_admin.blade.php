@@ -181,7 +181,7 @@
               <ul class="menu-sub">
                 <li class="menu-item {{ \Route::is('biaya-admin.*') ? 'active' : '' }}">
                   <a href="{{ route('biaya-admin.index') }}" class="menu-link">
-                    <div data-i18n="Without menu">Daftar Biaya</div>
+                    <div data-i18n="Without menu">Biaya Customer</div>
                   </a>
                 </li>
               </ul>
@@ -236,7 +236,7 @@
             </li>
             <li class="menu-item {{ \Route::is('admin.create') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-dock-top"></i>
+                <i class="menu-icon tf-icons bx bx-user"></i>
                 <div data-i18n="Account Settings">Account Settings</div>
               </a>
               <ul class="menu-sub">

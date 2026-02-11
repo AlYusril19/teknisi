@@ -129,7 +129,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="row mb-3">
+                    <div class="row mb-3" id="barang_kembali">
                         <label class="col-sm-2 col-form-label" for="barang">Barang Kembali</label>
                         <div class="col-sm-10">
                             <!-- Tombol untuk memunculkan modal -->
@@ -620,6 +620,20 @@
         jenisKegiatan.addEventListener('change', function () {
             toggleCustomerInput();
         });
+    });
+</script>
+
+{{-- hide barang kembali --}}
+<script>
+    document.getElementById('jenis_kegiatan').addEventListener('change', function() {
+        var kegiatan = this.value;
+        
+        // Tampilkan input customer jika kegiatan adalah mitra
+        if (kegiatan === 'mitra') {
+            $('#barang_kembali').hide(); // Sembunyikan
+        } else {
+            $('#barang_kembali').show(); // Tampilkan
+        }
     });
 </script>
 

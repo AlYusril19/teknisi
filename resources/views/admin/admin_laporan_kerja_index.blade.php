@@ -106,6 +106,9 @@
     </div>
   </div>
 </div>
+<div class="mt-4 justify-content-center">
+    {{ $laporan->links('pagination::bootstrap-5') }}
+</div>
 
 <!-- Modal Laporan -->
 <div class="modal fade" id="laporanModal" tabindex="-1" aria-labelledby="laporanModalLabel" aria-hidden="true">
@@ -284,11 +287,19 @@
                         // Jika ada data barang kembali, tampilkan judul dan list barang
                         titleBarang.style.display = 'block';
 
-                        data.barangKeluarView.forEach(function(barang) {
-                            var li = document.createElement('li');
-                            li.textContent = `${barang.nama} | x${barang.jumlah} ${barang.satuan} = ${formatRupiahJS(barang.harga_jual)}`;
-                            barangList.appendChild(li);
-                        });
+                        if (data.laporan.customer_id !== null) {
+                            data.barangKeluarView.forEach(function(barang) {
+                                var li = document.createElement('li');
+                                li.textContent = `${barang.nama} | x${barang.jumlah} ${barang.satuan} = ${formatRupiahJS(barang.harga_jual)}`;
+                                barangList.appendChild(li);
+                            });
+                        } else {
+                            data.barangKeluarView.forEach(function(barang) {
+                                var li = document.createElement('li');
+                                li.textContent = `${barang.nama} | x${barang.jumlah} ${barang.satuan}`;
+                                barangList.appendChild(li);
+                            });
+                        }
                     } else {
                         // Jika tidak ada data barang, sembunyikan judul
                         titleBarang.style.display = 'none';

@@ -7,17 +7,6 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daftar Customer</h5>
-            {{-- <a href="{{ route('biaya-admin.create') }}" class="btn btn-primary mb-0">Tambah Biaya</a> --}}
-            {{-- <form action="{{ route('biaya-admin.index') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="jenis / kegiatan" value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary me-2"><i class="bx bx-search"></i></button>
-                    <select name="filter" class="form-select" onchange="this.form.submit()">
-                        <option value="">Semua Laporan</option>
-                        <option value="lembur" {{ request('filter') == 'lembur' ? 'selected' : '' }}>Laporan Lembur</option>
-                    </select>
-                </div>
-            </form> --}}
         </div>
         <div class="table-responsive">
             <table class="table">
@@ -37,7 +26,18 @@
                         <tr>
                             <td align="center"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{ $loop->iteration }}</strong></td>
                             <td>{{ $data['nama'] ?? '-' }}</td>
-                            <td></td>
+                            <td>
+                                @if ($data['tagihan']->count())
+                                    <p>
+                                        Tagihan
+                                        <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">{{ $data['tagihan']->count() }}</span>
+                                        <br>
+                                        <i>Total: <small>{{ formatRupiah($data['total_tagihan']) }}</small></i>
+                                    </p>
+                                @else
+                                    Tagihan Lunas ✅
+                                @endif
+                            </td>
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -45,12 +45,6 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="{{ route('penagihan-admin.show', $data['id']) }}"><i class="bx bx-show-alt me-2"></i> Show</a>
-                                        {{-- <a class="dropdown-item" href="{{ route('biaya-admin.edit', $data['biaya']->id) }}"><i class="bx bx-edit-alt me-2"></i> Edit</a> --}}
-                                        {{-- <form action="{{ route('biaya-admin.destroy', $data->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item"><i class="bx bx-trash me-1"></i> Delete</button>
-                                        </form> --}}
                                     </div>
                                 </div>
                             </td>

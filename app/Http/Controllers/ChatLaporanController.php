@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use ApiResponse;
 use App\Models\ChatLaporan;
 use App\Models\LaporanKerja;
 use App\Models\UserApi;
@@ -71,6 +72,74 @@ class ChatLaporanController extends Controller
             'isi' => $request->komentar,
             'is_read' => false,
         ]);
+
+        // // Start Script baru hapus jika error
+        // // Ambil laporan + teknisi
+        // $laporan = LaporanKerja::with('teknisi')->find($request->laporan_id);
+
+        // foreach ($laporan as $lap) {
+        //     $lap->user = UserApi::getUserById($lap->user_id);
+        //     $lap->support = getTeknisi($lap);
+        //     $lap->supportHelper = getHelper($lap);
+        // }
+
+        // // Format pesan telegram
+        // $message = "💬 *Komentar Baru*\n"
+        //         . "Dari: *" . $laporan->user['name'] . "*\n"
+        //         . "Laporan: #" . $laporan->id . "\n\n"
+        //         . $request->komentar;
+
+        // // List target core (pemilik laporan + teknisi + admin)
+        // $targets = collect();
+
+        // // 1. Pembuat laporan
+        // if ($laporan->user_id !== session('user_id')) {
+        //     $targets->push($laporan->user);
+        // }
+
+        // // 2. Teknisi yang ditag pada laporan
+        // foreach ($laporan->teknisi as $teknisi) {
+        //     $teknisiID = UserApi::getUserById($teknisi->teknisi_id);
+        //     if ($teknisiID->id !== session('user_id')) {
+        //         $targets->push($teknisiID);
+        //     }
+        // }
+
+        // // 3. Admin
+        // $admins = ApiResponse::get('/api/get-user-admin')->json();
+        // foreach ($admins as $admin) {
+        //     if ($admin->id !== session('user_id')) {
+        //         $targets->push($admin);
+        //     }
+        // }
+
+        // // ------------------------------------------
+        // // 4. PROSES MENTION DENGAN @USERNAME
+        // // ------------------------------------------
+        // preg_match_all('/@([A-Za-z0-9_]+)/', $request->komentar, $matches);
+
+        // if (!empty($matches[1])) {
+        //     foreach ($matches[1] as $username) {
+        //         $user = UserApi::getUserByName($username);
+        //         if ($user && $user->id !== session('user_id')) {
+        //             $targets->push($user);
+        //         }
+        //     }
+        // }
+        // dd($user);
+
+        // // Hapus duplikat
+        // $targets = $targets->unique('id');
+
+        // // ------------------------------------------
+        // // 5. KIRIM TELEGRAM KE SETIAP TARGET
+        // // ------------------------------------------
+        // foreach ($targets as $user) {
+        //     if ($user->id_telegram) {
+        //         sendMessage($message, $user->id_telegram);
+        //     }
+        // }
+        // // End Script baru
 
         return response()->json(['success' => true]);
     }

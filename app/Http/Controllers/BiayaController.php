@@ -50,8 +50,8 @@ class BiayaController extends Controller
     {
         $request->validate([
             'customer_id' => 'nullable',
-            'jam_kerja' => 'required',
-            'jam_lembur' => 'required',
+            'jam_kerja' => 'nullable',
+            'jam_lembur' => 'nullable',
             'kabel' => 'nullable',
             'transport' => 'nullable',
             'jarak_tempuh' => 'nullable'
@@ -119,8 +119,8 @@ class BiayaController extends Controller
         $biaya = Biaya::findOrFail($id);
         $request->validate([
             // 'customer_id' => 'nullable'.$id,
-            'jam_kerja' => 'required',
-            'jam_lembur' => 'required',
+            'jam_kerja' => 'nullable',
+            'jam_lembur' => 'nullable',
             'kabel' => 'nullable',
             'transport' => 'nullable',
             'jarak_tempuh' => 'nullable'

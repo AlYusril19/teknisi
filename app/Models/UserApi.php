@@ -20,4 +20,12 @@ class UserApi extends Model
             return json_decode($response->getBody(), true);
         });
     }
+
+    public static function getUserByName($userName)
+    {
+        return Cache::remember("user_{$userName}", 60, function () use ($userName) {
+            $response = ApiResponse::get('/api/get-username/'.$userName);
+            return json_decode($response->getBody(), true);
+        });
+    }
 }

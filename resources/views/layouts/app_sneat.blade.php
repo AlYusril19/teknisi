@@ -155,13 +155,13 @@
             <li class="menu-item {{ \Route::is('laporan.*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-layout"></i>
-                <div data-i18n="Layouts">Kegiatan</div>
+                <div data-i18n="Layouts">Laporan</div>
               </a>
 
               <ul class="menu-sub">
                 <li class="menu-item {{ \Route::is('laporan.index') || \Route::is('laporan.create') ? 'active' : '' }}">
                   <a href="{{ route('laporan.index') }}" class="menu-link">
-                    <div data-i18n="Without menu">Kegiatan Saya</div>
+                    <div data-i18n="Without menu">Laporan Kegiatan</div>
                   </a>
                 </li>
               </ul>

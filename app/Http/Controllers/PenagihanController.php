@@ -19,9 +19,40 @@ class PenagihanController extends Controller
      */
     public function index()
     {
-        $customers = ApiResponse::get('/api/get-customer')->json();
+        // Ambil semua customer dari API
+        $customersData = ApiResponse::get('/api/get-customer')->json();
+
+        // Pastikan data adalah array
+        if (!is_array($customersData)) {
+            $customersData = [];
+        }
+
+        // Gunakan collect untuk memudahkan pengolahan
+        $customers = collect($customersData);
+
+        // Ubah setiap customer agar memiliki tagihan terkait
+        $customers = $customers->map(function ($customer) {
+            $tagihans = Penagihan::with('laporan_kerja.tagihan', 'pembayaran', 'penjualan')
+                ->where('customer_id', $customer['id'])
+                ->where('status', '<>', 'lunas')
+                ->get(); // ->get() untuk eksekusi query
+            $sisaTagihan = 0;
+            foreach ($tagihans as $data) {
+                $totalTagihan = $data->laporan_kerja?->flatMap->tagihan->sum('total_biaya') + $data->penjualan->sum('total_biaya');
+                $totalPembayaran = $data->pembayaran?->filter(function ($pembayaran) {
+                    return $pembayaran->status !== 'cancel'; // Ganti 'cancel' dengan nilai status yang sesuai
+                })->sum('jumlah_dibayar');
+                $sisaTagihan += $totalTagihan - $totalPembayaran;
+            }
+            $customer['tagihan'] = $tagihans;
+            $customer['total_tagihan'] = $sisaTagihan;
+
+            return $customer;
+        });
+
         return view('admin.admin_penagihan_index', compact('customers'));
     }
+
 
     /**
      * Show the form for creating a new resource.
