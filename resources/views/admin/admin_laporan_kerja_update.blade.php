@@ -15,7 +15,8 @@
           ">
             <div class="card-body">
               <div class="d-flex align-items-start">
-                <div class="d-flex align-items-center">
+                {{-- keterangan staff kerja --}}
+                <div class="flex-grow-1 me-3">
                   <div class="me-2">
                     <h5 class="mb-0 text-heading">{{ $laporan->jenis_kegiatan }}</h5>
                     <small class="fw-medium">Staff: </small>
@@ -37,7 +38,8 @@
                   </div>
                 </div>
 
-                <div class="ms-auto">
+                {{-- keterangan date time dan mitra --}}
+                <div class="flex-shrink-0 text-end">
                   <p class="mb-0">Date: {{ $laporan->tanggal_kegiatan ?? '-' }}</p>
                   <p class="mb-0 {{ $laporan->jam_selesai < $laporan->jam_mulai ? 'alert-danger' : '' }}">
                     Time:
