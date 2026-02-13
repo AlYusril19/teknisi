@@ -106,6 +106,16 @@ class LaporanKerjaAdminController extends Controller
                 }
             ])
             ->paginate($perPage);
+        foreach ($laporans as $laporan) {
+            $laporan->transport_hari_ini = LaporanKerja::where('customer_id', $laporan->customer_id)
+                ->whereDate('tanggal_kegiatan', $laporan->tanggal_kegiatan)
+                ->where('status', 'selesai')
+                ->where('id', '!=', $laporan->id) // penting
+                ->whereHas('tagihan', function ($q) {
+                    $q->where('nama_biaya', 'like', '%Transport%');
+                })
+                ->exists();
+        }
 
         // ambil customer 1x saja
         $customers = collect(
@@ -323,8 +333,27 @@ class LaporanKerjaAdminController extends Controller
 
             // biaya transport mitra
             if ($laporan->customer_id) {
-                $this->createTagihan($laporan->id, 'Biaya Transport' . $commentTagihan.$commentTransport, $biayaTransport);
+
+                // cek apakah sudah ada transport hari ini untuk customer yang sama
+                $sudahAdaTransport = LaporanKerja::where('customer_id', $laporan->customer_id)
+                    ->whereDate('tanggal_kegiatan', $laporan->tanggal_kegiatan)
+                    ->where('status', 'selesai')
+                    ->whereHas('tagihan', function ($q) {
+                        $q->where('nama_biaya', 'like', '%Transport%');
+                    })
+                    ->exists();
+
+                // LOGIKA HYBRID
+                if (!$sudahAdaTransport) {
+                    // laporan pertama hari itu → otomatis kena
+                    $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
+                } 
+                elseif ($request->boolean('transport_mitra')) {
+                    // sudah pernah ada → admin harus centang manual
+                    $this->createTagihan($laporan->id, 'Biaya Transport', $biayaTransport);
+                }
             }
+
 
             if ($request->transport) {
                 $this->createTagihan($laporan->id, 'Biaya Transport' . $commentTagihan, $biayaTransport);

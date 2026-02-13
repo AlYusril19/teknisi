@@ -123,6 +123,15 @@
                       <div class="d-flex gap-1 mb-1">
                         <input type="checkbox" name="transport"> <span>Transport</span>
                       </div>
+                    @elseif($laporan->transport_hari_ini)
+                      <div class="d-flex gap-1 mb-1">
+                        <input type="checkbox" name="transport_mitra"
+                          data-sudah-transport="{{ $laporan->transport_hari_ini ? 1 : 0 }}">
+                        <span>Transport</span>
+                      </div>
+                      <small class="text-danger ms-2">
+                        (Sudah ada Transport ⚠️)
+                      </small>
                     @else
                       <div class="d-flex gap-1 mb-1">
                         <input type="checkbox" name="mobil"> <span>Mobil</span>
@@ -334,5 +343,16 @@ setInterval(updateChatBadges, 5000);
 updateChatBadges();
 </script>
 
-
+ {{-- Script Transport Exist Mitra --}}
+<script>
+  document.querySelectorAll('input[name="transport_mitra"]').forEach(el => {
+    el.addEventListener('change', function() {
+      if (this.checked && this.dataset.sudahTransport === "1") {
+        if (!confirm("Transport sudah pernah dihitung hari ini. Yakin ingin tambah lagi?")) {
+          this.checked = false;
+        }
+      }
+    });
+  });
+</script>
 @endsection
