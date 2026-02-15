@@ -109,6 +109,7 @@ class LaporanKerjaAdminController extends Controller
         foreach ($laporans as $laporan) {
             $laporan->transport_hari_ini = LaporanKerja::where('customer_id', $laporan->customer_id)
                 ->whereDate('tanggal_kegiatan', $laporan->tanggal_kegiatan)
+                ->where('user_id', $laporan->user_id)
                 ->where('status', 'selesai')
                 ->where('id', '!=', $laporan->id) // penting
                 ->whereHas('tagihan', function ($q) {
@@ -337,6 +338,7 @@ class LaporanKerjaAdminController extends Controller
                 // cek apakah sudah ada transport hari ini untuk customer yang sama
                 $sudahAdaTransport = LaporanKerja::where('customer_id', $laporan->customer_id)
                     ->whereDate('tanggal_kegiatan', $laporan->tanggal_kegiatan)
+                    ->where('user_id', $laporan->user_id)
                     ->where('status', 'selesai')
                     ->whereHas('tagihan', function ($q) {
                         $q->where('nama_biaya', 'like', '%Transport%');

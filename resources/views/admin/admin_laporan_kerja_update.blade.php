@@ -99,9 +99,15 @@
                         <span class="input-group-text">%</span>
                       </div>
                     </div>
-                    <div class="col-6">
-                      <input type="number" class="form-control" name="kendaraan" placeholder="kendaraan">
-                    </div>
+                    @if ($laporan->transport_hari_ini)
+                      <div class="kendaraan-wrapper d-none col-6">
+                        <input type="number" class="form-control" name="kendaraan" placeholder="jumlah kendaraan" min="0">
+                      </div>
+                      @else
+                        <div class="col-6">
+                          <input type="number" class="form-control" name="kendaraan" placeholder="jumlah kendaraan" min="0">
+                        </div>
+                    @endif
                   </div>
                 @endif
                 {{--  --}}
@@ -125,9 +131,13 @@
                       </div>
                     @elseif($laporan->transport_hari_ini)
                       <div class="d-flex gap-1 mb-1">
-                        <input type="checkbox" name="transport_mitra"
+                        <input type="checkbox" name="transport_mitra" class="transport-checkbox"
                           data-sudah-transport="{{ $laporan->transport_hari_ini ? 1 : 0 }}">
                         <span>Transport</span>
+                      </div>
+                      <div class="mobil-wrapper d-none gap-1 mb-1"> 
+                        <input type="checkbox" name="mobil">
+                        <span>Mobil</span>
                       </div>
                       <small class="text-danger ms-2">
                         (Sudah ada Transport ⚠️)
@@ -344,7 +354,7 @@ updateChatBadges();
 </script>
 
  {{-- Script Transport Exist Mitra --}}
-<script>
+{{-- <script>
   document.querySelectorAll('input[name="transport_mitra"]').forEach(el => {
     el.addEventListener('change', function() {
       if (this.checked && this.dataset.sudahTransport === "1") {
@@ -354,5 +364,56 @@ updateChatBadges();
       }
     });
   });
+</script> --}}
+
+{{-- Script Transport Mobil Mitra --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.querySelectorAll('.transport-checkbox').forEach(function (checkbox) {
+    const card = checkbox.closest('.card');
+    const mobilWrapper = card.querySelector('.mobil-wrapper');
+    const kendaraanWrapper = card.querySelector('.kendaraan-wrapper');
+    
+    // Selector untuk input di dalamnya agar bisa di-reset
+    const mobilInput = mobilWrapper?.querySelector('input[name="mobil"]');
+    const kendaraanInput = kendaraanWrapper?.querySelector('input[name="kendaraan"]');
+
+    // Fungsi sakti untuk muncul/sembunyi
+    const toggleTransportExtras = (isChecked) => {
+      if (isChecked) {
+        // Munculkan semua
+        mobilWrapper?.classList.remove('d-none');
+        kendaraanWrapper?.classList.remove('d-none');
+      } else {
+        // Sembunyikan semua
+        mobilWrapper?.classList.add('d-none');
+        kendaraanWrapper?.classList.add('d-none');
+        
+        // Reset data agar tidak terkirim ke server saat hidden
+        if (mobilInput) mobilInput.checked = false;
+        if (kendaraanInput) kendaraanInput.value = ''; 
+      }
+    };
+
+    // 1. Cek kondisi awal (saat page load)
+    toggleTransportExtras(checkbox.checked);
+
+    // 2. Event Listener saat klik checkbox transport
+    checkbox.addEventListener('change', function () {
+      // Logika konfirmasi jika sudah pernah transport hari ini
+      if (this.checked && this.dataset.sudahTransport === "1") {
+        if (!confirm("Transport sudah pernah dihitung hari ini. Yakin ingin tambah lagi?")) {
+          this.checked = false;
+          toggleTransportExtras(false);
+          return;
+        }
+      }
+      
+      toggleTransportExtras(this.checked);
+    });
+  });
+});
 </script>
+
 @endsection
